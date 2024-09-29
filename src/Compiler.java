@@ -27,5 +27,15 @@ public class Compiler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // errors
+        String errFile = "src/error.txt";
+        try (FileWriter fw = new FileWriter(errFile)) {
+            for (String string : Lexer.getInstance().getErrors()) {
+                fw.write(string + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -16,6 +16,9 @@ public class Lexer {
     private Boolean isRowAnno = false;
     private Boolean isMultiAnno = false;
 
+    // erros
+    private List<String> errors = new ArrayList<>();
+
     // 2. 构造函数
     private Lexer() {}
 
@@ -43,8 +46,10 @@ public class Lexer {
                     if (ending == -1) {
                         break;
                     } else {
+                        // fix: after set columnNumber to '/', should break
                         columnNumber = ending + 1;
                         isMultiAnno = false;
+                        break;
                     }
                 }
                 // 3. 字母或下划线 + 数字 + " + ' + 其他
@@ -77,17 +82,19 @@ public class Lexer {
         columnNumber++;
         for(;columnNumber < line.length();columnNumber++) {
             ch = line.charAt(columnNumber);
-            if (Character.isAlphabetic(ch) || ch == '_') {
+            if (Character.isAlphabetic(ch) || ch == '_' || Character.isDigit(ch)) {
                 stringBuilder.append(ch);
             } else {
                 // 3. 拿到单词和单词类型
-                String string = stringBuilder.toString();
-                Token token = Category.getInstance().getTokenType(string);
-                tokens.add(new Pair(token, string, lineNumber));
-                columnNumber--;
                 break;
             }
         }
+        // 3. fix: judge token should be outside of loop
+        // 3. fix: if the word is at the end of the line, in loop it will not be added to tokens
+        String string = stringBuilder.toString();
+        Token token = Category.getInstance().getTokenType(string);
+        tokens.add(new Pair(token, string, lineNumber));
+        columnNumber--;
     }
 
     public void parseINTCON() {
@@ -155,6 +162,11 @@ public class Lexer {
         switch (ch) {
             case '&':
             case '|':
+                // errors
+                if (line.charAt(columnNumber + 1) != ch) {
+                    errors.add(lineNumber + " " + "a");
+                    break;
+                }
                 // 1.更新ch和stringBuilder
                 columnNumber++;
                 ch = line.charAt(columnNumber);
@@ -180,7 +192,16 @@ public class Lexer {
                 // 3. break
                 break;
             case '/':
-                if (line.charAt(columnNumber + 1) == '/') {
+                // fix: if '/' is last character
+                if (columnNumber == (line.length() - 1)) {
+                    // 1. 获取Token加入tokens
+                    token = Category.getInstance().getTokenType(stringBuilder.toString());
+                    tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
+                    // 2. break
+                    break;
+                }
+                //
+                else if (line.charAt(columnNumber + 1) == '/') {
                     // 1.更新ch和stringBuilder
                     columnNumber++;
                     ch = line.charAt(columnNumber);
@@ -218,5 +239,10 @@ public class Lexer {
     // 2. 获取tokens
     public List<Pair> getTokens() {
         return tokens;
+    }
+
+    // erros
+    public List<String> getErrors() {
+        return errors;
     }
 }
