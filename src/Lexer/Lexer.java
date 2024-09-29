@@ -1,0 +1,222 @@
+package Lexer;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Lexer {
+    // 1. 属性
+    private static Lexer instance;
+    private List<Pair> tokens = new ArrayList<>();
+    private String line = null;
+    private int columnNumber;
+    private int lineNumber;
+    private char ch;
+    private Boolean isRowAnno = false;
+    private Boolean isMultiAnno = false;
+
+    // 2. 构造函数
+    private Lexer() {}
+
+    public static Lexer getInstance() {
+        if (instance == null) {
+            instance = new Lexer();
+        }
+        return instance;
+    }
+
+    ///////////////////////////////////////////////////////////
+    // 1. 解析
+    public void parse(BufferedReader br) throws IOException {
+        lineNumber = 1;
+        while((line = br.readLine()) != null) {
+            // 1. 跳过注释
+            // 2. 换行
+            // 3. 解析: 关键词，数字，其他
+            for(columnNumber = 0;columnNumber < line.length();columnNumber++) {
+                if (isRowAnno) {
+                    isRowAnno = false;
+                    break;
+                } else if (isMultiAnno) {
+                    int ending = line.indexOf("*/", columnNumber);
+                    if (ending == -1) {
+                        break;
+                    } else {
+                        columnNumber = ending + 1;
+                        isMultiAnno = false;
+                    }
+                }
+                // 3. 字母或下划线 + 数字 + " + ' + 其他
+                ch = line.charAt(columnNumber);
+                if(ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t') {
+                    continue;
+                }
+
+                if(Character.isAlphabetic(ch) || ch == '_') {
+                    parseIDENFR();
+                } else if (Character.isDigit(ch)) {
+                    parseINTCON();
+                } else if (ch == '\"') {
+                    parseSTRCON();
+                } else if (ch == '\'') {
+                    parseCHRCON();
+                } else {
+                    parseOther();
+                }
+            }
+            lineNumber++;
+        }
+    }
+
+    public void parseIDENFR() {
+        // 1. 获取开头字符
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(ch);
+        // 2. 继续判断下一个字符
+        columnNumber++;
+        for(;columnNumber < line.length();columnNumber++) {
+            ch = line.charAt(columnNumber);
+            if (Character.isAlphabetic(ch) || ch == '_') {
+                stringBuilder.append(ch);
+            } else {
+                // 3. 拿到单词和单词类型
+                String string = stringBuilder.toString();
+                Token token = Category.getInstance().getTokenType(string);
+                tokens.add(new Pair(token, string, lineNumber));
+                columnNumber--;
+                break;
+            }
+        }
+    }
+
+    public void parseINTCON() {
+        // 1. 获取初始值
+        int value = ch - '0';
+        // 2. 继续判断
+        columnNumber++;
+        for(;columnNumber < line.length();columnNumber++) {
+            ch = line.charAt(columnNumber);
+            if (Character.isDigit(ch)) {
+                value = value * 10 + ch - '0';
+            } else {
+                tokens.add(new Pair(Token.INTCON, value, lineNumber));
+                columnNumber--;
+                break;
+            }
+        }
+    }
+
+    public void parseSTRCON() {
+        // 1. 获取初始值
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(ch);
+        // 2. 继续读取
+        columnNumber++;
+        for(;columnNumber < line.length();columnNumber++) {
+            // 3. 如果是"就结束，加入tokens
+            ch = line.charAt(columnNumber);
+            if (ch == '\"') {
+                 stringBuilder.append(ch);
+                tokens.add(new Pair(Token.STRCON, stringBuilder.toString(), lineNumber));
+                break;
+            } else {
+                stringBuilder.append(ch);
+            }
+        }
+    }
+
+    public void parseCHRCON() {
+        // 1. 获取字符
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(ch);
+        // 2. 找到字符
+        columnNumber++;
+        ch = line.charAt(columnNumber);
+        stringBuilder.append(ch);
+        // 3. 找到\'
+        columnNumber++;
+        ch = line.charAt(columnNumber);
+        stringBuilder.append(ch);
+        // 4. 加入tokens
+        tokens.add(new Pair(Token.CHRCON, stringBuilder.toString(), lineNumber));
+    }
+
+    public void parseOther() {
+        // 1. 获取字符
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(ch);
+        Token token;
+        // 2. 分类处理
+        // 2.1 && ||
+        // 2.2 ! != < <= > >= = ==
+        // 2.3 / // /*
+        // 2.4 + - * % ; , ( ) [ ] { }
+        switch (ch) {
+            case '&':
+            case '|':
+                // 1.更新ch和stringBuilder
+                columnNumber++;
+                ch = line.charAt(columnNumber);
+                stringBuilder.append(ch);
+                // 2. 获取Token加入tokens
+                token = Category.getInstance().getTokenType(stringBuilder.toString());
+                tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
+                // 3. break
+                break;
+            case '!':
+            case '<':
+            case '>':
+            case '=':
+                // 1.更新ch和stringBuilder
+                if (line.charAt(columnNumber + 1) == '=') {
+                    columnNumber++;
+                    ch = line.charAt(columnNumber);
+                    stringBuilder.append(ch);
+                }
+                // 2. 获取Token加入tokens
+                token = Category.getInstance().getTokenType(stringBuilder.toString());
+                tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
+                // 3. break
+                break;
+            case '/':
+                if (line.charAt(columnNumber + 1) == '/') {
+                    // 1.更新ch和stringBuilder
+                    columnNumber++;
+                    ch = line.charAt(columnNumber);
+                    stringBuilder.append(ch);
+                    // 2. isRowAnno
+                    isRowAnno = true;
+                    // 3. break
+                    break;
+                } else if (line.charAt(columnNumber + 1) == '*') {
+                    // 1.更新ch和stringBuilder
+                    columnNumber++;
+                    ch = line.charAt(columnNumber);
+                    stringBuilder.append(ch);
+                    // 2. isMultiAnno
+                    isMultiAnno = true;
+                    // 3. break
+                    break;
+                } else {
+                    // 1. 获取Token加入tokens
+                    token = Category.getInstance().getTokenType(stringBuilder.toString());
+                    tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
+                    // 2. break
+                    break;
+                }
+            default:
+                // 1. 获取Token加入tokens
+                token = Category.getInstance().getTokenType(stringBuilder.toString());
+                tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
+                // 2. break
+                break;
+        }
+    }
+
+    ///////////////////////////////////////////////////////////
+    // 2. 获取tokens
+    public List<Pair> getTokens() {
+        return tokens;
+    }
+}
