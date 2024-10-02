@@ -37,19 +37,21 @@ public class Lexer {
             // 1. 跳过注释
             // 2. 换行
             // 3. 解析: 关键词，数字，其他
+            // fix: isRowAnno must be initiated outside of for-loop
+            // fix: because if '//' is at the end of row, is won't be set to false
+            isRowAnno = false;
             for(columnNumber = 0;columnNumber < line.length();columnNumber++) {
                 if (isRowAnno) {
-                    isRowAnno = false;
                     break;
                 } else if (isMultiAnno) {
                     int ending = line.indexOf("*/", columnNumber);
                     if (ending == -1) {
                         break;
                     } else {
-                        // fix: after set columnNumber to '/', should break
+                        // fix: after set columnNumber to '/', should continue
                         columnNumber = ending + 1;
                         isMultiAnno = false;
-                        break;
+                        continue;
                     }
                 }
                 // 3. 字母或下划线 + 数字 + " + ' + 其他
@@ -99,7 +101,7 @@ public class Lexer {
 
     public void parseINTCON() {
         // 1. 获取初始值
-        int value = ch - '0';
+        long value = ch - '0';
         // 2. 继续判断
         columnNumber++;
         for(;columnNumber < line.length();columnNumber++) {
@@ -107,11 +109,13 @@ public class Lexer {
             if (Character.isDigit(ch)) {
                 value = value * 10 + ch - '0';
             } else {
-                tokens.add(new Pair(Token.INTCON, value, lineNumber));
-                columnNumber--;
                 break;
             }
         }
+        // 3. fix: judge token should be outside of loop
+        // 3. fix: if the word is at the end of the line, in loop it will not be added to tokens
+        tokens.add(new Pair(Token.INTCON, value, lineNumber));
+        columnNumber--;
     }
 
     public void parseSTRCON() {
@@ -138,9 +142,15 @@ public class Lexer {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(ch);
         // 2. 找到字符
+        // fix: character can be 'c', alse can be '\0'
         columnNumber++;
         ch = line.charAt(columnNumber);
         stringBuilder.append(ch);
+        if (ch == '\\') {
+            columnNumber++;
+            ch = line.charAt(columnNumber);
+            stringBuilder.append(ch);
+        }
         // 3. 找到\'
         columnNumber++;
         ch = line.charAt(columnNumber);
@@ -163,7 +173,10 @@ public class Lexer {
             case '&':
             case '|':
                 // errors
-                if (line.charAt(columnNumber + 1) != ch) {
+                if (columnNumber + 1 >= line.length()) {
+                    errors.add(lineNumber + " " + "a");
+                    break;
+                } else if (line.charAt(columnNumber + 1) != ch) {
                     errors.add(lineNumber + " " + "a");
                     break;
                 }
@@ -181,7 +194,11 @@ public class Lexer {
             case '>':
             case '=':
                 // 1.更新ch和stringBuilder
-                if (line.charAt(columnNumber + 1) == '=') {
+                if (columnNumber + 1 >= line.length()) {
+                    token = Category.getInstance().getTokenType(stringBuilder.toString());
+                    tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
+                    break;
+                } else if (line.charAt(columnNumber + 1) == '=') {
                     columnNumber++;
                     ch = line.charAt(columnNumber);
                     stringBuilder.append(ch);
@@ -193,7 +210,7 @@ public class Lexer {
                 break;
             case '/':
                 // fix: if '/' is last character
-                if (columnNumber == (line.length() - 1)) {
+                if (columnNumber + 1 == line.length()) {
                     // 1. 获取Token加入tokens
                     token = Category.getInstance().getTokenType(stringBuilder.toString());
                     tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));

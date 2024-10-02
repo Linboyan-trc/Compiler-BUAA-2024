@@ -2,9 +2,11 @@ package Lexer;
 
 public class Pair {
     // 1. Pair: 类别码 + word/value/charValue + 行号
+    // fix: value must be unsigned int
+    // fix: but in java there is no unsigned int, so we use long to store the unsigned int value
     private Token token; // 类别码
     private String word; // 单词
-    private int value; // 只对INTCON
+    private long value; // 只对INTCON
     private int lineNumber;
 
     // 1. 三类构造:String, int
@@ -15,7 +17,7 @@ public class Pair {
         this.lineNumber = lineNumber;
     }
 
-    public Pair(Token token, int value, int lineNumber) {
+    public Pair(Token token, long value, int lineNumber) {
         this.token = token;
         this.word = null;
         this.value = value;
@@ -31,7 +33,7 @@ public class Pair {
         return word;
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 

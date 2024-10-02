@@ -1,1 +1,1 @@
-else
+const int a = -2147483648
