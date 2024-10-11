@@ -1,9 +1,10 @@
 package Lexer;
 
+import ErrorHandler.ErrorHandler;
+import ErrorHandler.ErrorRecord;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Lexer {
     // 1. 属性
@@ -177,11 +178,27 @@ public class Lexer {
                 ////////////////////////////////////////////////////////////////////////////
                 // errors: need to be modified
                 if (columnNumber + 1 >= line.length()) {
-                    errors.add(lineNumber + " " + "a");
-                    break;
+                    // 1. record the error
+                    ErrorRecord errorRecord = new ErrorRecord(lineNumber, 'a');
+                    ErrorHandler.getInstance().addError(errorRecord);
+                    // 2. treat is as "||" or "&&", but record word as "|" or "&"
+                    columnNumber++;
+                    if(ch == '|') {
+                        return new Pair(Token.OR, stringBuilder.toString(), lineNumber);
+                    } else {
+                        return new Pair(Token.AND, stringBuilder.toString(), lineNumber);
+                    }
                 } else if (line.charAt(columnNumber + 1) != ch) {
-                    errors.add(lineNumber + " " + "a");
-                    break;
+                    // 1. record the error
+                    ErrorRecord errorRecord = new ErrorRecord(lineNumber, 'a');
+                    ErrorHandler.getInstance().addError(errorRecord);
+                    // 2. treat is as "||" or "&&", but record word as "|" or "&"
+                    columnNumber++;
+                    if(ch == '|') {
+                        return new Pair(Token.OR, stringBuilder.toString(), lineNumber);
+                    } else {
+                        return new Pair(Token.AND, stringBuilder.toString(), lineNumber);
+                    }
                 }
                 ////////////////////////////////////////////////////////////////////////////
                 // 1.更新ch和stringBuilder
