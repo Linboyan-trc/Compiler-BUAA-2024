@@ -17,10 +17,13 @@ public class Lexer {
     // 3. 注释
     private Boolean isRowAnno = false;
     private Boolean isMultiAnno = false;
+    // 4. 错误处理
+    private ErrorHandler errorHandler = ErrorHandler.getInstance();
 
     // 2. 构造函数
-    public Lexer(BufferedReader br) {
+    public Lexer(BufferedReader br) throws IOException {
         this.br = br;
+        line = br.readLine();
     }
 
     ///////////////////////////////////////////////////////////
@@ -180,7 +183,7 @@ public class Lexer {
                 if (columnNumber + 1 >= line.length()) {
                     // 1. record the error
                     ErrorRecord errorRecord = new ErrorRecord(lineNumber, 'a');
-                    ErrorHandler.getInstance().addError(errorRecord);
+                    errorHandler.addError(errorRecord);
                     // 2. treat is as "||" or "&&", but record word as "|" or "&"
                     columnNumber++;
                     if(ch == '|') {
@@ -191,7 +194,7 @@ public class Lexer {
                 } else if (line.charAt(columnNumber + 1) != ch) {
                     // 1. record the error
                     ErrorRecord errorRecord = new ErrorRecord(lineNumber, 'a');
-                    ErrorHandler.getInstance().addError(errorRecord);
+                    errorHandler.addError(errorRecord);
                     // 2. treat is as "||" or "&&", but record word as "|" or "&"
                     columnNumber++;
                     if(ch == '|') {

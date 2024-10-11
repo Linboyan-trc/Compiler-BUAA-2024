@@ -1,1 +1,6 @@
-const int a = -2147483648
+int main(){
+    int c;
+    c= getint();
+    printf("%d",c);
+    return c;
+}
