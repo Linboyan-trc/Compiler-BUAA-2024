@@ -19,7 +19,7 @@ public class Compiler {
         }
 
         // 3. 打印结果
-        String outputFile = "src/lexer.txt";
+        String outputFile = "src/parser.txt";
         try (FileWriter fw = new FileWriter(outputFile)) {
             for (Pair pair : Lexer.getInstance().getTokens()) {
                 fw.write(pair.toString() + "\n");

@@ -11,7 +11,8 @@ public enum Token {
     PLUS, MINU, MULT, DIV, MOD,
     LSS, LEQ, GRE, GEQ, EQL, NEQ, ASSIGN,
     SEMICN, COMMA,
-    LPARENT, RPARENT, LBRACK, RBRACK, LBRACE, RBRACE;
+    LPARENT, RPARENT, LBRACK, RBRACK, LBRACE, RBRACE,
+    EOF;
 
     public String toString() {
         return name();

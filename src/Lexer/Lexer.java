@@ -7,76 +7,78 @@ import java.util.List;
 
 public class Lexer {
     // 1. 属性
-    private static Lexer instance;
-    private List<Pair> tokens = new ArrayList<>();
+    private BufferedReader br;
+    // 2. 当前行，行数，列数，字符，Token
     private String line = null;
-    private int columnNumber;
-    private int lineNumber;
     private char ch;
+    private int columnNumber = 0;
+    private int lineNumber = 1;
+    // 3. 注释
     private Boolean isRowAnno = false;
     private Boolean isMultiAnno = false;
 
-    // erros
-    private List<String> errors = new ArrayList<>();
-
     // 2. 构造函数
-    private Lexer() {}
-
-    public static Lexer getInstance() {
-        if (instance == null) {
-            instance = new Lexer();
-        }
-        return instance;
+    public Lexer(BufferedReader br) {
+        this.br = br;
     }
 
     ///////////////////////////////////////////////////////////
     // 1. 解析
-    public void parse(BufferedReader br) throws IOException {
-        lineNumber = 1;
-        while((line = br.readLine()) != null) {
-            // 1. 跳过注释
-            // 2. 换行
-            // 3. 解析: 关键词，数字，其他
-            // fix: isRowAnno must be initiated outside of for-loop
-            // fix: because if '//' is at the end of row, is won't be set to false
-            isRowAnno = false;
-            for(columnNumber = 0;columnNumber < line.length();columnNumber++) {
+    public Pair parseAndGetPair() throws IOException {
+        // 1. 读到文件结束
+        if(line == null) {
+            return new Pair(Token.EOF);
+        } else {
+            // 1. 在本行继续读
+            while(columnNumber < line.length()) {
+                // 1. 跳过注释
+                // 2. 换行
+                // 3. 解析: 关键词，数字，其他
+                // fix: isRowAnno must be initiated outside of for-loop
+                // fix: because if '//' is at the end of row, is won't be set to false
                 if (isRowAnno) {
-                    break;
+                    nextLine();
+                    return parseAndGetPair();
                 } else if (isMultiAnno) {
                     int ending = line.indexOf("*/", columnNumber);
                     if (ending == -1) {
-                        break;
+                        nextLine();
+                        return parseAndGetPair();
                     } else {
                         // fix: after set columnNumber to '/', should continue
-                        columnNumber = ending + 1;
+                        columnNumber = ending + 2;
                         isMultiAnno = false;
                         continue;
                     }
                 }
+
                 // 3. 字母或下划线 + 数字 + " + ' + 其他
                 ch = line.charAt(columnNumber);
                 if(ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t') {
+                    columnNumber++;
                     continue;
                 }
 
                 if(Character.isAlphabetic(ch) || ch == '_') {
-                    parseIDENFR();
+                    return parseIDENFR();
                 } else if (Character.isDigit(ch)) {
-                    parseINTCON();
+                    return parseINTCON();
                 } else if (ch == '\"') {
-                    parseSTRCON();
+                    return parseSTRCON();
                 } else if (ch == '\'') {
-                    parseCHRCON();
+                    return parseCHRCON();
                 } else {
-                    parseOther();
+                    return parseOther();
                 }
             }
-            lineNumber++;
+            // 2. 如果本行没有读到有效Pair导致while循环结束，换行
+            nextLine();
+            // 3. 读下一行
+            return parseAndGetPair();
         }
     }
 
-    public void parseIDENFR() {
+    public Pair parseIDENFR() {
         // 1. 获取开头字符
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(ch);
@@ -95,11 +97,10 @@ public class Lexer {
         // 3. fix: if the word is at the end of the line, in loop it will not be added to tokens
         String string = stringBuilder.toString();
         Token token = Category.getInstance().getTokenType(string);
-        tokens.add(new Pair(token, string, lineNumber));
-        columnNumber--;
+        return new Pair(token, string, lineNumber);
     }
 
-    public void parseINTCON() {
+    public Pair parseINTCON() {
         // 1. 获取初始值
         long value = ch - '0';
         // 2. 继续判断
@@ -114,11 +115,10 @@ public class Lexer {
         }
         // 3. fix: judge token should be outside of loop
         // 3. fix: if the word is at the end of the line, in loop it will not be added to tokens
-        tokens.add(new Pair(Token.INTCON, value, lineNumber));
-        columnNumber--;
+        return new Pair(Token.INTCON, value, lineNumber);
     }
 
-    public void parseSTRCON() {
+    public Pair parseSTRCON() {
         // 1. 获取初始值
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(ch);
@@ -128,16 +128,17 @@ public class Lexer {
             // 3. 如果是"就结束，加入tokens
             ch = line.charAt(columnNumber);
             if (ch == '\"') {
-                 stringBuilder.append(ch);
-                tokens.add(new Pair(Token.STRCON, stringBuilder.toString(), lineNumber));
+                stringBuilder.append(ch);
+                columnNumber++;
                 break;
             } else {
                 stringBuilder.append(ch);
             }
         }
+        return new Pair(Token.STRCON, stringBuilder.toString(), lineNumber);
     }
 
-    public void parseCHRCON() {
+    public Pair parseCHRCON() {
         // 1. 获取字符
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(ch);
@@ -156,10 +157,11 @@ public class Lexer {
         ch = line.charAt(columnNumber);
         stringBuilder.append(ch);
         // 4. 加入tokens
-        tokens.add(new Pair(Token.CHRCON, stringBuilder.toString(), lineNumber));
+        columnNumber++;
+        return new Pair(Token.CHRCON, stringBuilder.toString(), lineNumber);
     }
 
-    public void parseOther() {
+    public Pair parseOther() throws IOException{
         // 1. 获取字符
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(ch);
@@ -172,7 +174,8 @@ public class Lexer {
         switch (ch) {
             case '&':
             case '|':
-                // errors
+                ////////////////////////////////////////////////////////////////////////////
+                // errors: need to be modified
                 if (columnNumber + 1 >= line.length()) {
                     errors.add(lineNumber + " " + "a");
                     break;
@@ -180,15 +183,15 @@ public class Lexer {
                     errors.add(lineNumber + " " + "a");
                     break;
                 }
+                ////////////////////////////////////////////////////////////////////////////
                 // 1.更新ch和stringBuilder
                 columnNumber++;
                 ch = line.charAt(columnNumber);
                 stringBuilder.append(ch);
                 // 2. 获取Token加入tokens
                 token = Category.getInstance().getTokenType(stringBuilder.toString());
-                tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
-                // 3. break
-                break;
+                columnNumber++;
+                return new Pair(token, stringBuilder.toString(), lineNumber);
             case '!':
             case '<':
             case '>':
@@ -196,8 +199,8 @@ public class Lexer {
                 // 1.更新ch和stringBuilder
                 if (columnNumber + 1 >= line.length()) {
                     token = Category.getInstance().getTokenType(stringBuilder.toString());
-                    tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
-                    break;
+                    columnNumber++;
+                    return new Pair(token, stringBuilder.toString(), lineNumber);
                 } else if (line.charAt(columnNumber + 1) == '=') {
                     columnNumber++;
                     ch = line.charAt(columnNumber);
@@ -205,17 +208,15 @@ public class Lexer {
                 }
                 // 2. 获取Token加入tokens
                 token = Category.getInstance().getTokenType(stringBuilder.toString());
-                tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
-                // 3. break
-                break;
+                columnNumber++;
+                return new Pair(token, stringBuilder.toString(), lineNumber);
             case '/':
                 // fix: if '/' is last character
                 if (columnNumber + 1 == line.length()) {
                     // 1. 获取Token加入tokens
                     token = Category.getInstance().getTokenType(stringBuilder.toString());
-                    tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
-                    // 2. break
-                    break;
+                    columnNumber++;
+                    return new Pair(token, stringBuilder.toString(), lineNumber);
                 }
                 //
                 else if (line.charAt(columnNumber + 1) == '/') {
@@ -225,8 +226,9 @@ public class Lexer {
                     stringBuilder.append(ch);
                     // 2. isRowAnno
                     isRowAnno = true;
-                    // 3. break
-                    break;
+                    // 3. parse next line
+                    nextLine();
+                    return parseAndGetPair();
                 } else if (line.charAt(columnNumber + 1) == '*') {
                     // 1.更新ch和stringBuilder
                     columnNumber++;
@@ -234,32 +236,29 @@ public class Lexer {
                     stringBuilder.append(ch);
                     // 2. isMultiAnno
                     isMultiAnno = true;
-                    // 3. break
-                    break;
+                    // 3. parse next line
+                    nextLine();
+                    return parseAndGetPair();
                 } else {
                     // 1. 获取Token加入tokens
                     token = Category.getInstance().getTokenType(stringBuilder.toString());
-                    tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
-                    // 2. break
-                    break;
+                    columnNumber++;
+                    return new Pair(token, stringBuilder.toString(), lineNumber);
                 }
             default:
                 // 1. 获取Token加入tokens
                 token = Category.getInstance().getTokenType(stringBuilder.toString());
-                tokens.add(new Pair(token, stringBuilder.toString(), lineNumber));
-                // 2. break
-                break;
+                columnNumber++;
+                return new Pair(token, stringBuilder.toString(), lineNumber);
         }
     }
 
     ///////////////////////////////////////////////////////////
-    // 2. 获取tokens
-    public List<Pair> getTokens() {
-        return tokens;
-    }
-
-    // erros
-    public List<String> getErrors() {
-        return errors;
+    // 3. 读下一行
+    public void nextLine() throws IOException {
+        isRowAnno = false;
+        line = br.readLine();
+        lineNumber++;
+        columnNumber = 0;
     }
 }

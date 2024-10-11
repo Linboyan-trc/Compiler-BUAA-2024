@@ -9,7 +9,7 @@ public class Pair {
     private long value; // 只对INTCON
     private int lineNumber;
 
-    // 1. 三类构造:String, int
+    // 1. 三类构造:String, int, EOF
     public Pair(Token token, String word, int lineNumber) {
         this.token = token;
         this.word = word;
@@ -22,6 +22,13 @@ public class Pair {
         this.word = null;
         this.value = value;
         this.lineNumber = lineNumber;
+    }
+
+    public Pair(Token token) {
+        this.token = token;
+        this.word = null;
+        this.value = 0;
+        this.lineNumber = 0;
     }
 
     // 2. 工具函数: 获取TOKEN类型， 输出成字符串
