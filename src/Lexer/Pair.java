@@ -44,6 +44,10 @@ public class Pair {
         return value;
     }
 
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
     @Override
     public String toString() {
         if (token == Token.INTCON) {

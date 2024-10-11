@@ -1,6 +1,7 @@
 package Parser;
 
 import ErrorHandler.ErrorHandler;
+import ErrorHandler.ErrorRecord;
 import Lexer.Lexer;
 import Lexer.Pair;
 import Lexer.Token;
@@ -188,13 +189,15 @@ public class Parser {
         // 2.1 如果是',',那么继续解析<ConstDef>,并不断获取下一个Token
         // 2.2 输出';'的Token
         // 2.3 追加语法成分
-        getToken();
-        while(token == Token.COMMA) {
+        while(getToken(Token.COMMA)) {
             fw.write(pair.toString() + "\n");
             parseConstDef();
-            getToken();
         }
-        fw.write(pair.toString() + "\n");
+        if (getToken(Token.SEMICN)) {
+            fw.write(pair.toString() + "\n");
+        } else {
+            errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+        }
         fw.write("<ConstDecl>\n");
     }
 
@@ -284,16 +287,18 @@ public class Parser {
         parseVarDef();
 
         // 3. 如果下一个是,继续解析<VarDef>
-        getToken();
-        while(token == Token.COMMA) {
+        while(getToken(Token.COMMA)) {
             fw.write(pair.toString() + "\n");
             parseVarDef();
-            getToken();
         }
 
         // 4. 解析';'
         // 4. 最后追加语法成分
-        fw.write(pair.toString() + "\n");
+        if (getToken(Token.SEMICN)) {
+            fw.write(pair.toString() + "\n");
+        } else {
+            errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+        }
         fw.write("<VarDecl>\n");
     }
 
@@ -641,14 +646,20 @@ public class Parser {
             // 'break' ';'
             case BREAKTK:
                 fw.write(pair.toString() + "\n");
-                getToken();
-                fw.write(pair.toString() + "\n");
+                if(getToken(Token.SEMICN)){
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+                }
                 break;
             // 'continue' ';'
             case CONTINUETK:
                 fw.write(pair.toString() + "\n");
-                getToken();
-                fw.write(pair.toString() + "\n");
+                if(getToken(Token.SEMICN)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+                }
                 break;
             // 'return' ';' | 'return' <Exp> ';'
             case RETURNTK:
@@ -656,13 +667,20 @@ public class Parser {
                 fw.write(pair.toString() + "\n");
                 // 2. 没有 ';' | <Exp> ';'
                 getToken();
-                if(token != Token.SEMICN) {
+                if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
+                        || token == Token.IDENFR || token == Token.LPARENT
+                        || token == Token.INTCON || token == Token.CHRCON) {
                     retract(1);
                     parseExp();
                     getToken();
                 }
                 // 3. ';'
-                fw.write(pair.toString() + "\n");
+                if(token == Token.SEMICN) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    retract(1);
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+                }
                 break;
             // 'printf' '(' <StringConst> { ',' <Exp> } ')' ';'
             case PRINTFTK:
@@ -683,8 +701,11 @@ public class Parser {
                 // 5. ')'
                 fw.write(pair.toString() + "\n");
                 // 6. ';'
-                getToken();
-                fw.write(pair.toString() + "\n");
+                if(getToken(Token.SEMICN)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+                }
                 break;
             // <LVal>
                 // <LVal> '=' <Exp> ';'
@@ -834,7 +855,7 @@ public class Parser {
     public void parseStringConst() throws IOException {
         getToken();
         fw.write(pair.toString() + "\n");
-        fw.write("<StringConst>\n");
+        //fw.write("<StringConst>\n");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////

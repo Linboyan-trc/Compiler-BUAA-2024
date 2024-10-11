@@ -19,7 +19,6 @@ SEMICN ;
 PRINTFTK printf
 LPARENT (
 STRCON "%d"
-<StringConst>
 COMMA ,
 IDENFR c
 <LVal>
