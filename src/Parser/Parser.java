@@ -8,7 +8,7 @@ import Lexer.Token;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Parser {
@@ -17,7 +17,7 @@ public class Parser {
     private Pair pair;
     private Token token;
     private int tokenIndex = -1;
-    private List<Pair> tokens = new ArrayList<>();
+    private List<Pair> tokens = new LinkedList<>();
     // 2. 输出文件
     FileWriter fw;
     // 3. 错误处理
@@ -91,7 +91,7 @@ public class Parser {
             // 1. <ConstDecl>
             if(token == Token.CONSTTK) {
                 retract(1);
-                fw.write("///////////////////// ConstDecl /////////////////////\n");
+                //fw.write("///////////////////// ConstDecl /////////////////////\n");
                 parseConstDecl();
             }
             // 2. <VarDecl>
@@ -111,7 +111,7 @@ public class Parser {
                 }
                 // 3. int a
                 retract(3);
-                fw.write("///////////////////// VarDecl /////////////////////\n");
+                //fw.write("///////////////////// VarDecl /////////////////////\n");
                 parseVarDecl();
             }
             // 2.2 char a() + char a
@@ -119,12 +119,13 @@ public class Parser {
                 // 1. IDENFR
                 getToken();
                 // 2. '('
+                getToken();
                 if (token == Token.LPARENT) {
                     retract(2);
                     break;
                 }
                 retract(3);
-                fw.write("///////////////////// VarDecl /////////////////////\n");
+                //fw.write("///////////////////// VarDecl /////////////////////\n");
                 parseVarDecl();
             }
             getToken();
@@ -138,8 +139,8 @@ public class Parser {
         // 3.3 是char: 继续读一个
             // 回退 + 解析<FuncDef>
         // 3.4 继续获取下一个Token
-        fw.write("///////////////////// FuncDef /////////////////////\n");
         while(token == Token.VOIDTK || token == Token.INTTK || token == Token.CHARTK) {
+            //fw.write("///////////////////// FuncDef /////////////////////\n");
             // 1. void
             if(token == Token.VOIDTK) {
                 retract(1);
@@ -168,7 +169,7 @@ public class Parser {
         // 4.2 解析<MainFuncDef>
         // 4.3 最后追加语法成分
         retract(1);
-        fw.write("///////////////////// MainFuncDef /////////////////////\n");
+        //fw.write("///////////////////// MainFuncDef /////////////////////\n");
         parseMainFuncDef();
         fw.write("<CompUnit>\n");
     }
@@ -469,7 +470,7 @@ public class Parser {
         // 3. '['
         if (getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
-            if(getToken(Token.RPARENT)) {
+            if(getToken(Token.RBRACK)) {
                 fw.write(pair.toString() + "\n");
             } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
@@ -734,7 +735,9 @@ public class Parser {
                 // 1. <LVal> = IDENFR | IDENFR []，所以只读一个Token不够走到'='或';'，一直读直到读到'='或者';'
                 int cnt = 0;
                 getToken();
-                while(token != Token.ASSIGN && token != Token.SEMICN) {
+                // fix: when error 'i' happens, the end of <LVal> has no ';', then will trap in this loop
+                // fix: should add a situation that token != Token.EOF
+                while(token != Token.ASSIGN && token != Token.SEMICN && token != Token.EOF) {
                     cnt++;
                     getToken();
                 }
