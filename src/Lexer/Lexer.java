@@ -257,7 +257,7 @@ public class Lexer {
                     // 2. isMultiAnno
                     isMultiAnno = true;
                     // 3. parse next line
-                    nextLine();
+                    columnNumber++;
                     return parseAndGetPair();
                 } else {
                     // 1. 获取Token加入tokens

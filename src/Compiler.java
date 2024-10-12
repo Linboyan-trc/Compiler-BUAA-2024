@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 import ErrorHandler.ErrorHandler;
 import ErrorHandler.ErrorRecord;
@@ -19,17 +16,15 @@ public class Compiler {
 
         // 3. 打印结果
         String outputFile = "parser.txt";
-        String tempFile = "temp.txt";
         FileWriter fwOut = new FileWriter(outputFile);
-        FileWriter fwTemp = new FileWriter(tempFile);
-        Parser parser = new Parser(lexer,fwOut,fwTemp);
+        Parser parser = new Parser(lexer,fwOut);
         parser.parseCompUnit();
         fwOut.close();
-        fwTemp.close();
 
         // 4. errors
         String errFile = "error.txt";
         FileWriter fwErr = new FileWriter(errFile);
+        ErrorHandler.getInstance().sortErrorsByLineNumber();
         for (ErrorRecord errorRecord : ErrorHandler.getInstance().getErrors()) {
             fwErr.write(errorRecord + "\n");
         }

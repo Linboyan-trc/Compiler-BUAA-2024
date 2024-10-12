@@ -6,7 +6,6 @@ import Lexer.Lexer;
 import Lexer.Pair;
 import Lexer.Token;
 
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,14 +20,14 @@ public class Parser {
     private List<Pair> tokens = new ArrayList<>();
     // 2. 输出文件
     FileWriter fw;
-    FileWriter fwTemp;
+    FileWriter fwOrigin;
     // 3. 错误处理
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
 
-    public Parser(Lexer lexer, FileWriter fw, FileWriter fwTemp) {
+    public Parser(Lexer lexer, FileWriter fw) {
         this.lexer = lexer;
         this.fw = fw;
-        this.fwTemp = fwTemp;
+        this.fwOrigin = fw;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -423,7 +422,7 @@ public class Parser {
         // 2.4 如果不是')', 说明是<FuncFParams>，回退一位然后解析
         // 2.4 否则就是')', 直接解析即可
         getToken();
-        if (token != Token.RPARENT) {
+        if (token != Token.RPARENT && token != Token.LBRACE) {
             retract(1);
             parseFuncFParams();
             getToken();
@@ -628,12 +627,9 @@ public class Parser {
                 // 5. <Stmt>
                 parseStmt();
                 // 6. 可能有:'else' <Stmt>
-                getToken();
-                if (token == Token.ELSETK) {
+                if (getToken(Token.ELSETK)) {
                     fw.write(pair.toString() + "\n");
                     parseStmt();
-                } else {
-                    retract(1);
                 }
                 break;
             // 'for' '(' 没有 | <ForStmt> ';' 没有 | <Cond> ';' 没有 | <ForStmt> ')' <Stmt>
@@ -669,7 +665,12 @@ public class Parser {
                     getToken();
                 }
                 // 8. ')'
-                fw.write(pair.toString() + "\n");
+                if(token == Token.RPARENT) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    retract(1);
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+                }
                 // 9. <Stmt>
                 parseStmt();
                 break;
@@ -722,14 +723,16 @@ public class Parser {
                 // 3. <StringConst>
                 parseStringConst();
                 // 4. ',' <Exp> ')' 或 ')'
-                getToken();
-                while(token == Token.COMMA) {
+                while(getToken(Token.COMMA)) {
                     fw.write(pair.toString() + "\n");
                     parseExp();
-                    getToken();
                 }
                 // 5. ')'
-                fw.write(pair.toString() + "\n");
+                if(getToken(Token.RPARENT)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+                }
                 // 6. ';'
                 if(getToken(Token.SEMICN)) {
                     fw.write(pair.toString() + "\n");
@@ -747,18 +750,19 @@ public class Parser {
                 // 2. <Exp> -> a();
                 int anchor = tokenIndex - 1;
                 if(getToken(Token.LPARENT)) {
-                    retract(2);
+                    retractAbsolutely(anchor);
                     parseExp();
                 } else {
                     // 1. 先扫一遍会不会出现<LVal>中的a[ = {1};错误
-                    FileWriter fwOrigin = fw;
-                    fw = fwTemp;
+                    // fix: in deeper recursive layer, fw will be set original and errorHandler will be turned on
+                    fw = new FileWriter("temp.txt");
                     fw.write("///////// in temp /////////\n");
                     errorHandler.turnOff();
-                    retract(1);
+                    retractAbsolutely(anchor);
                     parseLVal();
                     errorHandler.turnOn();
                     fw.write("///////// out temp /////////\n");
+                    fw.close();
                     fw = fwOrigin;
                     // 2. 读等号
                     if(getToken(Token.ASSIGN)) {
@@ -874,8 +878,11 @@ public class Parser {
         if (token == Token.LPARENT) {
             fw.write(pair.toString() + "\n");
             parseExp();
-            getToken();
-            fw.write(pair.toString() + "\n");
+            if(getToken(Token.RPARENT)) {
+                fw.write(pair.toString() + "\n");
+            } else {
+                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+            }
         }
         // 2. <Number>
         else if (token == Token.INTCON) {
@@ -943,8 +950,11 @@ public class Parser {
                 getToken();
                 fw.write(pair.toString() + "\n");
                 // 3. ')' | <FuncRParams> ')'
+                // fix: if errors 'j' happens, missing ')', this will enter <parseFuncRParams> branch
                 getToken();
-                if (token != Token.RPARENT) {
+                if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
+                        || token == Token.IDENFR || token == Token.LPARENT
+                        || token == Token.INTCON || token == Token.CHRCON) {
                     retract(1);
                     parseFuncRParams();
                     getToken();
