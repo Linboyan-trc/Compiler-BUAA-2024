@@ -91,6 +91,7 @@ public class Parser {
             // 1. <ConstDecl>
             if(token == Token.CONSTTK) {
                 retract(1);
+                fw.write("///////////////////// ConstDecl /////////////////////\n");
                 parseConstDecl();
             }
             // 2. <VarDecl>
@@ -110,16 +111,20 @@ public class Parser {
                 }
                 // 3. int a
                 retract(3);
+                fw.write("///////////////////// VarDecl /////////////////////\n");
                 parseVarDecl();
             }
             // 2.2 char a() + char a
             else {
+                // 1. IDENFR
                 getToken();
+                // 2. '('
                 if (token == Token.LPARENT) {
                     retract(2);
                     break;
                 }
                 retract(3);
+                fw.write("///////////////////// VarDecl /////////////////////\n");
                 parseVarDecl();
             }
             getToken();
@@ -133,6 +138,7 @@ public class Parser {
         // 3.3 是char: 继续读一个
             // 回退 + 解析<FuncDef>
         // 3.4 继续获取下一个Token
+        fw.write("///////////////////// FuncDef /////////////////////\n");
         while(token == Token.VOIDTK || token == Token.INTTK || token == Token.CHARTK) {
             // 1. void
             if(token == Token.VOIDTK) {
@@ -162,6 +168,7 @@ public class Parser {
         // 4.2 解析<MainFuncDef>
         // 4.3 最后追加语法成分
         retract(1);
+        fw.write("///////////////////// MainFuncDef /////////////////////\n");
         parseMainFuncDef();
         fw.write("<CompUnit>\n");
     }
@@ -216,18 +223,20 @@ public class Parser {
         // 2.1 如果是'['就是数组
             // 解析<ConstExp>
             // ']'
-        getToken();
-        if(token == Token.LBRACK) {
+        if(getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
             parseConstExp();
-            getToken();
-            fw.write(pair.toString() + "\n");
-            getToken();
+            if(getToken(Token.RBRACK)) {
+                fw.write(pair.toString() + "\n");
+            } else {
+                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
+            }
         }
 
         // 3.1 读'=''
         // 3.2 解析<ConstInitVal>
         // 3.3 追加语法成分
+        getToken();
         fw.write(pair.toString() + "\n");
         parseConstInitVal();
         fw.write("<ConstDef>\n");
@@ -246,11 +255,11 @@ public class Parser {
             // 1.1 <ConstExp>, ... }
             getToken();
             if (token != Token.RBRACE) {
+                retract(1);
                 parseConstExp();
                 getToken();
                 while(token == Token.COMMA) {
                     fw.write(pair.toString() + "\n");
-                    getToken();
                     parseConstExp();
                     getToken();
                 }
@@ -316,23 +325,22 @@ public class Parser {
         // 3.1 解析'['
         // 3.2 解析<ConstExp>
         // 3.3 解析']'
-        getToken();
-        if(token == Token.LBRACK) {
+        if(getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
             parseConstExp();
-            getToken();
-            fw.write(pair.toString() + "\n");
-            getToken();
+            if(getToken(Token.RBRACK)) {
+                fw.write(pair.toString() + "\n");
+            } else {
+                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
+            }
         }
 
         // 4. 解析'='
         // 4.1 如果可以解析'=', 说明有<InitVal>
         // 4.2 追加语法成分
-        if(token == Token.ASSIGN) {
+        if(getToken(Token.ASSIGN)) {
             fw.write(pair.toString() + "\n");
             parseInitVal();
-        } else {
-            retract(1);
         }
         fw.write("<VarDef>\n");
     }
@@ -357,11 +365,11 @@ public class Parser {
             // 2. <Exp>,<Exp>
             getToken();
             if (token != Token.RBRACE) {
+                retract(1);
                 parseExp();
                 getToken();
                 while(token == Token.COMMA) {
                     fw.write(pair.toString() + "\n");
-                    getToken();
                     parseExp();
                     getToken();
                 }
@@ -408,8 +416,12 @@ public class Parser {
             parseFuncFParams();
             getToken();
         }
-        fw.write(pair.toString() + "\n");
-
+        if(token == Token.RPARENT) {
+            fw.write(pair.toString() + "\n");
+        } else {
+            retract(1);
+            errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+        }
         // 2.5 解析<Block>
         // 2.5 追加语法成分
         parseBlock();
@@ -455,14 +467,14 @@ public class Parser {
         fw.write(pair.toString() + "\n");
 
         // 3. '['
-        getToken();
-        if (token == Token.LBRACK) {
+        if (getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
-            getToken();
-            fw.write(pair.toString() + "\n");
-            getToken();
+            if(getToken(Token.RPARENT)) {
+                fw.write(pair.toString() + "\n");
+            } else {
+                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
+            }
         }
-        retract(1);
 
         // 4. 追加语法成分
         fw.write("<FuncFParam>\n");
@@ -485,8 +497,11 @@ public class Parser {
         // 3. ()
         getToken();
         fw.write(pair.toString() + "\n");
-        getToken();
-        fw.write(pair.toString() + "\n");
+        if (getToken(Token.RPARENT)) {
+            fw.write(pair.toString() + "\n");
+        } else {
+            errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+        }
 
         // 4. <Block>
         parseBlock();
@@ -593,8 +608,11 @@ public class Parser {
                 // 3. <Conf>
                 parseCond();
                 // 4. ')'
-                getToken();
-                fw.write(pair.toString() + "\n");
+                if(getToken(Token.RPARENT)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+                }
                 // 5. <Stmt>
                 parseStmt();
                 // 6. 可能有:'else' <Stmt>
@@ -635,7 +653,7 @@ public class Parser {
                 getToken();
                 if(token != Token.RPARENT) {
                     retract(1);
-                    parseCond();
+                    parseForStmt();
                     getToken();
                 }
                 // 8. ')'
@@ -750,8 +768,11 @@ public class Parser {
                     parseExp();
                 }
                 // 4. ';'
-                getToken();
-                fw.write(pair.toString() + "\n");
+                if(getToken(Token.SEMICN)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
+                }
                 break;
         }
         fw.write("<Stmt>\n");
@@ -794,15 +815,15 @@ public class Parser {
         fw.write(pair.toString() + "\n");
 
         // 2. 没有 | [ <Exp> ]
-        getToken();
-        if (token == Token.LBRACK) {
+        if (getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
             parseExp();
-            getToken();
-            fw.write(pair.toString() + "\n");
-            getToken();
+            if(getToken(Token.RBRACK)) {
+                fw.write(pair.toString() + "\n");
+            } else {
+                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
+            }
         }
-        retract(1);
         fw.write("<LVal>\n");
     }
 
@@ -895,7 +916,12 @@ public class Parser {
                     getToken();
                 }
                 // 4. ')'
-                fw.write(pair.toString() + "\n");
+                if(token == Token.RPARENT) {
+                    fw.write(pair.toString() + "\n");
+                } else {
+                    retract(1);
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+                }
             } else {
                 retract(2);
                 parsePrimaryExp();
@@ -932,7 +958,7 @@ public class Parser {
             getToken();
         }
         retract(1);
-        fw.write("<FucnRParams>\n");
+        fw.write("<FuncRParams>\n");
     }
 
     public void parseMulExp() throws IOException {
