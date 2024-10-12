@@ -24,11 +24,11 @@ public class Pair {
         this.lineNumber = lineNumber;
     }
 
-    public Pair(Token token) {
+    public Pair(Token token, int lineNumber) {
         this.token = token;
         this.word = null;
         this.value = 0;
-        this.lineNumber = 0;
+        this.lineNumber = lineNumber;
     }
 
     // 2. 工具函数: 获取TOKEN类型， 输出成字符串

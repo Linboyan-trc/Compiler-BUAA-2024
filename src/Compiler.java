@@ -19,10 +19,13 @@ public class Compiler {
 
         // 3. 打印结果
         String outputFile = "parser.txt";
+        String tempFile = "temp.txt";
         FileWriter fwOut = new FileWriter(outputFile);
-        Parser parser = new Parser(lexer,fwOut);
+        FileWriter fwTemp = new FileWriter(tempFile);
+        Parser parser = new Parser(lexer,fwOut,fwTemp);
         parser.parseCompUnit();
         fwOut.close();
+        fwTemp.close();
 
         // 4. errors
         String errFile = "error.txt";

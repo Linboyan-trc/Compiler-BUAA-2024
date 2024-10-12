@@ -31,7 +31,7 @@ public class Lexer {
     public Pair parseAndGetPair() throws IOException {
         // 1. 读到文件结束
         if(line == null) {
-            return new Pair(Token.EOF);
+            return new Pair(Token.EOF, lineNumber);
         } else {
             // 1. 在本行继续读
             while(columnNumber < line.length()) {
