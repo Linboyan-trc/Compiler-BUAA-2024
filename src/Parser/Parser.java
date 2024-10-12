@@ -753,9 +753,12 @@ public class Parser {
                     // 1. 先扫一遍会不会出现<LVal>中的a[ = {1};错误
                     FileWriter fwOrigin = fw;
                     fw = fwTemp;
+                    fw.write("///////// in temp /////////\n");
                     errorHandler.turnOff();
+                    retract(1);
                     parseLVal();
                     errorHandler.turnOn();
+                    fw.write("///////// out temp /////////\n");
                     fw = fwOrigin;
                     // 2. 读等号
                     if(getToken(Token.ASSIGN)) {
@@ -794,63 +797,11 @@ public class Parser {
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
+                break;
             default:
                 // 1. 此时只剩其他类型的<Exp>
                 retract(1);
                 parseExp();
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
-                } else {
-                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
-                }
-
-
-
-
-
-
-
-                // 1. <LVal> = IDENFR | IDENFR []，所以只读一个Token不够走到'='或';'，一直读直到读到'='或者';'
-                int cnt = 0;
-                getToken();
-                // fix: when error 'i' happens, the end of <LVal> has no ';', then will trap in this loop
-                // fix: should add a situation that token != Token.EOF
-                // bug: if the error 'i' happens, then this loop will consume all the rest testfile
-                // bug: but we should restrict only in this line
-                while(token != Token.ASSIGN && token != Token.SEMICN && token != Token.EOF) {
-                    cnt++;
-                    getToken();
-                }
-                // 2. <LVal> '='
-                    // <Exp>
-                    // 'getint' '(' ')'
-                    // 'getchar' '(' ')'
-                if (token == Token.ASSIGN) {
-                    // 1. <LVal>
-                    retract(cnt + 2);
-                    parseLVal();
-                    // 2. '='
-                    getToken();
-                    fw.write(pair.toString() + "\n");
-                    // 3. 'getint' | 'getchar' | <Exp>
-                    getToken();
-                    if (token == Token.GETINTTK || token == Token.GETCHARTK) {
-                        fw.write(pair.toString() + "\n");
-                        getToken();
-                        fw.write(pair.toString() + "\n");
-                        getToken();
-                        fw.write(pair.toString() + "\n");
-                    } else {
-                        retract(1);
-                        parseExp();
-                    }
-                }
-                // 3. <Exp>
-                else {
-                    retract(cnt + 2);
-                    parseExp();
-                }
-                // 4. ';'
                 if(getToken(Token.SEMICN)) {
                     fw.write(pair.toString() + "\n");
                 } else {
