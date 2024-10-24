@@ -29,6 +29,8 @@ public class Category {
         strTokenTable.put("if", Token.IFTK);
         strTokenTable.put("else", Token.ELSETK);
         strTokenTable.put("for", Token.FORTK);
+        strTokenTable.put("repeat", Token.REPEATTK);
+        strTokenTable.put("until",Token.UNTILTK);
         strTokenTable.put("return", Token.RETURNTK);
         strTokenTable.put("printf", Token.PRINTFTK);
         strTokenTable.put("getint", Token.GETINTTK);

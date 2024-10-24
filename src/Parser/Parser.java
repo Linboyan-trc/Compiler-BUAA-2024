@@ -589,6 +589,7 @@ public class Parser {
             // <Blcok>
             // 'if' '(' <Cond> ')' <Stmt> 可能有:'else' <Stmt>
             // 'for' '(' 没有 | <ForStmt> ';' 没有 | <Cond> ';' 没有 <ForStmt> ')' <Stmt>
+            // 'repeat' <Stmt> 'until' '(' <Cond> ')' ';'
             // 'break' ';'
             // 'continue' ';'
             // 'return' ';' | 'return' <Exp> ';'
@@ -616,7 +617,7 @@ public class Parser {
                 // 2. '('
                 getToken();
                 fw.write(pair.toString() + "\n");
-                // 3. <Conf>
+                // 3. <Cond>
                 parseCond();
                 // 4. ')'
                 if(getToken(Token.RPARENT)) {
@@ -674,6 +675,27 @@ public class Parser {
                 // 9. <Stmt>
                 parseStmt();
                 break;
+            // 'repeat' <Stmt> 'until' '(' <Cond> ')' ';'
+            case REPEATTK:
+                // 1. 'repeat'
+                fw.write(pair.toString() + "\n");
+                // 2. <Stmt>
+                parseStmt();
+                // 3. 'until'
+                getToken();
+                fw.write(pair.toString() + "\n");
+                // 4. '('
+                getToken();
+                fw.write(pair.toString() + "\n");
+                // 5. <Cond>
+                parseCond();
+                // 6. ')'
+                getToken();
+                fw.write(pair.toString() + "\n");
+                // 7. ';'
+                getToken();
+                fw.write(pair.toString() + "\n");
+                break;
             // 'break' ';'
             case BREAKTK:
                 fw.write(pair.toString() + "\n");
@@ -700,7 +722,7 @@ public class Parser {
                 getToken();
                 if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
                         || token == Token.IDENFR || token == Token.LPARENT
-                        || token == Token.INTCON || token == Token.CHRCON) {
+                        || token == Token.INTCON || token == Token.HEXCON || token == Token.CHRCON) {
                     retract(1);
                     parseExp();
                     getToken();
@@ -885,7 +907,7 @@ public class Parser {
             }
         }
         // 2. <Number>
-        else if (token == Token.INTCON) {
+        else if (token == Token.INTCON || token == Token.HEXCON) {
             retract(1);
             parseNumber();
         }
@@ -954,7 +976,7 @@ public class Parser {
                 getToken();
                 if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
                         || token == Token.IDENFR || token == Token.LPARENT
-                        || token == Token.INTCON || token == Token.CHRCON) {
+                        || token == Token.INTCON || token == Token.HEXCON || token == Token.CHRCON) {
                     retract(1);
                     parseFuncRParams();
                     getToken();

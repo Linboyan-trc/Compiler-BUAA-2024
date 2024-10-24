@@ -105,21 +105,54 @@ public class Lexer {
     }
 
     public Pair parseINTCON() {
-        // 1. 获取初始值
-        long value = ch - '0';
-        // 2. 继续判断
-        columnNumber++;
-        for(;columnNumber < line.length();columnNumber++) {
-            ch = line.charAt(columnNumber);
-            if (Character.isDigit(ch)) {
-                value = value * 10 + ch - '0';
-            } else {
-                break;
+        // 1. 有两种情况
+            // 1. 123
+            // 2. 0x123 | OX123
+        boolean isHex = false;
+        if(ch == '0' && columnNumber <= (line.length()-2)) {
+            if (line.charAt(columnNumber + 1) == 'x' || line.charAt(columnNumber + 1) == 'X') {
+                isHex = true;
             }
         }
-        // 3. fix: judge token should be outside of loop
-        // 3. fix: if the word is at the end of the line, in loop it will not be added to tokens
-        return new Pair(Token.INTCON, value, lineNumber);
+
+        // 2.1 处理Hexadecimal
+        if (isHex) {
+            // 2.1.1 获取字符
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(line.charAt(columnNumber));
+            columnNumber++;
+            stringBuilder.append(line.charAt(columnNumber));
+            columnNumber++;
+            // 2.1.2 判断digit或alphabetic
+            for(;columnNumber < line.length();columnNumber++) {
+                ch = line.charAt(columnNumber);
+                if (Character.isAlphabetic(ch) || Character.isDigit(ch)) {
+                    stringBuilder.append(ch);
+                } else {
+                    break;
+                }
+            }
+            // 2.1.3
+            return new Pair(Token.HEXCON, stringBuilder.toString(), lineNumber);
+        }
+        // 2.2 处理Decimal
+        else {
+            // 1. 获取初始值
+            long value = ch - '0';
+            // 2. 继续判断
+            columnNumber++;
+            for (; columnNumber < line.length(); columnNumber++) {
+                ch = line.charAt(columnNumber);
+                if (Character.isDigit(ch)) {
+                    value = value * 10 + ch - '0';
+                } else {
+                    break;
+                }
+            }
+            // 3. fix: judge token should be outside of loop
+            // 3. fix: if the word is at the end of the line, in loop it will not be added to tokens
+            return new Pair(Token.INTCON, value, lineNumber);
+        }
     }
 
     public Pair parseSTRCON() {
