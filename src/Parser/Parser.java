@@ -37,6 +37,10 @@ public class Parser {
         this.fwOrigin = fw;
     }
 
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////
     // 1. 第一种getToken用于简单获取下一个
     // 2. 第二种getToken用于错误处理却少情况:i, j, k
@@ -270,7 +274,7 @@ public class Parser {
 
         // 3.2 解析<ConstInitVal>
         // 3.3 追加语法成分
-        defNode.setInitValues(parseConstInitVal());
+        parseConstInitVal(defNode);
 
         // 4. 符号表: 添加一个变量
         symbolTable.addToVariables(defNode);
@@ -278,7 +282,7 @@ public class Parser {
         return defNode;
     }
 
-    public LinkedList<ExpNode> parseConstInitVal() throws IOException {
+    public void parseConstInitVal(DefNode defNode) throws IOException {
         // 1. 解析<ConstInitVal>
         // 1.1 有三种可能: <ConstExp> | {<ConstExp>, ... } | <StirngConst> -> "..."
 
@@ -311,8 +315,7 @@ public class Parser {
         // 2."..."
         else if (token == Token.STRCON) {
             retract(1);
-            // TODO: 把字符串转化为字符存储到initValues
-            parseStringConst();
+            defNode.setInitValueForSTRCON(parseStringConst());
         }
         // 3. <ConstExp>
         else {
@@ -322,7 +325,7 @@ public class Parser {
 
         // 2. 追加语法成分
         fw.write("<ConstInitVal>\n");
-        return initValues;
+        defNode.setInitValues(initValues);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -361,7 +364,7 @@ public class Parser {
         return declNode;
     }
 
-    public DefNode parseVarDef(DeclNode parent) throws IOException {
+    public DefNode parseVarDef(DeclNode declNode) throws IOException {
         // 1. 解析<VarDef>
         // 1. <VarDef>有两种情况
             // IDENFR 或 IDENFR '[' + <ConstExp> + ']' -> 也就是不赋初值
@@ -371,7 +374,7 @@ public class Parser {
         // 2. 创建<DefNode>
         getToken();
         fw.write(pair.toString() + "\n");
-        DefNode defNode = new DefNode(parent,pair);
+        DefNode defNode = new DefNode(declNode,pair);
 
         // 3. 如果是数组
         // 3.1 解析'['
@@ -393,7 +396,7 @@ public class Parser {
         // 4.2 追加语法成分
         if(getToken(Token.ASSIGN)) {
             fw.write(pair.toString() + "\n");
-            defNode.setInitValues(parseInitVal());
+            parseInitVal(defNode);
         }
 
         // 5. 符号表
@@ -402,7 +405,7 @@ public class Parser {
         return defNode;
     }
 
-    public LinkedList<ExpNode> parseInitVal() throws IOException {
+    public void parseInitVal(DefNode defNode) throws IOException {
         // 1. 解析<InitVal>
         // 2. <InitVal>有三种
             // <Exp>
@@ -440,8 +443,7 @@ public class Parser {
         // 1.3.2 <StringConst>
         else if (token == Token.STRCON) {
             retract(1);
-            // TODO: 把字符串转化为字符存储到initValues
-            parseStringConst();
+            defNode.setInitValueForSTRCON(parseStringConst());
         }
         // 1.3.3 <Exp>
         else {
@@ -451,7 +453,7 @@ public class Parser {
 
         // 2. 追加语法成分
         fw.write("<InitVal>\n");
-        return initValues;
+        defNode.setInitValues(initValues);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -478,6 +480,7 @@ public class Parser {
         funcDefNode.setPair(pair);
         symbolTable.addToFunctions(funcDefNode);
         symbolTable = new SymbolTable(symbolTable);
+        symbolTable.getParent().addChild(symbolTable);
 
         // 2.3 解析'('
         getToken();
@@ -542,15 +545,22 @@ public class Parser {
         // 1. BType
         getToken();
         fw.write(pair.toString() + "\n");
+        SyntaxType type;
+        if(token == Token.INTTK) {
+            type = SyntaxType.Int;
+        } else {
+            type = SyntaxType.Char;
+        }
 
         // 2. IDENFR
         getToken();
         fw.write(pair.toString() + "\n");
-        FuncFParamNode funcFParamNode = new FuncFParamNode(pair);
+        FuncFParamNode funcFParamNode = new FuncFParamNode(type,pair);
 
         // 3. '['
         if (getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
+            funcFParamNode.toArray();
             funcFParamNode.setLength(new NumberNode(0));
             if(getToken(Token.RBRACK)) {
                 fw.write(pair.toString() + "\n");
@@ -593,6 +603,7 @@ public class Parser {
 
         // 4. 建立新的符号表
         symbolTable = new SymbolTable(symbolTable);
+        symbolTable.getParent().addChild(symbolTable);
 
         // 5. <Block>
         mainFuncDefNode.setBlockNode(parseBlock());
@@ -632,7 +643,7 @@ public class Parser {
         return blockNode;
     }
 
-    public void parseBlockItem() throws IOException {
+    public BlockItemNode parseBlockItem() throws IOException {
         // 1. 解析<BlockItem>
         // 1. <BlockItem> = <ConstDecl> | <VarDecl> | <Stmt>
 
@@ -640,17 +651,17 @@ public class Parser {
         getToken();
         if(token == Token.CONSTTK) {
             retract(1);
-            parseConstDecl();
+            return parseConstDecl();
         }
         // 2. <VarDecl>
         else if (token == Token.INTTK || token == Token.CHARTK) {
             retract(1);
-            parseVarDecl();
+            return parseVarDecl();
         }
         // 3. <Stmt>
         else {
             retract(1);
-            parseStmt();
+            return parseStmt();
         }
     }
 
@@ -700,6 +711,7 @@ public class Parser {
             case LBRACE:
                 retract(1);
                 symbolTable = new SymbolTable(symbolTable);
+                symbolTable.getParent().addChild(symbolTable);
                 stmtNode = parseBlock();
                 symbolTable = symbolTable.getParent();
                 break;
@@ -801,7 +813,7 @@ public class Parser {
             // 'return' ';' | 'return' <Exp> ';'
             case RETURNTK:
                 // 1. 更新节点
-                stmtNode = new ReturnNode(curToken);
+                stmtNode = new ReturnNode(pair);
                 // 2. 'return'
                 fw.write(pair.toString() + "\n");
                 // 3. 没有 ';' | <Exp> ';'
@@ -831,7 +843,7 @@ public class Parser {
                 getToken();
                 fw.write(pair.toString() + "\n");
                 // 4. <StringConst>
-                ((PrintNode) stmtNode).setPair(parseStringConst());
+                ((PrintNode) stmtNode).setString(parseStringConst());
                 // 5. ',' <Exp> ')' 或 ')'
                 while(getToken(Token.COMMA)) {
                     fw.write(pair.toString() + "\n");
@@ -934,46 +946,55 @@ public class Parser {
         return stmtNode;
     }
 
-    public void parseForStmt() throws IOException {
+    public ForStmtNode parseForStmt() throws IOException {
         // 1. 解析<ForStmt>
         // 1. <ForStmt> = <LVal> '=' <Exp>
+        ForStmtNode forStmtNode = new ForStmtNode();
 
         // 1. <LVal>
-        parseLVal();
+        forStmtNode.setlValNode(parseLVal());
         // 2. '='
         getToken();
         fw.write(pair.toString() + "\n");
         // 3. <Exp>
-        parseExp();
+        forStmtNode.setExpNode(parseExp());
+        // 4. 追加语法成分
         fw.write("<ForStmt>\n");
+        return forStmtNode;
     }
 
-    public void parseExp() throws IOException {
+    public ExpNode parseExp() throws IOException {
         // 1. 解析<Exp>
         // 2. <Exp> = <AddExp>
-        parseAddExp();
+        ExpNode expNode = parseAddExp();
         fw.write("<Exp>\n");
+        return expNode;
     }
 
-    public void parseCond() throws IOException {
+    public ExpNode parseCond() throws IOException {
         // 1. 解析<Cond>
         // 2. <Cond> = <LOrExp>
-        parseLOrExp();
+        ExpNode expNode = parseLOrExp();
         fw.write("<Cond>\n");
+        return expNode;
     }
 
-    public void parseLVal() throws IOException {
+    public LValNode parseLVal() throws IOException {
         // 1. 解析<LVal>
         // 2. <LVal> = IDENFR | IDENFR [ <Exp> ]
 
-        // 1. IDENFR
+        // 1. 创建节点
+        LValNode lValNode = new LValNode();
+
+        // 2. IDENFR
         getToken();
         fw.write(pair.toString() + "\n");
+        lValNode.setPair(pair);
 
-        // 2. 没有 | [ <Exp> ]
+        // 3. 没有 | [ <Exp> ]
         if (getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
-            parseExp();
+            lValNode.setLength(parseExp());
             if(getToken(Token.RBRACK)) {
                 fw.write(pair.toString() + "\n");
             } else {
@@ -981,9 +1002,10 @@ public class Parser {
             }
         }
         fw.write("<LVal>\n");
+        return lValNode;
     }
 
-    public void parsePrimaryExp() throws IOException {
+    public ExpNode parsePrimaryExp() throws IOException {
         // 1. 解析<PrimaryExp>
         // 1. <PrimaryExp>
             // '(' + <Exp> + ')'
@@ -991,56 +1013,65 @@ public class Parser {
             // <Number>
             // <Character>
 
-        // 1. '(' + <Exp> + ')'
+        // 1. 创建节点
+        ExpNode expNode;
+
+        // 2. '(' + <Exp> + ')'
         getToken();
         if (token == Token.LPARENT) {
             fw.write(pair.toString() + "\n");
-            parseExp();
+            expNode = parseExp();
             if(getToken(Token.RPARENT)) {
                 fw.write(pair.toString() + "\n");
             } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
             }
         }
-        // 2. <Number>
+        // 3. <Number>
         else if (token == Token.INTCON) {
             retract(1);
-            parseNumber();
+            expNode = parseNumber();
         }
-        // 3. <Character>
+        // 4. <Character>
         else if (token == Token.CHRCON) {
             retract(1);
-            parseCharacter();
+            expNode = parseCharacter();
         }
-        // 4. <LVal>
+        // 5. <LVal>
         else {
             retract(1);
-            parseLVal();
+            expNode = parseLVal();
         }
         fw.write("<PrimaryExp>\n");
+        return expNode;
     }
 
-    public void parseNumber() throws IOException {
+    public NumberNode parseNumber() throws IOException {
+        NumberNode numberNode = new NumberNode(pair.getValue());
         getToken();
         fw.write(pair.toString() + "\n");
         fw.write("<Number>\n");
+        return numberNode;
     }
 
-    public void parseCharacter() throws IOException {
+    public CharacterNode parseCharacter() throws IOException {
+        CharacterNode characterNode = new CharacterNode(pair.getWord());
         getToken();
         fw.write(pair.toString() + "\n");
         fw.write("<Character>\n");
+        return characterNode;
     }
 
-    public void parseStringConst() throws IOException {
+    public String parseStringConst() throws IOException {
         getToken();
         fw.write(pair.toString() + "\n");
         //fw.write("<StringConst>\n");
+        return pair.getWord();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 7. <UnaryExp>, <UnaryOp>, <FuncRParams>, <MulExp>, <AddExp>, <RelExp>, <EqExp>, <LAndExp>, <LOrExp>, <ConstExp>
-    public void parseUnaryExp() throws IOException {
+    public ExpNode parseUnaryExp() throws IOException {
         // 1. 解析<UnaryExp>
         // 1. <UnaryExp>
             // <PrimaryExp>
@@ -1048,11 +1079,13 @@ public class Parser {
             // <UnaryOp> <UnaryExp>
 
         // 1. <UnaryOp> <UnaryExp>
+        ExpNode expNode;
         getToken();
         if (token == Token.PLUS || token == Token.MINU || token == Token.NOT) {
             retract(1);
-            parseUnaryOp();
-            parseUnaryExp();
+            expNode = new UnaryExpNode();
+            ((UnaryExpNode)expNode).setUnaryOp(parseUnaryOp());
+            ((UnaryExpNode)expNode).setExpNode(parseUnaryExp());
         }
         // 2. IDENFR '(' 没有 | <FuncRParams> ')'
         // 2. <PrimaryExp>的开头也可能是IDENFR
@@ -1063,6 +1096,7 @@ public class Parser {
             if (token == Token.LPARENT) {
                 // 1. IDENFR
                 retract(1);
+                expNode = new FuncCallNode(pair);
                 fw.write(pair.toString() + "\n");
                 // 2. '('
                 getToken();
@@ -1074,7 +1108,7 @@ public class Parser {
                         || token == Token.IDENFR || token == Token.LPARENT
                         || token == Token.INTCON || token == Token.CHRCON) {
                     retract(1);
-                    parseFuncRParams();
+                    ((FuncCallNode) expNode).setArgs(parseFuncRParams());
                     getToken();
                 }
                 // 4. ')'
@@ -1086,44 +1120,47 @@ public class Parser {
                 }
             } else {
                 retract(2);
-                parsePrimaryExp();
+                expNode = parsePrimaryExp();
             }
         }
         // 3. <PrimaryExp>
         else {
             retract(1);
-            parsePrimaryExp();
+            expNode = parsePrimaryExp();
         }
         fw.write("<UnaryExp>\n");
+        return expNode;
     }
 
-    public void parseUnaryOp() throws IOException {
+    public Pair parseUnaryOp() throws IOException {
         // 1. 解析<UnaryOp>
         // 1. <UnaryOp> = '+' | '-' | '!'
         getToken();
         fw.write(pair.toString() + "\n");
         fw.write("<UnaryOp>\n");
+        return pair;
     }
 
-    public void parseFuncRParams() throws IOException {
+    public LinkedList<ExpNode> parseFuncRParams() throws IOException {
         // 1. 解析<FuncRParams>
         // 1. <FuncRParams> = <Exp> { ',' <Exp> }
 
-        // 1. <Exp>
-        parseExp();
+        // 1. 创建初始列表
+        LinkedList<ExpNode> args = new LinkedList<>();
+
+        // 2. <Exp>
+        args.add(parseExp());
 
         // 2. { ',' <Exp> }
-        getToken();
-        while (token == Token.COMMA) {
+        while (getToken(Token.COMMA)) {
             fw.write(pair.toString() + "\n");
-            parseExp();
-            getToken();
+            args.add(parseExp());
         }
-        retract(1);
         fw.write("<FuncRParams>\n");
+        return args;
     }
 
-    public void parseMulExp() throws IOException {
+    public ExpNode parseMulExp() throws IOException {
         // 1. 解析<MulExp>
         // 1. <MulExp>
             // <UnaryExp>
@@ -1131,114 +1168,133 @@ public class Parser {
             // -> 这里存在左递归
             // -> 文法改写为 <MulExp> = <UnaryExp> {'*' | '/' | '%' <UnaryExp>}
         // 1. <UnaryExp>
-        parseUnaryExp();
+        ExpNode expNode = parseUnaryExp();
         fw.write("<MulExp>\n");
         // 2. '*' | '/' | '%' <UnaryExp> {'*' | '/' | '%' <UnaryExp>}
-        getToken();
-        while(token == Token.MULT || token == Token.DIV || token == Token.MOD) {
+        while(getToken(Token.MULT,Token.DIV,Token.MOD)) {
+            BinaryExpNode binaryExpNode = new BinaryExpNode();
+            binaryExpNode.setLeftExp(expNode);
+            binaryExpNode.setBinaryOp(pair);
             fw.write(pair.toString() + "\n");
-            parseUnaryExp();
+
+            binaryExpNode.setRightExp(parseUnaryExp());
+            expNode = binaryExpNode;
             fw.write("<MulExp>\n");
-            getToken();
         }
-        retract(1);
+        return expNode;
     }
 
-    public void parseAddExp() throws IOException {
+    public ExpNode parseAddExp() throws IOException {
         // 1. 解析<AddExp>
         // 1. <AddExp> = <MulExp> | <AddExp> '+' | '-' <MulExp>
             // 1. 改写文法<AddExp> = <MulExp> {'+' | '-' <MulExp>}
 
         // 1. <MulExp>
-        parseMulExp();
+        ExpNode expNode = parseMulExp();
         fw.write("<AddExp>\n");
         // 2. {'+' | '-' <MulExp>}
-        getToken();
-        while(token == Token.PLUS || token == Token.MINU) {
+        while(getToken(Token.PLUS,Token.MINU)) {
+            BinaryExpNode binaryExpNode = new BinaryExpNode();
+            binaryExpNode.setLeftExp(expNode);
+            binaryExpNode.setBinaryOp(pair);
             fw.write(pair.toString() + "\n");
-            parseMulExp();
+
+            binaryExpNode.setRightExp(parseMulExp());
+            expNode = binaryExpNode;
             fw.write("<AddExp>\n");
-            getToken();
         }
-        retract(1);
+        return expNode;
     }
 
-    public void parseRelExp() throws IOException {
+    public ExpNode parseRelExp() throws IOException {
         // 1. 解析<RelExp>
         // 1. <RelExp> = <AddExp> | <RelExp> '<' | '>' | "<=" | ">=" <AddExp>
             // 1. 改写文法 <RelExp> = <AddExp> {'<' | '>' | "<=" | ">=" <AddExp>}
         // 1. <AddExp>
-        parseAddExp();
+        ExpNode expNode = parseAddExp();
         fw.write("<RelExp>\n");
         // 2. {'<' | '>' | "<=" | ">=" <AddExp>}
-        getToken();
-        while(token == Token.LSS || token == Token.GRE || token == Token.LEQ || token == Token.GEQ) {
+        while(getToken(Token.LSS,Token.GRE,Token.LEQ,Token.GEQ)) {
+            BinaryExpNode binaryExpNode = new BinaryExpNode();
+            binaryExpNode.setLeftExp(expNode);
+            binaryExpNode.setBinaryOp(pair);
             fw.write(pair.toString() + "\n");
-            parseAddExp();
+
+            binaryExpNode.setRightExp(parseAddExp());
+            expNode = binaryExpNode;
             fw.write("<RelExp>\n");
-            getToken();
         }
-        retract(1);
+        return expNode;
     }
 
-    public void parseEqExp() throws IOException {
+    public ExpNode parseEqExp() throws IOException {
         // 1. 解析<EqExp>
         // 1. <EqExp> = <RelExp> | <EqExp> "==" | "!=" <RelExp>
             // 1. 改写文法: <EqExp> = <RelExp> {"==" | "!=" <RelExp>}
         // 1. <RelExp>
-        parseRelExp();
+        ExpNode expNode = parseRelExp();
         fw.write("<EqExp>\n");
         // 2. {"==" | "!=" <RelExp>}
-        getToken();
-        while(token == Token.EQL || token == Token.NEQ) {
+        while(getToken(Token.EQL,Token.NEQ)) {
+            BinaryExpNode binaryExpNode = new BinaryExpNode();
+            binaryExpNode.setLeftExp(expNode);
+            binaryExpNode.setBinaryOp(pair);
             fw.write(pair.toString() + "\n");
-            parseRelExp();
+
+            binaryExpNode.setRightExp(parseRelExp());
+            expNode = binaryExpNode;
             fw.write("<EqExp>\n");
-            getToken();
         }
-        retract(1);
+        return expNode;
     }
 
-    public void parseLAndExp() throws IOException {
+    public ExpNode parseLAndExp() throws IOException {
         // 1. 解析<LAndExp>
         // 1. <LAndExp> = <EqExp> | <LAndExp> "&&" <EqExp>
             // 1. 改写文法： <LAndExp> = <EqExp> {"&&" <EqExp>}
         // 1. <EqExp>
-        parseEqExp();
+        ExpNode expNode = parseEqExp();
         fw.write("<LAndExp>\n");
         // 2. {"&&" <EqExp>}
-        getToken();
-        while(token == Token.AND) {
+        while(getToken(Token.AND)) {
+            BinaryExpNode binaryExpNode = new BinaryExpNode();
+            binaryExpNode.setLeftExp(expNode);
+            binaryExpNode.setBinaryOp(pair);
             fw.write(pair.toString() + "\n");
-            parseEqExp();
+
+            binaryExpNode.setRightExp(parseEqExp());
+            expNode = binaryExpNode;
             fw.write("<LAndExp>\n");
-            getToken();
         }
-        retract(1);
+        return expNode;
     }
 
-    public void parseLOrExp() throws IOException {
+    public ExpNode parseLOrExp() throws IOException {
         // 1. 解析<LOrExp>
         // 1. <LOrExp> = <LAndExp> | <LOrExp> "||" <LAndExp>
             // 1. 改写文法: <LOrExp> = <LAndExp> {"||" <LAndExp>}
         // 1. <LAndExp>
-        parseLAndExp();
+        ExpNode expNode = parseLAndExp();
         fw.write("<LOrExp>\n");
         // 2. {"||" <LAndExp>}
-        getToken();
-        while(token == Token.OR) {
+        while(getToken(Token.OR)) {
+            BinaryExpNode binaryExpNode = new BinaryExpNode();
+            binaryExpNode.setLeftExp(expNode);
+            binaryExpNode.setBinaryOp(pair);
             fw.write(pair.toString() + "\n");
-            parseLAndExp();
+
+            binaryExpNode.setRightExp(parseLAndExp());
+            expNode = binaryExpNode;
             fw.write("<LOrExp>\n");
-            getToken();
         }
-        retract(1);
+        return expNode;
     }
 
-    public void parseConstExp() throws IOException {
+    public ExpNode parseConstExp() throws IOException {
         // 1. 解析<ConstExp>
         // 1. <ConstExp> = <AddExp>
-        parseAddExp();
+        ExpNode expNode = parseAddExp();
         fw.write("<ConstExp>\n");
+        return expNode;
     }
 }

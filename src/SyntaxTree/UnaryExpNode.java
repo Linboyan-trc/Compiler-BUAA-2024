@@ -8,7 +8,9 @@ public class UnaryExpNode implements ExpNode {
     private ExpNode expNode;
 
     // 2.
-    public UnaryExpNode(Pair unaryOp) {
+    public UnaryExpNode() { }
+
+    public void setUnaryOp(Pair unaryOp) {
         this.unaryOp = unaryOp;
     }
 

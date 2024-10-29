@@ -1,4 +1,4 @@
 ///////// in temp /////////
-IDENFR yuming
+IDENFR i
 <LVal>
 ///////// out temp /////////

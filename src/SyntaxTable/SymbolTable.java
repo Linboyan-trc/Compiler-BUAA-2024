@@ -3,6 +3,8 @@ package SyntaxTable;
 import SyntaxTree.DefNode;
 import SyntaxTree.FuncDefNode;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 
 public class SymbolTable {
@@ -12,6 +14,7 @@ public class SymbolTable {
     private LinkedList<SymbolItem<DefNode>> variables = new LinkedList<>();
     private LinkedList<SymbolItem<FuncDefNode>> functions = new LinkedList<>();
     private SymbolTable parent = null;
+    private LinkedList<SymbolTable> children = new LinkedList<>();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 新建符号表，在建立第一个符号表的时候显示的指定深度为1
@@ -23,6 +26,10 @@ public class SymbolTable {
     public SymbolTable(SymbolTable parent){
         this.parent = parent;
         this.depth = parent.depth + 1;
+    }
+
+    public void addChild(SymbolTable child){
+        children.add(child);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,5 +127,34 @@ public class SymbolTable {
     // 3. get
     public SymbolTable getParent() {
         return parent;
+    }
+
+    public LinkedList<SymbolItem<DefNode>> getVariables() {
+        return variables;
+    }
+
+    public LinkedList<SymbolItem<FuncDefNode>> getFunctions() {
+        return functions;
+    }
+
+    public LinkedList<SymbolTable> getChildren() {
+        return children;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 4. print for dfs
+    public int print(FileWriter fw, int scope) throws IOException {
+        for(SymbolItem<DefNode> item : variables){
+            if(item.getNode().getParent() == null) {
+                fw.write(scope + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
+            } else {
+                fw.write(scope + " " + item.getName() + " " + item.getNode().getParent().getDeclNodeType().toString() + "\n");
+            }
+        }
+        for(SymbolTable item : children){
+            scope++;
+            scope = item.print(fw,scope);
+        }
+        return scope;
     }
 }

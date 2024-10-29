@@ -4,6 +4,10 @@ import ErrorHandler.ErrorHandler;
 import ErrorHandler.ErrorRecord;
 import Lexer.Lexer;
 import Parser.Parser;
+import SyntaxTable.SymbolItem;
+import SyntaxTable.SymbolTable;
+import SyntaxTree.DefNode;
+import SyntaxTree.FuncDefNode;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
@@ -29,5 +33,24 @@ public class Compiler {
             fwErr.write(errorRecord + "\n");
         }
         fwErr.close();
+
+        // 5. symbol
+        String symFile = "symbol.txt";
+        FileWriter fwSym = new FileWriter(symFile);
+        // 5.1 全局
+        int scope = 1;
+        SymbolTable symbolTable = parser.getSymbolTable();
+        for(SymbolItem<DefNode> item:symbolTable.getVariables()){
+            fwSym.write(scope + " " + item.getName() + " " + item.getNode().getParent().getDeclNodeType().toString() + "\n");
+        }
+        for(SymbolItem<FuncDefNode> item:symbolTable.getFunctions()){
+            fwSym.write(scope + " " + item.getName() + " " + item.getNode().getFuncDefType().toString() + "\n");
+        }
+        // 5.2 逐个
+        for(SymbolTable child:symbolTable.getChildren()){
+            scope++;
+            scope = child.print(fwSym,scope);
+        }
+        fwSym.close();
     }
 }

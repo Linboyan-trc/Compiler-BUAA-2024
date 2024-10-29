@@ -4,7 +4,7 @@ import SyntaxTable.SyntaxType;
 
 import java.util.LinkedList;
 
-public class DeclNode {
+public class DeclNode implements BlockItemNode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. <DeclNode> = [变量类型:需要新开一个枚举类] + <DefNode>
     private SyntaxType declNodeType;

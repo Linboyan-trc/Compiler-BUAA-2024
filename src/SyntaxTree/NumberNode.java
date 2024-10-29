@@ -2,10 +2,10 @@ package SyntaxTree;
 
 public class NumberNode implements ExpNode {
     // 1. num
-    private int number;
+    private long number;
 
     // 2.
-    public NumberNode(int number) {
+    public NumberNode(long number) {
         this.number = number;
     }
 }
