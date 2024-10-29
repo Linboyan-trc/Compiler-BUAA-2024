@@ -2,17 +2,19 @@ package SyntaxTree;
 
 import Lexer.Pair;
 
+import java.util.LinkedList;
+
 public class DefNode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. <DefNode> = Pair:IDENFR + 维数 + 初始值
-    private Pair identity;
+    private Pair pair;
     private LinkedList<ExpNode> dimensions = new LinkedList<>();
     private LinkedList<ExpNode> initValues = null;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. set
-    public DefNode(Pair identity) {
-        this.identity = identity;
+    public DefNode(Pair pair) {
+        this.pair = pair;
     }
 
     public void addDimension(ExpNode expNode) {
@@ -24,8 +26,8 @@ public class DefNode {
     }
 
     // 2. get
-    public Pair getIdentity() {
-        return identity;
+    public Pair getPair() {
+        return pair;
     }
 
     public LinkedList<ExpNode> getDimensions() {

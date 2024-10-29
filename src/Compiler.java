@@ -15,11 +15,8 @@ public class Compiler {
         Lexer lexer = new Lexer(br);
 
         // 3. 打印结果
-        String outputFile = "parser.txt";
-        FileWriter fwOut = new FileWriter(outputFile);
-        Parser parser = new Parser(lexer,fwOut);
+        Parser parser = new Parser(lexer);
         parser.parseCompUnit();
-        fwOut.close();
 
         // 4. errors
         String errFile = "error.txt";

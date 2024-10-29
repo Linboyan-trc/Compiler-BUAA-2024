@@ -2,19 +2,21 @@ package SyntaxTree;
 
 import Lexer.Pair;
 
+import java.util.LinkedList;
+
 public class FuncDefNode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. <FuncDefNode> = [变量类型:需要新开一个枚举类] + Pair:IDENFR + 参数列表 + 块
     private String funcDefType;
-    private Pair identity;
+    private Pair pair;
     private LinkedList<FuncFParamNode> funcFParamNodes = new LinkedList<>();
     private BlockNode blockNode;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. set
-    public FuncDefNode(String funcDefType, Pair identity) {
+    public FuncDefNode(String funcDefType, Pair pair) {
         this.funcDefType = funcDefType;
-        this.identity = identity;
+        this.pair = pair;
     }
 
     public void setFuncFParams(LinkedList<FuncFParamNode> funcFParamNodes) {
@@ -30,8 +32,8 @@ public class FuncDefNode {
         return funcDefType;
     }
 
-    public Pair getIdent() {
-        return identity;
+    public Pair getPair() {
+        return pair;
     }
 
     public LinkedList<FuncFParamNode> getFuncFParamNodes() {

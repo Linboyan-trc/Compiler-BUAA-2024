@@ -5,6 +5,7 @@ import ErrorHandler.ErrorRecord;
 import Lexer.Lexer;
 import Lexer.Pair;
 import Lexer.Token;
+import SyntaxTable.SymbolTable;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,16 +19,13 @@ public class Parser {
     private Token token;
     private int tokenIndex = -1;
     private List<Pair> tokens = new ArrayList<>();
-    // 2. 输出文件
-    FileWriter fw;
-    FileWriter fwOrigin;
-    // 3. 错误处理
+    // 2. 错误处理
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
+    // 3. 语义分析
+    private SymbolTable symbolTable  = new SymbolTable(null,1);
 
-    public Parser(Lexer lexer, FileWriter fw) {
+    public Parser(Lexer lexer) {
         this.lexer = lexer;
-        this.fw = fw;
-        this.fwOrigin = fw;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
