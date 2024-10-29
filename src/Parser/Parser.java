@@ -22,14 +22,19 @@ public class Parser {
     private Token token;
     private int tokenIndex = -1;
     private List<Pair> tokens = new ArrayList<>();
-    // 2. 错误处理
+    // 2. 输出文件
+    FileWriter fw;
+    FileWriter fwOrigin;
+    // 3. 错误处理
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
-    // 3. 语义分析
+    // 4. 语义分析
     private int forDepth = 0;
     private SymbolTable symbolTable  = new SymbolTable(null,1);
 
-    public Parser(Lexer lexer) {
+    public Parser(Lexer lexer, FileWriter fw) {
         this.lexer = lexer;
+        this.fw = fw;
+        this.fwOrigin = fw;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +160,6 @@ public class Parser {
             // 回退 + 解析<FuncDef>
         // 3.4 继续获取下一个Token
         while(token == Token.VOIDTK || token == Token.INTTK || token == Token.CHARTK) {
-            //fw.write("///////////////////// FuncDef /////////////////////\n");
             // 1. void
             if(token == Token.VOIDTK) {
                 retract(1);
@@ -185,6 +189,7 @@ public class Parser {
         // 4.3 最后追加语法成分
         retract(1);
         compUnit.setMainFuncDefNode(parseMainFuncDef());
+        fw.write("<CompUnit>\n");
         return compUnit;
     }
 
@@ -200,9 +205,11 @@ public class Parser {
 
         // 1.1 读取'const'
         getToken();
+        fw.write(pair.toString() + "\n");
         // 1.2 读取BType
         // 1.2 创建<DeclNode>
         getToken();
+        fw.write(pair.toString() + "\n");
         DeclNode declNode = null;
         if(token == Token.INTTK) {
             declNode = new DeclNode(SyntaxType.ConstInt);
@@ -217,11 +224,15 @@ public class Parser {
         // 2.2 输出';'的Token
         // 2.3 追加语法成分
         while(getToken(Token.COMMA)) {
+            fw.write(pair.toString() + "\n");
             declNode.addDefNode(parseConstDef(declNode));
         }
-        if (!getToken(Token.SEMICN)) {
+        if (getToken(Token.SEMICN)) {
+            fw.write(pair.toString() + "\n");
+        } else {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
         }
+        fw.write("<ConstDecl>\n");
         return declNode;
     }
 
@@ -235,6 +246,7 @@ public class Parser {
         // 1.读IDENFR的Token
         // 1. 创建DefNode节点,传入IDENFR
         getToken();
+        fw.write(pair.toString() + "\n");
         DefNode defNode = new DefNode(declNode,pair);
 
         // 2.读下一个Token
@@ -242,15 +254,19 @@ public class Parser {
             // 解析<ConstExp>
             // ']'
         if(getToken(Token.LBRACK)) {
+            fw.write(pair.toString() + "\n");
             defNode.setLength(parseConstExp());
             defNode.getParent().toArray();
-            if(!getToken(Token.RBRACK)) {
+            if(getToken(Token.RBRACK)) {
+                fw.write(pair.toString() + "\n");
+            } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
 
         // 3.1 读'=''
         getToken();
+        fw.write(pair.toString() + "\n");
 
         // 3.2 解析<ConstInitVal>
         // 3.3 追加语法成分
@@ -258,6 +274,7 @@ public class Parser {
 
         // 4. 符号表: 添加一个变量
         symbolTable.addToVariables(defNode);
+        fw.write("<ConstDef>\n");
         return defNode;
     }
 
@@ -275,6 +292,7 @@ public class Parser {
         // 1.1 {<ConstExp>, ... }
         getToken();
         if (token == Token.LBRACE) {
+            fw.write(pair.toString() + "\n");
             // 1.1 <ConstExp>, ... }
             getToken();
             if (token != Token.RBRACE) {
@@ -282,10 +300,13 @@ public class Parser {
                 initValues.add(parseConstExp());
                 getToken();
                 while(token == Token.COMMA) {
+                    fw.write(pair.toString() + "\n");
                     initValues.add(parseConstExp());
                     getToken();
                 }
             }
+            // 1.2 '}'
+            fw.write(pair.toString() + "\n");
         }
         // 2."..."
         else if (token == Token.STRCON) {
@@ -300,6 +321,7 @@ public class Parser {
         }
 
         // 2. 追加语法成分
+        fw.write("<ConstInitVal>\n");
         return initValues;
     }
 
@@ -311,6 +333,7 @@ public class Parser {
 
         // 1. 先读BType
         getToken();
+        fw.write(pair.toString() + "\n");
         DeclNode declNode = null;
         if(token == Token.INTTK) {
             declNode = new DeclNode(SyntaxType.Int);
@@ -323,14 +346,18 @@ public class Parser {
 
         // 3. 如果下一个是,继续解析<VarDef>
         while(getToken(Token.COMMA)) {
+            fw.write(pair.toString() + "\n");
             declNode.addDefNode(parseVarDef(declNode));
         }
 
         // 4. 解析';'
         // 4. 最后追加语法成分
-        if (!getToken(Token.SEMICN)) {
+        if (getToken(Token.SEMICN)) {
+            fw.write(pair.toString() + "\n");
+        } else {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
         }
+        fw.write("<VarDecl>\n");
         return declNode;
     }
 
@@ -343,6 +370,7 @@ public class Parser {
         // 2. 解析IDENFR
         // 2. 创建<DefNode>
         getToken();
+        fw.write(pair.toString() + "\n");
         DefNode defNode = new DefNode(parent,pair);
 
         // 3. 如果是数组
@@ -350,9 +378,12 @@ public class Parser {
         // 3.2 解析<ConstExp>
         // 3.3 解析']'
         if(getToken(Token.LBRACK)) {
+            fw.write(pair.toString() + "\n");
             defNode.setLength(parseConstExp());
             defNode.getParent().toArray();
-            if(!getToken(Token.RBRACK)) {
+            if(getToken(Token.RBRACK)) {
+                fw.write(pair.toString() + "\n");
+            } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
@@ -361,11 +392,13 @@ public class Parser {
         // 4.1 如果可以解析'=', 说明有<InitVal>
         // 4.2 追加语法成分
         if(getToken(Token.ASSIGN)) {
+            fw.write(pair.toString() + "\n");
             defNode.setInitValues(parseInitVal());
         }
 
         // 5. 符号表
         symbolTable.addToVariables(defNode);
+        fw.write("<VarDef>\n");
         return defNode;
     }
 
@@ -387,17 +420,22 @@ public class Parser {
         // 1.3.1 { <Exp>, ... }
         getToken();
         if (token == token.LBRACE) {
-            // 1. <Exp>,<Exp>
+            // 1. '{'
+            fw.write(pair.toString() + "\n");
+            // 2. <Exp>,<Exp>
             getToken();
             if (token != Token.RBRACE) {
                 retract(1);
                 initValues.add(parseExp());
                 getToken();
                 while(token == Token.COMMA) {
+                    fw.write(pair.toString() + "\n");
                     initValues.add(parseExp());
                     getToken();
                 }
             }
+            // 3. '}'
+            fw.write(pair.toString() + "\n");
         }
         // 1.3.2 <StringConst>
         else if (token == Token.STRCON) {
@@ -412,6 +450,7 @@ public class Parser {
         }
 
         // 2. 追加语法成分
+        fw.write("<InitVal>\n");
         return initValues;
     }
 
@@ -435,12 +474,14 @@ public class Parser {
 
         // 2.2 解析IDENFR
         getToken();
+        fw.write(pair.toString() + "\n");
         funcDefNode.setPair(pair);
         symbolTable.addToFunctions(funcDefNode);
         symbolTable = new SymbolTable(symbolTable);
 
         // 2.3 解析'('
         getToken();
+        fw.write(pair.toString() + "\n");
 
         // 2.4 解析<FuncFParams>
         // 2.4 如果不是')', 说明是<FuncFParams>，回退一位然后解析
@@ -451,7 +492,9 @@ public class Parser {
             funcDefNode.setFuncFParams(parseFuncFParams());
             getToken();
         }
-        if(token != Token.RPARENT) {
+        if(token == Token.RPARENT) {
+            fw.write(pair.toString() + "\n");
+        } else {
             retract(1);
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
         }
@@ -461,11 +504,14 @@ public class Parser {
 
         // 3. 符号表退栈
         symbolTable = symbolTable.getParent();
+        fw.write("<FuncDef>\n");
         return funcDefNode;
     }
 
     public void parseFuncType() throws IOException {
         getToken();
+        fw.write(pair.toString() + "\n");
+        fw.write("<FuncType>\n");
     }
 
     public LinkedList<FuncFParamNode> parseFuncFParams() throws IOException {
@@ -480,8 +526,10 @@ public class Parser {
 
         // 2. 循环解析,' <FuncFParam>
         while(getToken(Token.COMMA)) {
+            fw.write(pair.toString() + "\n");
             funcFParamNodes.add(parseFuncFParam());
         }
+        fw.write("<FuncFParams>\n");
         return funcFParamNodes;
     }
 
@@ -493,15 +541,20 @@ public class Parser {
 
         // 1. BType
         getToken();
+        fw.write(pair.toString() + "\n");
 
         // 2. IDENFR
         getToken();
+        fw.write(pair.toString() + "\n");
         FuncFParamNode funcFParamNode = new FuncFParamNode(pair);
 
         // 3. '['
         if (getToken(Token.LBRACK)) {
+            fw.write(pair.toString() + "\n");
             funcFParamNode.setLength(new NumberNode(0));
-            if(!getToken(Token.RBRACK)) {
+            if(getToken(Token.RBRACK)) {
+                fw.write(pair.toString() + "\n");
+            } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
@@ -510,6 +563,7 @@ public class Parser {
         symbolTable.addToVariables(funcFParamNode);
 
         // 5. 追加语法成分
+        fw.write("<FuncFParam>\n");
         return funcFParamNode;
     }
 
@@ -521,14 +575,19 @@ public class Parser {
 
         // 1. int
         getToken();
+        fw.write(pair.toString() + "\n");
         FuncDefNode mainFuncDefNode = new FuncDefNode();
 
         // 2. main
         getToken();
+        fw.write(pair.toString() + "\n");
 
         // 3. ()
         getToken();
-        if (!getToken(Token.RPARENT)) {
+        fw.write(pair.toString() + "\n");
+        if (getToken(Token.RPARENT)) {
+            fw.write(pair.toString() + "\n");
+        } else {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
         }
 
@@ -542,6 +601,7 @@ public class Parser {
         symbolTable = symbolTable.getParent();
 
         // 7. 追加语法成分
+        fw.write("<MainFuncDef>\n");
         return mainFuncDefNode;
     }
 
@@ -554,6 +614,7 @@ public class Parser {
 
         // 1. '{'
         getToken();
+        fw.write(pair.toString() + "\n");
 
         // 2. <BlockItem>
         getToken();
@@ -564,8 +625,10 @@ public class Parser {
         }
 
         // 3. '}'
+        fw.write(pair.toString() + "\n");
 
         // 4. 追加语法成分
+        fw.write("<Block>\n");
         return blockNode;
     }
 
@@ -593,7 +656,7 @@ public class Parser {
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 6. <Stmt>, <ForStmt>, <Exp>, <Cond>, <LVal>, <PrimaryExp>, <Number>, <Character>, <StringConst>
-    public void parseStmt() throws IOException {
+    public StmtNode parseStmt() throws IOException {
         // 1. 解析<Stmt>
         // 1. <Stmt> =
             // <LVal> '=' <Exp> ';'
@@ -631,6 +694,7 @@ public class Parser {
         switch (token) {
             // ';'
             case SEMICN:
+                fw.write(pair.toString() + "\n");
                 break;
             // <Blcok>
             case LBRACE:
@@ -644,18 +708,23 @@ public class Parser {
                 // 1. 更新节点
                 stmtNode = new BranchNode();
                 // 2. 'if'
+                fw.write(pair.toString() + "\n");
                 // 3. '('
                 getToken();
+                fw.write(pair.toString() + "\n");
                 // 4. <Conf>
                 ((BranchNode) stmtNode).setCond(parseCond());
                 // 5. ')'
-                if(!getToken(Token.RPARENT)) {
+                if(getToken(Token.RPARENT)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
                 // 6. <Stmt>
                 ((BranchNode) stmtNode).setIfStmt(parseStmt());
                 // 7. 可能有:'else' <Stmt>
                 if (getToken(Token.ELSETK)) {
+                    fw.write(pair.toString() + "\n");
                     ((BranchNode) stmtNode).setElseStmt(parseStmt());
                 }
                 break;
@@ -664,8 +733,10 @@ public class Parser {
                 // 1. 更新节点
                 stmtNode = new ForNode();
                 // 2. 'for'
+                fw.write(pair.toString() + "\n");
                 // 3. '('
                 getToken();
+                fw.write(pair.toString() + "\n");
                 // 4. 没有 | <ForStmt>
                 getToken();
                 if(token != Token.SEMICN) {
@@ -674,6 +745,7 @@ public class Parser {
                     getToken();
                 }
                 // 4. ';'
+                fw.write(pair.toString() + "\n");
                 // 5. 没有 | <Cond>
                 getToken();
                 if(token != Token.SEMICN) {
@@ -682,6 +754,7 @@ public class Parser {
                     getToken();
                 }
                 // 6. ';'
+                fw.write(pair.toString() + "\n");
                 // 7. 没有 | <ForStmt>
                 getToken();
                 if(token != Token.RPARENT) {
@@ -690,7 +763,9 @@ public class Parser {
                     getToken();
                 }
                 // 8. ')'
-                if(token != Token.RPARENT) {
+                if(token == Token.RPARENT) {
+                    fw.write(pair.toString() + "\n");
+                } else {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
@@ -703,7 +778,11 @@ public class Parser {
             case BREAKTK:
                 // 1. 更新节点
                 stmtNode = new BreakNode();
-                if(!getToken(Token.SEMICN)){
+                // 2.
+                fw.write(pair.toString() + "\n");
+                if(getToken(Token.SEMICN)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
@@ -711,7 +790,11 @@ public class Parser {
             case CONTINUETK:
                 // 1.更新节点
                 stmtNode = new ContinueNode();
-                if(!getToken(Token.SEMICN)) {
+                // 2.
+                fw.write(pair.toString() + "\n");
+                if(getToken(Token.SEMICN)) {
+                    fw.write(pair.toString() + "\n");
+                } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
@@ -720,6 +803,7 @@ public class Parser {
                 // 1. 更新节点
                 stmtNode = new ReturnNode(curToken);
                 // 2. 'return'
+                fw.write(pair.toString() + "\n");
                 // 3. 没有 ';' | <Exp> ';'
                 getToken();
                 if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
@@ -730,7 +814,9 @@ public class Parser {
                     getToken();
                 }
                 // 4. ';'
-                if(token != Token.SEMICN) {
+                if(token == Token.SEMICN) {
+                    fw.write(pair.toString() + "\n");
+                } else {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
@@ -740,20 +826,25 @@ public class Parser {
                 // 1. 更新节点
                 stmtNode = new PrintNode();
                 // 2. 'printf'
+                fw.write(pair.toString() + "\n");
                 // 3. '('
                 getToken();
+                fw.write(pair.toString() + "\n");
                 // 4. <StringConst>
                 ((PrintNode) stmtNode).setPair(parseStringConst());
                 // 5. ',' <Exp> ')' 或 ')'
                 while(getToken(Token.COMMA)) {
+                    fw.write(pair.toString() + "\n");
                     ((PrintNode) stmtNode).addArgument(parseExp());
                 }
                 // 6. ')'
                 if(!getToken(Token.RPARENT)) {
+                    fw.write(pair.toString() + "\n");
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
                 // 7. ';'
                 if(!getToken(Token.SEMICN)) {
+                    fw.write(pair.toString() + "\n");
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
@@ -785,24 +876,33 @@ public class Parser {
                     if(getToken(Token.ASSIGN)) {
                         // 1. 重新扫描
                         retractAbsolutely(anchor);
-                        parseLVal();
+                        LValNode lValNode = parseLVal();
                         // 2. 读等号
                         getToken();
                         fw.write(pair.toString() + "\n");
                         // 3. 'getint' | 'getchar' | <Exp>
                         getToken();
                         if (token == Token.GETINTTK || token == Token.GETCHARTK) {
+                            // 1. 更新节点
+                            // 1. 'getint' | 'getchar'
+                            stmtNode = new GetIntNode(lValNode);
                             fw.write(pair.toString() + "\n");
+                            // 2. '('
                             getToken();
                             fw.write(pair.toString() + "\n");
+                            // 3. ')'
                             if (getToken(Token.RPARENT)) {
                                 fw.write(pair.toString() + "\n");
                             } else {
                                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                             }
                         } else {
+                            // 1. 更新节点
+                            stmtNode = new AssignNode();
+                            // 2. 设置节点
+                            ((AssignNode) stmtNode).setLValNode(lValNode);
                             retract(1);
-                            parseExp();
+                            ((AssignNode) stmtNode).setExpNode(parseExp());
                         }
                     }
                     // 3. 没有等号就是<Exp>
@@ -810,7 +910,7 @@ public class Parser {
                         // 1. 重新扫描
                         retractAbsolutely(anchor);
                         // 2. <Exp>
-                        parseExp();
+                        stmtNode = parseExp();
                     }
                 }
                 if(getToken(Token.SEMICN)) {
@@ -822,7 +922,7 @@ public class Parser {
             default:
                 // 1. 此时只剩其他类型的<Exp>
                 retract(1);
-                parseExp();
+                stmtNode = parseExp();
                 if(getToken(Token.SEMICN)) {
                     fw.write(pair.toString() + "\n");
                 } else {
@@ -831,6 +931,7 @@ public class Parser {
                 break;
         }
         fw.write("<Stmt>\n");
+        return stmtNode;
     }
 
     public void parseForStmt() throws IOException {
