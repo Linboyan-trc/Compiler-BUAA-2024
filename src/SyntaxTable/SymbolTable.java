@@ -115,4 +115,10 @@ public class SymbolTable {
         }
         return false;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 3. get
+    public SymbolTable getParent() {
+        return parent;
+    }
 }

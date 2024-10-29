@@ -6,10 +6,13 @@ import Lexer.Lexer;
 import Lexer.Pair;
 import Lexer.Token;
 import SyntaxTable.SymbolTable;
+import SyntaxTable.SyntaxType;
+import SyntaxTree.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Parser {
@@ -22,6 +25,7 @@ public class Parser {
     // 2. 错误处理
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
     // 3. 语义分析
+    private int forDepth = 0;
     private SymbolTable symbolTable  = new SymbolTable(null,1);
 
     public Parser(Lexer lexer) {
@@ -42,23 +46,26 @@ public class Parser {
         token = tokens.get(tokenIndex).getToken();
     }
 
-    public boolean getToken(Token tokenExpected) throws IOException {
+    public boolean getToken(Token... tokenExpecteds) throws IOException {
         // 1.1 当用到最新token的时候才需要读取新的token
         tokenIndex++;
         if (tokens.size() == tokenIndex) {
             tokens.add(lexer.parseAndGetPair());
         }
+
         // 1.2 没有用到最新token从当前token拿就可以
         // 1.2.1 如果符合期望就正常读
-        // 1.2.2 如果不符合期望就取消这次token的读取，防止影响后续语法分析
-        if(tokens.get(tokenIndex).getToken() == tokenExpected) {
-            pair = tokens.get(tokenIndex);
-            token = tokens.get(tokenIndex).getToken();
-            return true;
-        } else {
-            tokenIndex--;
-            return false;
+        for(Token tokenExpected:tokenExpecteds) {
+            if(tokens.get(tokenIndex).getToken() == tokenExpected) {
+                pair = tokens.get(tokenIndex);
+                token = tokens.get(tokenIndex).getToken();
+                return true;
+            }
         }
+
+        // 1.2.2 如果不符合期望就取消这次token的读取，防止影响后续语法分析
+        tokenIndex--;
+        return false;
     }
 
     // 1. 回退
@@ -80,9 +87,10 @@ public class Parser {
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 1. 解析<CompUnit>
-    public void parseCompUnit() throws IOException {
-        // 1. 获取第一个Token
-        getToken();
+    public CompUnit parseCompUnit() throws IOException {
+        // 1. 创建顶层语法点
+        CompUnit compUnit = new CompUnit();
+
         // 2. 解析<Decl>
         // 2.1 <Decl>有两种情况
             // const int|char a = ...; -> 回退 + 解析<ConstDecl>
@@ -95,12 +103,13 @@ public class Parser {
                 // 继续读一个
                     // 是'('说明是函数，回退结束解析<Decl>
                     // 否则是变量，回退 + 解析<VarDecl>
+        // 2. 获取第一个Token
+        getToken();
         while(token == Token.CONSTTK || token == Token.INTTK || token == Token.CHARTK) {
             // 1. <ConstDecl>
             if(token == Token.CONSTTK) {
                 retract(1);
-                //fw.write("///////////////////// ConstDecl /////////////////////\n");
-                parseConstDecl();
+                compUnit.addDeclNode(parseConstDecl());
             }
             // 2. <VarDecl>
             // 2.1 int main + int a() + int a
@@ -119,8 +128,7 @@ public class Parser {
                 }
                 // 3. int a
                 retract(3);
-                //fw.write("///////////////////// VarDecl /////////////////////\n");
-                parseVarDecl();
+                compUnit.addDeclNode(parseVarDecl());
             }
             // 2.2 char a() + char a
             else {
@@ -133,8 +141,7 @@ public class Parser {
                     break;
                 }
                 retract(3);
-                //fw.write("///////////////////// VarDecl /////////////////////\n");
-                parseVarDecl();
+                compUnit.addDeclNode(parseVarDecl());
             }
             getToken();
         }
@@ -152,7 +159,7 @@ public class Parser {
             // 1. void
             if(token == Token.VOIDTK) {
                 retract(1);
-                parseFuncDef();
+                compUnit.addFuncDefNode(parseFuncDef());
             }
             // 2. int main() 和 int a()
             else if (token == Token.INTTK) {
@@ -162,12 +169,12 @@ public class Parser {
                     break;
                 }
                 retract(2);
-                parseFuncDef();
+                compUnit.addFuncDefNode(parseFuncDef());
             }
             // 3. char a()
             else {
                 retract(1);
-                parseFuncDef();
+                compUnit.addFuncDefNode(parseFuncDef());
             }
             getToken();
         }
@@ -177,14 +184,13 @@ public class Parser {
         // 4.2 解析<MainFuncDef>
         // 4.3 最后追加语法成分
         retract(1);
-        //fw.write("///////////////////// MainFuncDef /////////////////////\n");
-        parseMainFuncDef();
-        fw.write("<CompUnit>\n");
+        compUnit.setMainFuncDefNode(parseMainFuncDef());
+        return compUnit;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 2. 解析<ConstDecl>, <ConstDef>, <ConstInitVal>
-    public void parseConstDecl() throws IOException {
+    public DeclNode parseConstDecl() throws IOException {
         // 1. 解析<ConstDecl>
         // 1. 包含'const' + BType + <ConstDef>:
             // const int a = 0;
@@ -194,30 +200,32 @@ public class Parser {
 
         // 1.1 读取'const'
         getToken();
-        fw.write(pair.toString() + "\n");
         // 1.2 读取BType
+        // 1.2 创建<DeclNode>
         getToken();
-        fw.write(pair.toString() + "\n");
+        DeclNode declNode = null;
+        if(token == Token.INTTK) {
+            declNode = new DeclNode(SyntaxType.ConstInt);
+        } else {
+            declNode = new DeclNode(SyntaxType.ConstChar);
+        }
         // 1.3 解析<ConstDef>
-        parseConstDef();
+        declNode.addDefNode(parseConstDef(declNode));
 
         // 2. 解析完继续获取下一个Token
         // 2.1 如果是',',那么继续解析<ConstDef>,并不断获取下一个Token
         // 2.2 输出';'的Token
         // 2.3 追加语法成分
         while(getToken(Token.COMMA)) {
-            fw.write(pair.toString() + "\n");
-            parseConstDef();
+            declNode.addDefNode(parseConstDef(declNode));
         }
-        if (getToken(Token.SEMICN)) {
-            fw.write(pair.toString() + "\n");
-        } else {
+        if (!getToken(Token.SEMICN)) {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
         }
-        fw.write("<ConstDecl>\n");
+        return declNode;
     }
 
-    public void parseConstDef() throws IOException {
+    public DefNode parseConstDef(DeclNode declNode) throws IOException {
         // 1. 解析<ConstDef>
         // 1. 包含
             // IDENFR
@@ -225,121 +233,126 @@ public class Parser {
             // '=' + <ConstInitVal>
 
         // 1.读IDENFR的Token
+        // 1. 创建DefNode节点,传入IDENFR
         getToken();
-        fw.write(pair.toString() + "\n");
+        DefNode defNode = new DefNode(declNode,pair);
 
         // 2.读下一个Token
         // 2.1 如果是'['就是数组
             // 解析<ConstExp>
             // ']'
         if(getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            parseConstExp();
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
-            } else {
+            defNode.setLength(parseConstExp());
+            defNode.getParent().toArray();
+            if(!getToken(Token.RBRACK)) {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
 
         // 3.1 读'=''
+        getToken();
+
         // 3.2 解析<ConstInitVal>
         // 3.3 追加语法成分
-        getToken();
-        fw.write(pair.toString() + "\n");
-        parseConstInitVal();
-        fw.write("<ConstDef>\n");
+        defNode.setInitValues(parseConstInitVal());
+
+        // 4. 符号表: 添加一个变量
+        symbolTable.addToVariables(defNode);
+        return defNode;
     }
 
-    public void parseConstInitVal() throws IOException {
+    public LinkedList<ExpNode> parseConstInitVal() throws IOException {
         // 1. 解析<ConstInitVal>
         // 1.1 有三种可能: <ConstExp> | {<ConstExp>, ... } | <StirngConst> -> "..."
 
         // 1.{
             // 1.1 }
             // 1.2 <ConstExp> }
+
+        // 1. 初始化一个LinkedList<ExpNode>
+        LinkedList<ExpNode> initValues = new LinkedList<>();
+
+        // 1.1 {<ConstExp>, ... }
         getToken();
         if (token == Token.LBRACE) {
-            fw.write(pair.toString() + "\n");
             // 1.1 <ConstExp>, ... }
             getToken();
             if (token != Token.RBRACE) {
                 retract(1);
-                parseConstExp();
+                initValues.add(parseConstExp());
                 getToken();
                 while(token == Token.COMMA) {
-                    fw.write(pair.toString() + "\n");
-                    parseConstExp();
+                    initValues.add(parseConstExp());
                     getToken();
                 }
             }
-            // 1.2 }
-            fw.write(pair.toString() + "\n");
         }
         // 2."..."
         else if (token == Token.STRCON) {
             retract(1);
+            // TODO: 把字符串转化为字符存储到initValues
             parseStringConst();
         }
         // 3. <ConstExp>
         else {
             retract(1);
-            parseConstExp();
+            initValues.add(parseConstExp());
         }
 
         // 2. 追加语法成分
-        fw.write("<ConstInitVal>\n");
+        return initValues;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 3. 解析<VarDecl>, <VarDef>, <InitVal>
-    public void parseVarDecl() throws IOException {
+    public DeclNode parseVarDecl() throws IOException {
         // 1. 解析<VarDecl>
         // 1. <VarDecl> = BType <VarDef> { ',' <VarDef> } ';'
 
         // 1. 先读BType
         getToken();
-        fw.write(pair.toString() + "\n");
+        DeclNode declNode = null;
+        if(token == Token.INTTK) {
+            declNode = new DeclNode(SyntaxType.Int);
+        } else {
+            declNode = new DeclNode(SyntaxType.Char);
+        }
 
         // 2. 解析<VarDef>
-        parseVarDef();
+        declNode.addDefNode(parseVarDef(declNode));
 
         // 3. 如果下一个是,继续解析<VarDef>
         while(getToken(Token.COMMA)) {
-            fw.write(pair.toString() + "\n");
-            parseVarDef();
+            declNode.addDefNode(parseVarDef(declNode));
         }
 
         // 4. 解析';'
         // 4. 最后追加语法成分
-        if (getToken(Token.SEMICN)) {
-            fw.write(pair.toString() + "\n");
-        } else {
+        if (!getToken(Token.SEMICN)) {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
         }
-        fw.write("<VarDecl>\n");
+        return declNode;
     }
 
-    public void parseVarDef() throws IOException {
+    public DefNode parseVarDef(DeclNode parent) throws IOException {
         // 1. 解析<VarDef>
         // 1. <VarDef>有两种情况
             // IDENFR 或 IDENFR '[' + <ConstExp> + ']' -> 也就是不赋初值
             // IDENFR '=' + <InitVal> 或 IDENFR '[' + <ConstExp> + ']' + '=' + <InitVal> -> 也就是赋初值
 
         // 2. 解析IDENFR
+        // 2. 创建<DefNode>
         getToken();
-        fw.write(pair.toString() + "\n");
+        DefNode defNode = new DefNode(parent,pair);
 
         // 3. 如果是数组
         // 3.1 解析'['
         // 3.2 解析<ConstExp>
         // 3.3 解析']'
         if(getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            parseConstExp();
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
-            } else {
+            defNode.setLength(parseConstExp());
+            defNode.getParent().toArray();
+            if(!getToken(Token.RBRACK)) {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
@@ -348,73 +361,86 @@ public class Parser {
         // 4.1 如果可以解析'=', 说明有<InitVal>
         // 4.2 追加语法成分
         if(getToken(Token.ASSIGN)) {
-            fw.write(pair.toString() + "\n");
-            parseInitVal();
+            defNode.setInitValues(parseInitVal());
         }
-        fw.write("<VarDef>\n");
+
+        // 5. 符号表
+        symbolTable.addToVariables(defNode);
+        return defNode;
     }
 
-    public void parseInitVal() throws IOException {
+    public LinkedList<ExpNode> parseInitVal() throws IOException {
         // 1. 解析<InitVal>
         // 2. <InitVal>有三种
             // <Exp>
             // { <Exp>, ... }
             // <StringConst>
 
+        // 1. 初始化一个LinkedList<ExpNode>
+        LinkedList<ExpNode> initValues = new LinkedList<>();
+
         // 1. 获取第一个Token
         // 1.1 查看是否是'{'
-            // 不是则回退直接解析<Exp>
-            // 否则解析'{',然后循环解析<Exp>
+        // 不是则回退直接解析<Exp>
+        // 否则解析'{',然后循环解析<Exp>
         // 1.2 最后追加语法成分
         // 1.3.1 { <Exp>, ... }
         getToken();
         if (token == token.LBRACE) {
-            // 1. {
-            fw.write(pair.toString() + "\n");
-            // 2. <Exp>,<Exp>
+            // 1. <Exp>,<Exp>
             getToken();
             if (token != Token.RBRACE) {
                 retract(1);
-                parseExp();
+                initValues.add(parseExp());
                 getToken();
                 while(token == Token.COMMA) {
-                    fw.write(pair.toString() + "\n");
-                    parseExp();
+                    initValues.add(parseExp());
                     getToken();
                 }
             }
-            // 3. }
-            fw.write(pair.toString() + "\n");
         }
         // 1.3.2 <StringConst>
         else if (token == Token.STRCON) {
             retract(1);
+            // TODO: 把字符串转化为字符存储到initValues
             parseStringConst();
         }
         // 1.3.3 <Exp>
         else {
             retract(1);
-            parseExp();
+            initValues.add(parseExp());
         }
-        fw.write("<InitVal>\n");
+
+        // 2. 追加语法成分
+        return initValues;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 4. 解析<FuncDef>, <FuncType>, <FuncFParams>, <FuncFParam>
-    public void parseFuncDef() throws IOException {
+    public FuncDefNode parseFuncDef() throws IOException {
         // 1. 解析<FuncDef>
         // 1. <FuncDef> = <FuncType> IDENFR '(' <FuncFParams>')' <Block>
 
         // 2.1 解析<FuncType>
+        // 2.1 初始化一个<FuncDefNode> = funcDefType + pair + 参数列表 + 块
         parseFuncType();
+        FuncDefNode funcDefNode = null;
+        if(token == Token.VOIDTK){
+            funcDefNode = new FuncDefNode(SyntaxType.VoidFunc);
+        } else if (token == Token.INTTK) {
+            funcDefNode = new FuncDefNode(SyntaxType.IntFunc);
+        } else {
+            funcDefNode = new FuncDefNode(SyntaxType.CharFunc);
+        }
 
         // 2.2 解析IDENFR
         getToken();
-        fw.write(pair.toString() + "\n");
+        funcDefNode.setPair(pair);
+        symbolTable.addToFunctions(funcDefNode);
+        symbolTable = new SymbolTable(symbolTable);
 
         // 2.3 解析'('
         getToken();
-        fw.write(pair.toString() + "\n");
 
         // 2.4 解析<FuncFParams>
         // 2.4 如果不是')', 说明是<FuncFParams>，回退一位然后解析
@@ -422,46 +448,44 @@ public class Parser {
         getToken();
         if (token != Token.RPARENT && token != Token.LBRACE) {
             retract(1);
-            parseFuncFParams();
+            funcDefNode.setFuncFParams(parseFuncFParams());
             getToken();
         }
-        if(token == Token.RPARENT) {
-            fw.write(pair.toString() + "\n");
-        } else {
+        if(token != Token.RPARENT) {
             retract(1);
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
         }
         // 2.5 解析<Block>
         // 2.5 追加语法成分
-        parseBlock();
-        fw.write("<FuncDef>\n");
+        funcDefNode.setBlockNode(parseBlock());
+
+        // 3. 符号表退栈
+        symbolTable = symbolTable.getParent();
+        return funcDefNode;
     }
 
     public void parseFuncType() throws IOException {
         getToken();
-        fw.write(pair.toString() + "\n");
-        fw.write("<FuncType>\n");
     }
 
-    public void parseFuncFParams() throws IOException {
+    public LinkedList<FuncFParamNode> parseFuncFParams() throws IOException {
         // 1. 解析<FuncFParams>
         // 1. <FuncFParams> = <FuncFParam> { ',' <FuncFParam> }
 
+        // 1. 创建LinkedList<FuncFParamNode>
+        LinkedList<FuncFParamNode> funcFParamNodes = new LinkedList<>();
+
         // 1. 解析<FuncFParam>
-        parseFuncFParam();
+        funcFParamNodes.add(parseFuncFParam());
 
         // 2. 循环解析,' <FuncFParam>
-        getToken();
-        while(token == Token.COMMA) {
-            fw.write(pair.toString() + "\n");
-            parseFuncFParam();
-            getToken();
+        while(getToken(Token.COMMA)) {
+            funcFParamNodes.add(parseFuncFParam());
         }
-        retract(1);
-        fw.write("<FuncFParams>\n");
+        return funcFParamNodes;
     }
 
-    public void parseFuncFParam() throws IOException {
+    public FuncFParamNode parseFuncFParam() throws IOException {
         // 1. 解析<FuncFParam>
         // 1. <FuncFParam>
             // BType + IDENFR
@@ -469,77 +493,80 @@ public class Parser {
 
         // 1. BType
         getToken();
-        fw.write(pair.toString() + "\n");
 
         // 2. IDENFR
         getToken();
-        fw.write(pair.toString() + "\n");
+        FuncFParamNode funcFParamNode = new FuncFParamNode(pair);
 
         // 3. '['
         if (getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
-            } else {
+            funcFParamNode.setLength(new NumberNode(0));
+            if(!getToken(Token.RBRACK)) {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
 
-        // 4. 追加语法成分
-        fw.write("<FuncFParam>\n");
+        // 4. 符号表
+        symbolTable.addToVariables(funcFParamNode);
+
+        // 5. 追加语法成分
+        return funcFParamNode;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 5. <MainFuncDef>, <Block>, <BlockItem>
-    public void parseMainFuncDef() throws IOException {
+    public FuncDefNode parseMainFuncDef() throws IOException {
         // 1. 解析<MainFuncDef>
         // 1. <MainFuncDef> = int main() <Block>
 
         // 1. int
         getToken();
-        fw.write(pair.toString() + "\n");
+        FuncDefNode mainFuncDefNode = new FuncDefNode();
 
         // 2. main
         getToken();
-        fw.write(pair.toString() + "\n");
 
         // 3. ()
         getToken();
-        fw.write(pair.toString() + "\n");
-        if (getToken(Token.RPARENT)) {
-            fw.write(pair.toString() + "\n");
-        } else {
+        if (!getToken(Token.RPARENT)) {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
         }
 
-        // 4. <Block>
-        parseBlock();
+        // 4. 建立新的符号表
+        symbolTable = new SymbolTable(symbolTable);
 
-        // 5. 追加语法成分
-        fw.write("<MainFuncDef>\n");
+        // 5. <Block>
+        mainFuncDefNode.setBlockNode(parseBlock());
+
+        // 6. 符号表退栈
+        symbolTable = symbolTable.getParent();
+
+        // 7. 追加语法成分
+        return mainFuncDefNode;
     }
 
-    public void parseBlock() throws IOException {
+    public BlockNode parseBlock() throws IOException {
         // 1. 解析<Block>
         // 1. <Block> = '{' + {BlockItem} + '}'
 
+        // 1. 创建节点
+        BlockNode blockNode = new BlockNode();
+
         // 1. '{'
         getToken();
-        fw.write(pair.toString() + "\n");
 
         // 2. <BlockItem>
         getToken();
         while(token != Token.RBRACE) {
             retract(1);
-            parseBlockItem();
+            blockNode.addBlockItemNode(parseBlockItem());
             getToken();
         }
 
         // 3. '}'
-        fw.write(pair.toString() + "\n");
 
         // 4. 追加语法成分
-        fw.write("<Block>\n");
+        return blockNode;
     }
 
     public void parseBlockItem() throws IOException {
@@ -596,145 +623,137 @@ public class Parser {
                 // <Exp> ';'
                 // <LVal> '=' 'getint' '(' ')' ';'
                 // <LVal> '=' 'getchar' '(' ')' ';'
+
+        // 1. 创建节点
+        StmtNode stmtNode = new NopNode();
+
         getToken();
         switch (token) {
             // ';'
             case SEMICN:
-                fw.write(pair.toString() + "\n");
                 break;
             // <Blcok>
             case LBRACE:
                 retract(1);
-                parseBlock();
+                symbolTable = new SymbolTable(symbolTable);
+                stmtNode = parseBlock();
+                symbolTable = symbolTable.getParent();
                 break;
             // 'if' '(' <Cond> ')' <Stmt> 可能有:'else' <Stmt>
             case IFTK:
-                // 1. 'if'
-                fw.write(pair.toString() + "\n");
-                // 2. '('
+                // 1. 更新节点
+                stmtNode = new BranchNode();
+                // 2. 'if'
+                // 3. '('
                 getToken();
-                fw.write(pair.toString() + "\n");
-                // 3. <Conf>
-                parseCond();
-                // 4. ')'
-                if(getToken(Token.RPARENT)) {
-                    fw.write(pair.toString() + "\n");
-                } else {
+                // 4. <Conf>
+                ((BranchNode) stmtNode).setCond(parseCond());
+                // 5. ')'
+                if(!getToken(Token.RPARENT)) {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
-                // 5. <Stmt>
-                parseStmt();
-                // 6. 可能有:'else' <Stmt>
+                // 6. <Stmt>
+                ((BranchNode) stmtNode).setIfStmt(parseStmt());
+                // 7. 可能有:'else' <Stmt>
                 if (getToken(Token.ELSETK)) {
-                    fw.write(pair.toString() + "\n");
-                    parseStmt();
+                    ((BranchNode) stmtNode).setElseStmt(parseStmt());
                 }
                 break;
             // 'for' '(' 没有 | <ForStmt> ';' 没有 | <Cond> ';' 没有 | <ForStmt> ')' <Stmt>
             case FORTK:
-                // 1. 'for'
-                fw.write(pair.toString() + "\n");
-                // 2. '('
+                // 1. 更新节点
+                stmtNode = new ForNode();
+                // 2. 'for'
+                // 3. '('
                 getToken();
-                fw.write(pair.toString() + "\n");
-                // 3. 没有 | <ForStmt>
+                // 4. 没有 | <ForStmt>
                 getToken();
                 if(token != Token.SEMICN) {
                     retract(1);
-                    parseForStmt();
+                    ((ForNode) stmtNode).setForStmtNodeFirst(parseForStmt());
                     getToken();
                 }
                 // 4. ';'
-                fw.write(pair.toString() + "\n");
                 // 5. 没有 | <Cond>
                 getToken();
                 if(token != Token.SEMICN) {
                     retract(1);
-                    parseCond();
+                    ((ForNode) stmtNode).setCond(parseCond());
                     getToken();
                 }
                 // 6. ';'
-                fw.write(pair.toString() + "\n");
                 // 7. 没有 | <ForStmt>
                 getToken();
                 if(token != Token.RPARENT) {
                     retract(1);
-                    parseForStmt();
+                    ((ForNode) stmtNode).setForStmtNodeSecond(parseForStmt());
                     getToken();
                 }
                 // 8. ')'
-                if(token == Token.RPARENT) {
-                    fw.write(pair.toString() + "\n");
-                } else {
+                if(token != Token.RPARENT) {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
                 // 9. <Stmt>
-                parseStmt();
+                forDepth++;
+                ((ForNode) stmtNode).setStmt(parseStmt());
+                forDepth--;
                 break;
             // 'break' ';'
             case BREAKTK:
-                fw.write(pair.toString() + "\n");
-                if(getToken(Token.SEMICN)){
-                    fw.write(pair.toString() + "\n");
-                } else {
+                // 1. 更新节点
+                stmtNode = new BreakNode();
+                if(!getToken(Token.SEMICN)){
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
             // 'continue' ';'
             case CONTINUETK:
-                fw.write(pair.toString() + "\n");
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
-                } else {
+                // 1.更新节点
+                stmtNode = new ContinueNode();
+                if(!getToken(Token.SEMICN)) {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
             // 'return' ';' | 'return' <Exp> ';'
             case RETURNTK:
-                // 1. 'return'
-                fw.write(pair.toString() + "\n");
-                // 2. 没有 ';' | <Exp> ';'
+                // 1. 更新节点
+                stmtNode = new ReturnNode(curToken);
+                // 2. 'return'
+                // 3. 没有 ';' | <Exp> ';'
                 getToken();
                 if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
                         || token == Token.IDENFR || token == Token.LPARENT
                         || token == Token.INTCON || token == Token.CHRCON) {
                     retract(1);
-                    parseExp();
+                    ((ReturnNode) stmtNode).setExpNode(parseExp());
                     getToken();
                 }
-                // 3. ';'
-                if(token == Token.SEMICN) {
-                    fw.write(pair.toString() + "\n");
-                } else {
+                // 4. ';'
+                if(token != Token.SEMICN) {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
             // 'printf' '(' <StringConst> { ',' <Exp> } ')' ';'
             case PRINTFTK:
-                // 1. 'printf'
-                fw.write(pair.toString() + "\n");
-                // 2. '('
+                // 1. 更新节点
+                stmtNode = new PrintNode();
+                // 2. 'printf'
+                // 3. '('
                 getToken();
-                fw.write(pair.toString() + "\n");
-                // 3. <StringConst>
-                parseStringConst();
-                // 4. ',' <Exp> ')' 或 ')'
+                // 4. <StringConst>
+                ((PrintNode) stmtNode).setPair(parseStringConst());
+                // 5. ',' <Exp> ')' 或 ')'
                 while(getToken(Token.COMMA)) {
-                    fw.write(pair.toString() + "\n");
-                    parseExp();
+                    ((PrintNode) stmtNode).addArgument(parseExp());
                 }
-                // 5. ')'
-                if(getToken(Token.RPARENT)) {
-                    fw.write(pair.toString() + "\n");
-                } else {
+                // 6. ')'
+                if(!getToken(Token.RPARENT)) {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
-                // 6. ';'
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
-                } else {
+                // 7. ';'
+                if(!getToken(Token.SEMICN)) {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;

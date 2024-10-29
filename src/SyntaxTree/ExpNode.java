@@ -1,4 +1,4 @@
 package SyntaxTree;
 
-public class ExpNode {
+public interface ExpNode extends StmtNode {
 }
