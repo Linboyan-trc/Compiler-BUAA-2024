@@ -1,4 +1,4 @@
 ///////// in temp /////////
-IDENFR a
+IDENFR b
 <LVal>
 ///////// out temp /////////

@@ -994,7 +994,11 @@ public class Parser {
         fw.write(pair.toString() + "\n");
         // 3. <Exp>
         forStmtNode.setExpNode(parseExp());
-        // 4. 追加语法成分
+
+        // 4. 需要对<LVal>和<Exp>进行类型检查
+        forStmtNode.checkForError(symbolTable);
+
+        // 5. 追加语法成分
         fw.write("<ForStmt>\n");
         return forStmtNode;
     }

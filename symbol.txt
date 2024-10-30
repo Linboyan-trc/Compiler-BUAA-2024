@@ -1,7 +1,1 @@
-1 func1 CharFunc
-1 func2 IntFunc
-1 func3 IntFunc
-2 b CharArray
-3 c Char
-4 a Int
-5 b CharArray
+2 a ConstInt
