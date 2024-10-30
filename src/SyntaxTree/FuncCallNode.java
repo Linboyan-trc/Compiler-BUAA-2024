@@ -41,9 +41,12 @@ public class FuncCallNode implements ExpNode {
         // 4.2 arguments中每个<ExpNode>的类型
         else {
             for(int i = 0; i < arguments.size(); i++) {
-                SyntaxType temp1 = funcDefNode.getFuncFParamNodes().get(i).getDefNodeType();
-                SyntaxType temp2 = arguments.get(i).getSyntaxType(symbolTable);
-                if(temp1 != temp2) {
+                SyntaxType temp1 = arguments.get(i).getSyntaxType(symbolTable);
+                SyntaxType temp2 = funcDefNode.getFuncFParamNodes().get(i).getDefNodeType();
+                if((temp1.isArray() && temp2.isVariable()) ||
+                        (temp1.isVariable() && temp2.isArray()) ||
+                        (temp1.isCharArray() && temp2.isIntArray())||
+                        (temp1.isIntArray() && temp2.isCharArray())) {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'e'));
                     break;
                 }

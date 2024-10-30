@@ -1,4 +1,4 @@
 ///////// in temp /////////
-IDENFR change1
+IDENFR a
 <LVal>
 ///////// out temp /////////

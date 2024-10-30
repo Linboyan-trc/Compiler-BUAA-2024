@@ -42,6 +42,25 @@ public class LValNode implements ExpNode {
         // 1. 首先在符号表中获取节点
         DefNode defNode = symbolTable.getVariable(pair.getWord());
         // 2. 节点自带类型
-        return defNode.getDefNodeType();
+        // 2. 对于左值表达式: a, a[10]等
+        // 2. 如果length = null,那么类型就和Pair一致
+        // 2. 如果length != null,那么类型就是ConstInt, ConstChar, Int, Char中的一种
+        if(length == null) {
+            return defNode.getDefNodeType();
+        } else {
+            SyntaxType arrayType = defNode.getDefNodeType();
+            switch (arrayType) {
+                case ConstIntArray:
+                    return SyntaxType.ConstInt;
+                case ConstCharArray:
+                    return SyntaxType.ConstChar;
+                case IntArray:
+                    return SyntaxType.Int;
+                case CharArray:
+                    return SyntaxType.Char;
+                default:
+                    return null;
+            }
+        }
     }
 }
