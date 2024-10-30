@@ -8,20 +8,14 @@ import java.util.LinkedList;
 public class DefNode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. <DefNode> = Parent + Pair:IDENFR + 维数 + 初始值
-    private DeclNode parent = null;
     private SyntaxType defNodeType = null;
     private Pair pair;
     private ExpNode length = null;
     private LinkedList<ExpNode> initValues = null;
-    private String initValueForSTRCON = null;
+    private Pair initValueForSTRCON = null;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. set
-    public DefNode(DeclNode parent, Pair pair) {
-        this.parent = parent;
-        this.pair = pair;
-    }
-
     public DefNode(SyntaxType defNodeType, Pair pair) {
         this.defNodeType = defNodeType;
         this.pair = pair;
@@ -35,23 +29,30 @@ public class DefNode {
         this.initValues = initValues;
     }
 
-    public void setInitValueForSTRCON(String initValueForSTRCON) {
+    public void setInitValueForSTRCON(Pair initValueForSTRCON) {
         this.initValueForSTRCON = initValueForSTRCON;
     }
 
-    public void toArray(){
-        if(defNodeType == SyntaxType.Int) {
-            defNodeType = SyntaxType.IntArray;
-        } else if(defNodeType == SyntaxType.Char){
-            defNodeType = SyntaxType.CharArray;
+    public void toArray() {
+        switch (defNodeType) {
+            case ConstChar:
+                defNodeType = SyntaxType.ConstCharArray;
+                break;
+            case ConstInt:
+                defNodeType = SyntaxType.ConstIntArray;
+                break;
+            case Char:
+                defNodeType = SyntaxType.CharArray;
+                break;
+            case Int:
+                defNodeType = SyntaxType.IntArray;
+                break;
+            default:
+                break;
         }
     }
 
     // 2. get
-    public DeclNode getParent() {
-        return parent;
-    }
-
     public Pair getPair() {
         return pair;
     }

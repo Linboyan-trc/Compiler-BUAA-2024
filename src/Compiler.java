@@ -41,7 +41,7 @@ public class Compiler {
         int scope = 1;
         SymbolTable symbolTable = parser.getSymbolTable();
         for(SymbolItem<DefNode> item:symbolTable.getVariables()){
-            fwSym.write(scope + " " + item.getName() + " " + item.getNode().getParent().getDeclNodeType().toString() + "\n");
+            fwSym.write(scope + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
         }
         for(SymbolItem<FuncDefNode> item:symbolTable.getFunctions()){
             fwSym.write(scope + " " + item.getName() + " " + item.getNode().getFuncDefType().toString() + "\n");

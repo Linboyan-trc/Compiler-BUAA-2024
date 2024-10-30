@@ -214,14 +214,16 @@ public class Parser {
         // 1.2 创建<DeclNode>
         getToken();
         fw.write(pair.toString() + "\n");
-        DeclNode declNode = null;
-        if(token == Token.INTTK) {
-            declNode = new DeclNode(SyntaxType.ConstInt);
+        DeclNode declNode = new DeclNode();
+        SyntaxType syntaxType;
+        if(token == Token.INTTK){
+            syntaxType = SyntaxType.ConstInt;
         } else {
-            declNode = new DeclNode(SyntaxType.ConstChar);
+            syntaxType = SyntaxType.ConstChar;
         }
+
         // 1.3 解析<ConstDef>
-        declNode.addDefNode(parseConstDef(declNode));
+        declNode.addDefNode(parseConstDef(syntaxType));
 
         // 2. 解析完继续获取下一个Token
         // 2.1 如果是',',那么继续解析<ConstDef>,并不断获取下一个Token
@@ -229,7 +231,7 @@ public class Parser {
         // 2.3 追加语法成分
         while(getToken(Token.COMMA)) {
             fw.write(pair.toString() + "\n");
-            declNode.addDefNode(parseConstDef(declNode));
+            declNode.addDefNode(parseConstDef(syntaxType));
         }
         if (getToken(Token.SEMICN)) {
             fw.write(pair.toString() + "\n");
@@ -240,7 +242,7 @@ public class Parser {
         return declNode;
     }
 
-    public DefNode parseConstDef(DeclNode declNode) throws IOException {
+    public DefNode parseConstDef(SyntaxType syntaxType) throws IOException {
         // 1. 解析<ConstDef>
         // 1. 包含
             // IDENFR
@@ -251,7 +253,7 @@ public class Parser {
         // 1. 创建DefNode节点,传入IDENFR
         getToken();
         fw.write(pair.toString() + "\n");
-        DefNode defNode = new DefNode(declNode,pair);
+        DefNode defNode = new DefNode(syntaxType,pair);
 
         // 2.读下一个Token
         // 2.1 如果是'['就是数组
@@ -260,7 +262,7 @@ public class Parser {
         if(getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
             defNode.setLength(parseConstExp());
-            defNode.getParent().toArray();
+            defNode.toArray();
             if(getToken(Token.RBRACK)) {
                 fw.write(pair.toString() + "\n");
             } else {
@@ -337,20 +339,21 @@ public class Parser {
         // 1. 先读BType
         getToken();
         fw.write(pair.toString() + "\n");
-        DeclNode declNode = null;
+        DeclNode declNode = new DeclNode();
+        SyntaxType syntaxType;
         if(token == Token.INTTK) {
-            declNode = new DeclNode(SyntaxType.Int);
+            syntaxType = SyntaxType.Int;
         } else {
-            declNode = new DeclNode(SyntaxType.Char);
+            syntaxType = SyntaxType.Char;
         }
 
         // 2. 解析<VarDef>
-        declNode.addDefNode(parseVarDef(declNode));
+        declNode.addDefNode(parseVarDef(syntaxType));
 
         // 3. 如果下一个是,继续解析<VarDef>
         while(getToken(Token.COMMA)) {
             fw.write(pair.toString() + "\n");
-            declNode.addDefNode(parseVarDef(declNode));
+            declNode.addDefNode(parseVarDef(syntaxType));
         }
 
         // 4. 解析';'
@@ -364,7 +367,7 @@ public class Parser {
         return declNode;
     }
 
-    public DefNode parseVarDef(DeclNode declNode) throws IOException {
+    public DefNode parseVarDef(SyntaxType syntaxType) throws IOException {
         // 1. 解析<VarDef>
         // 1. <VarDef>有两种情况
             // IDENFR 或 IDENFR '[' + <ConstExp> + ']' -> 也就是不赋初值
@@ -374,7 +377,7 @@ public class Parser {
         // 2. 创建<DefNode>
         getToken();
         fw.write(pair.toString() + "\n");
-        DefNode defNode = new DefNode(declNode,pair);
+        DefNode defNode = new DefNode(syntaxType,pair);
 
         // 3. 如果是数组
         // 3.1 解析'['
@@ -383,7 +386,7 @@ public class Parser {
         if(getToken(Token.LBRACK)) {
             fw.write(pair.toString() + "\n");
             defNode.setLength(parseConstExp());
-            defNode.getParent().toArray();
+            defNode.toArray();
             if(getToken(Token.RBRACK)) {
                 fw.write(pair.toString() + "\n");
             } else {
@@ -507,6 +510,9 @@ public class Parser {
 
         // 3. 符号表退栈
         symbolTable = symbolTable.getParent();
+
+        // 4. 检查funcDefType和<Block>返回值是否一致
+        funcDefNode.checkForError();
         fw.write("<FuncDef>\n");
         return funcDefNode;
     }
@@ -586,7 +592,7 @@ public class Parser {
         // 1. int
         getToken();
         fw.write(pair.toString() + "\n");
-        FuncDefNode mainFuncDefNode = new FuncDefNode();
+        FuncDefNode mainFuncDefNode = new FuncDefNode(SyntaxType.IntFunc);
 
         // 2. main
         getToken();
@@ -611,7 +617,10 @@ public class Parser {
         // 6. 符号表退栈
         symbolTable = symbolTable.getParent();
 
-        // 7. 追加语法成分
+        // 7. 检查返回值是否为int类型
+        mainFuncDefNode.checkForError();
+
+        // 8. 追加语法成分
         fw.write("<MainFuncDef>\n");
         return mainFuncDefNode;
     }
@@ -638,7 +647,10 @@ public class Parser {
         // 3. '}'
         fw.write(pair.toString() + "\n");
 
-        // 4. 追加语法成分
+        // 4. 设置<BlockNode>结尾行号
+        blockNode.setEndLineNumber(pair.getLineNumber());
+
+        // 5. 追加语法成分
         fw.write("<Block>\n");
         return blockNode;
     }
@@ -790,7 +802,11 @@ public class Parser {
             case BREAKTK:
                 // 1. 更新节点
                 stmtNode = new BreakNode();
-                // 2.
+                // 2. 判断是否在<ForStmt>内
+                if(forDepth == 0) {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'm'));
+                }
+                // 3.
                 fw.write(pair.toString() + "\n");
                 if(getToken(Token.SEMICN)) {
                     fw.write(pair.toString() + "\n");
@@ -802,7 +818,11 @@ public class Parser {
             case CONTINUETK:
                 // 1.更新节点
                 stmtNode = new ContinueNode();
-                // 2.
+                // 2. 判断是否在<ForStmt>内
+                if(forDepth == 0) {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'm'));
+                }
+                // 3.
                 fw.write(pair.toString() + "\n");
                 if(getToken(Token.SEMICN)) {
                     fw.write(pair.toString() + "\n");
@@ -850,15 +870,19 @@ public class Parser {
                     ((PrintNode) stmtNode).addArgument(parseExp());
                 }
                 // 6. ')'
-                if(!getToken(Token.RPARENT)) {
+                if(getToken(Token.RPARENT)) {
                     fw.write(pair.toString() + "\n");
+                } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
                 // 7. ';'
-                if(!getToken(Token.SEMICN)) {
+                if(getToken(Token.SEMICN)) {
                     fw.write(pair.toString() + "\n");
+                } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
+                // 8. 对printf的格式字符数量和表达式数量进行检查
+                ((PrintNode) stmtNode).checkForError();
                 break;
             // <LVal>
                 // <LVal> '=' <Exp> ';'
@@ -897,7 +921,11 @@ public class Parser {
                         if (token == Token.GETINTTK || token == Token.GETCHARTK) {
                             // 1. 更新节点
                             // 1. 'getint' | 'getchar'
-                            stmtNode = new GetIntNode(lValNode);
+                            if(token == Token.GETINTTK) {
+                                stmtNode = new GetIntNode(lValNode);
+                            } else {
+                                stmtNode = new GetCharNode(lValNode);
+                            }
                             fw.write(pair.toString() + "\n");
                             // 2. '('
                             getToken();
@@ -908,6 +936,12 @@ public class Parser {
                             } else {
                                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                             }
+                            // 4. 对<LValNode>的类型不能为Const进行检查
+                            if(stmtNode instanceof GetIntNode) {
+                                ((GetIntNode) stmtNode).checkForError(symbolTable);
+                            } else {
+                                ((GetCharNode) stmtNode).checkForError(symbolTable);
+                            }
                         } else {
                             // 1. 更新节点
                             stmtNode = new AssignNode();
@@ -915,6 +949,8 @@ public class Parser {
                             ((AssignNode) stmtNode).setLValNode(lValNode);
                             retract(1);
                             ((AssignNode) stmtNode).setExpNode(parseExp());
+                            // 3. 对两者类型是否匹配进行检查
+                            ((AssignNode) stmtNode).checkForError(symbolTable);
                         }
                     }
                     // 3. 没有等号就是<Exp>
@@ -1001,6 +1037,9 @@ public class Parser {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
+
+        // 4. 检查是否使用未命名变量
+        lValNode.checkForError(symbolTable);
         fw.write("<LVal>\n");
         return lValNode;
     }
@@ -1062,11 +1101,11 @@ public class Parser {
         return characterNode;
     }
 
-    public String parseStringConst() throws IOException {
+    public Pair parseStringConst() throws IOException {
         getToken();
         fw.write(pair.toString() + "\n");
         //fw.write("<StringConst>\n");
-        return pair.getWord();
+        return pair;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -1118,6 +1157,8 @@ public class Parser {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
+                // 5. 检查:是否存在使用未定义名字'c'，参数个数不匹配'd'，参数个数匹配但是参数类型不匹配'e'这三类错误
+                ((FuncCallNode) expNode).checkForError(symbolTable);
             } else {
                 retract(2);
                 expNode = parsePrimaryExp();

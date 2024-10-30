@@ -19,8 +19,6 @@ public class FuncDefNode {
         this.funcDefType = funcDefType;
     }
 
-    public FuncDefNode() { }
-
     public void setPair(Pair pair) {
         this.pair = pair;
     }
@@ -44,5 +42,11 @@ public class FuncDefNode {
 
     public LinkedList<FuncFParamNode> getFuncFParamNodes() {
         return funcFParamNodes;
+    }
+
+    // 3. 检查
+    // 3. 就是检查函数的funcDefType和<Block>的返回值是否能一致
+    public void checkForError() {
+        blockNode.checkForError(funcDefType);
     }
 }

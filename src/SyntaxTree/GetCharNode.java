@@ -5,21 +5,14 @@ import ErrorHandler.ErrorRecord;
 import SyntaxTable.SymbolTable;
 import SyntaxTable.SyntaxType;
 
-public class AssignNode implements StmtNode {
-    // 1. <LValNode> + <ExpNode>
+public class GetCharNode implements StmtNode {
+    // 1. <LVal>
     private LValNode lValNode;
-    private ExpNode expNode;
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
 
-    // 2.
-    public AssignNode() { }
-
-    public void setLValNode(LValNode lValNode) {
+    // 2. 构造
+    public GetCharNode(LValNode lValNode) {
         this.lValNode = lValNode;
-    }
-
-    public void setExpNode(ExpNode expNode) {
-        this.expNode = expNode;
     }
 
     // 3. 检查

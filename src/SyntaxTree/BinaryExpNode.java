@@ -1,6 +1,9 @@
 package SyntaxTree;
 
 import Lexer.Pair;
+import Lexer.Token;
+import SyntaxTable.SymbolTable;
+import SyntaxTable.SyntaxType;
 
 public class BinaryExpNode implements ExpNode {
     // 1. 就是()*(), ()+()
@@ -21,5 +24,22 @@ public class BinaryExpNode implements ExpNode {
 
     public void setRightExp(ExpNode expNode) {
         this.rightExp = expNode;
+    }
+
+    // 1. 获取SyntaxType
+    @Override
+    public SyntaxType getSyntaxType(SymbolTable symbolTable) {
+        // 1. 如果经过了+，-，*，/，%的运算，就是INT
+        if(binaryOp.getToken() == Token.PLUS ||
+                binaryOp.getToken() == Token.MINU ||
+                binaryOp.getToken() == Token.MULT ||
+                binaryOp.getToken() == Token.DIV ||
+                binaryOp.getToken() == Token.MOD) {
+            return SyntaxType.Int;
+        }
+        // 2. 否则是<Cond>
+        else {
+            return SyntaxType.Bool;
+        }
     }
 }

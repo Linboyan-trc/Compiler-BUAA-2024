@@ -1,11 +1,16 @@
 package SyntaxTree;
 
+import ErrorHandler.ErrorHandler;
+import ErrorHandler.ErrorRecord;
 import Lexer.Pair;
+import SyntaxTable.SymbolTable;
+import SyntaxTable.SyntaxType;
 
 public class LValNode implements ExpNode {
     // 1. Pair + 维数
     private Pair pair;
     private ExpNode length = null;
+    private ErrorHandler errorHandler = ErrorHandler.getInstance();
 
     // 2. 构造 + 设置pair + 设置length
     public LValNode() { }
@@ -18,6 +23,25 @@ public class LValNode implements ExpNode {
         this.length = length;
     }
 
-    // 3. 检查
-    // TODO: 错误处理
+    // 3. get
+    public Pair getPair() {
+        return pair;
+    }
+
+    // 4. 检查
+    // 4. 使用未命名变量，为c类错误
+    public void checkForError(SymbolTable symbolTable) {
+        if(symbolTable.getVariable(pair.getWord()) == null) {
+            errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'c'));
+        }
+    }
+
+    // 1. 获取SyntaxType
+    @Override
+    public SyntaxType getSyntaxType(SymbolTable symbolTable) {
+        // 1. 首先在符号表中获取节点
+        DefNode defNode = symbolTable.getVariable(pair.getWord());
+        // 2. 节点自带类型
+        return defNode.getDefNodeType();
+    }
 }

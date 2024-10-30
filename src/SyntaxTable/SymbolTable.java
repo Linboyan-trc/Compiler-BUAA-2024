@@ -1,5 +1,7 @@
 package SyntaxTable;
 
+import ErrorHandler.ErrorHandler;
+import ErrorHandler.ErrorRecord;
 import SyntaxTree.DefNode;
 import SyntaxTree.FuncDefNode;
 
@@ -15,6 +17,8 @@ public class SymbolTable {
     private LinkedList<SymbolItem<FuncDefNode>> functions = new LinkedList<>();
     private SymbolTable parent = null;
     private LinkedList<SymbolTable> children = new LinkedList<>();
+    // 2. 错误处理
+    private ErrorHandler errorHandler = ErrorHandler.getInstance();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 新建符号表，在建立第一个符号表的时候显示的指定深度为1
@@ -44,10 +48,10 @@ public class SymbolTable {
         // 1.3 numOfElements:    [1] | 0
         // 1.3 initValues:       1 | null
         // 1.4 判断在本层是否存在重复
-        if(containedInVariables(defNode) ||
-                (parent == null && containedInFunctions(defNode))) {
+        if(containedInVariables(defNode.getPair().getWord()) ||
+                (parent == null && containedInFunctions(defNode.getPair().getWord()))) {
             // 2.1 若重复需要添加到错误列表
-            // TODO: 若重复需要添加到错误列表
+            errorHandler.addError(new ErrorRecord(defNode.getPair().getLineNumber(), 'b'));
         } else {
             // 2.2 否则添加到本层变量表
             variables.add(new SymbolItem<>(defNode));
@@ -64,10 +68,10 @@ public class SymbolTable {
         // 1.3 参数列表:          int b | null
         // 1.3 块:               {}
         // 1.4 判断在本层是否存在重复
-        if(containedInFunctions(funcDefNode) ||
-                (parent == null && containedInVariables(funcDefNode))) {
+        if(containedInFunctions(funcDefNode.getPair().getWord()) ||
+                (parent == null && containedInVariables(funcDefNode.getPair().getWord()))) {
             // 2.1 若重复需要添加到错误列表
-            // TODO: 若重复需要添加到错误列表
+            errorHandler.addError(new ErrorRecord(funcDefNode.getPair().getLineNumber(), 'b'));
         } else {
             functions.add(new SymbolItem<>(funcDefNode));
         }
@@ -75,10 +79,8 @@ public class SymbolTable {
 
     // 2.2 工具:DefNode在variables，functions中是否存在
     // 2.2 工具:FuncDefNode在variables，functions中是否存在
-    public boolean containedInVariables(DefNode defNode) {
-        // 1. name
-        String name = defNode.getPair().getWord();
-        // 2. 遍历
+    public boolean containedInVariables(String name) {
+        // 1. 遍历
         for(SymbolItem<DefNode> item : variables){
             if(item.getName().equals(name)){
                 return true;
@@ -87,34 +89,8 @@ public class SymbolTable {
         return false;
     }
 
-    public boolean containedInVariables(FuncDefNode funcDefNode) {
-        // 1. name
-        String name = funcDefNode.getPair().getWord();
-        // 2. 遍历
-        for(SymbolItem<DefNode> item : variables){
-            if(item.getName().equals(name)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean containedInFunctions(DefNode defNode) {
-        // 1. name
-        String name = defNode.getPair().getWord();
-        // 2. 遍历
-        for(SymbolItem<FuncDefNode> item : functions){
-            if(item.getName().equals(name)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean containedInFunctions(FuncDefNode funcDefNode) {
-        // 1. name
-        String name = funcDefNode.getPair().getWord();
-        // 2. 遍历
+    public boolean containedInFunctions(String name) {
+        // 1. 遍历
         for(SymbolItem<FuncDefNode> item : functions){
             if(item.getName().equals(name)){
                 return true;
@@ -141,15 +117,37 @@ public class SymbolTable {
         return children;
     }
 
+    public DefNode getVariable(String name) {
+        for(SymbolItem<DefNode> item : variables){
+            if(item.getName().equals(name)){
+                return item.getNode();
+            }
+        }
+        if(parent != null){
+            return parent.getVariable(name);
+        } else {
+            return null;
+        }
+    }
+
+    public FuncDefNode getFunction(String name) {
+        for(SymbolItem<FuncDefNode> item : functions){
+            if(item.getName().equals(name)){
+                return item.getNode();
+            }
+        }
+        if(parent != null){
+            return parent.getFunction(name);
+        } else {
+            return null;
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 4. print for dfs
     public int print(FileWriter fw, int scope) throws IOException {
         for(SymbolItem<DefNode> item : variables){
-            if(item.getNode().getParent() == null) {
-                fw.write(scope + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
-            } else {
-                fw.write(scope + " " + item.getName() + " " + item.getNode().getParent().getDeclNodeType().toString() + "\n");
-            }
+            fw.write(scope + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
         }
         for(SymbolTable item : children){
             scope++;

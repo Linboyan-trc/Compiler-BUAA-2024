@@ -1,2 +1,6 @@
-1 x IntArray
-1 i IntArray
+1 const1 ConstInt
+1 const2 ConstInt
+1 change1 Int
+1 gets1 IntFunc
+2 var1 Int
+2 var2 Int
