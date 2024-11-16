@@ -1,13 +1,16 @@
 package SyntaxTree;
 
 import Lexer.Pair;
+import SyntaxTable.SymbolTable;
 import SyntaxTable.SyntaxType;
 
 import java.util.LinkedList;
 
 public class DefNode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 1. <DefNode> = Parent + Pair:IDENFR + 维数 + 初始值
+    // 1. <DefNode> = <DefNode> = 符号表 + isFinal + Pair:IDENFR + 维数 + 初始值
+    protected final SymbolTable symbolTable;
+    protected final boolean isFinal;
     private SyntaxType defNodeType = null;
     private Pair pair;
     private ExpNode length = null;
@@ -16,20 +19,15 @@ public class DefNode {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. set
-    public DefNode(SyntaxType defNodeType, Pair pair) {
+    public DefNode(SymbolTable symbolTable, boolean isFinal,
+                   SyntaxType defNodeType, Pair pair,
+                   ExpNode length, LinkedList<ExpNode> initValues, Pair initValueForSTRCON) {
+        this.symbolTable = symbolTable;
+        this.isFinal = isFinal;
         this.defNodeType = defNodeType;
         this.pair = pair;
-    }
-
-    public void setLength(ExpNode expNode) {
-        this.length = expNode;
-    }
-
-    public void setInitValues(LinkedList<ExpNode> initValues) {
+        this.length = length;
         this.initValues = initValues;
-    }
-
-    public void setInitValueForSTRCON(Pair initValueForSTRCON) {
         this.initValueForSTRCON = initValueForSTRCON;
     }
 
@@ -53,15 +51,19 @@ public class DefNode {
     }
 
     // 2. get
+    public boolean isFinal() {
+        return isFinal;
+    }
+
+    public SyntaxType getDefNodeType() {
+        return defNodeType;
+    }
+
     public Pair getPair() {
         return pair;
     }
 
     public ExpNode getLength() {
         return length;
-    }
-
-    public SyntaxType getDefNodeType() {
-        return defNodeType;
     }
 }
