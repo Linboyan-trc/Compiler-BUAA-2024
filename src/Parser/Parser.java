@@ -241,7 +241,7 @@ public class Parser {
         if(getToken(LBRACK)) {
             units.add(pair);
 
-            // TODO: 4. IDENFR对应的类型需要转换
+            // TODO: 4. IDENFR对应的类型需要转换 + 设置length
 
             // 5. <ConstExp>
             units.add(parseConstExp());
@@ -355,30 +355,17 @@ public class Parser {
         LinkedList<ParsedUnit> units = parseDef(syntaxType);
 
         // 2. ('=', <InitVal>)
-        boolean isSpecial = false;
         if (getToken(ASSIGN)) {
             // 2.1 '='
             units.add(pair);
 
-            // 2.2 特殊处理getint(), getchar()
-            if(getToken(GETINTTK,GETCHARTK)) {
-                isSpecial = true;
-                units.add(pair);
-                getToken(LPARENT);
-                units.add(pair);
-                getToken(RPARENT);
-                units.add(pair);
-            }
-
-            // 2.3 <InitVal>
-            else {
-                units.add(parseInitVal());
-            }
+            // 2.2 <InitVal>
+            units.add(parseInitVal());
         }
 
         // 3. 返回节点:Special: getint(), getchat()
         // 3. 返回节点:<VarDef>
-        return new ParsedUnit(isSpecial? "Special" : "VarDef", units);
+        return new ParsedUnit("VarDef", units);
     }
 
     // 3.1 <VarDecl> = BType <VarDef> {, <VarDef>}

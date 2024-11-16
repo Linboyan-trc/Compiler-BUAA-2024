@@ -12,6 +12,8 @@ import java.util.LinkedList;
 public class SymbolTable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 深度，变量，函数，上层符号表
+    private static int count = 0;
+    private final int id;
     private int depth = 1;
     private LinkedList<SymbolItem<DefNode>> variables = new LinkedList<>();
     private LinkedList<SymbolItem<FuncDefNode>> functions = new LinkedList<>();
@@ -25,11 +27,13 @@ public class SymbolTable {
     public SymbolTable(SymbolTable parent,int depth) {
         this.parent = parent;
         this.depth = depth;
+        this.id = count++;
     }
 
     public SymbolTable(SymbolTable parent){
         this.parent = parent;
         this.depth = parent.depth + 1;
+        this.id = count++;
     }
 
     public void addChild(SymbolTable child){
@@ -101,8 +105,8 @@ public class SymbolTable {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 3. get
-    public SymbolTable getParent() {
-        return parent;
+    public int getId() {
+        return id;
     }
 
     public LinkedList<SymbolItem<DefNode>> getVariables() {
@@ -111,6 +115,10 @@ public class SymbolTable {
 
     public LinkedList<SymbolItem<FuncDefNode>> getFunctions() {
         return functions;
+    }
+
+    public SymbolTable getParent() {
+        return parent;
     }
 
     public LinkedList<SymbolTable> getChildren() {

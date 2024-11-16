@@ -23,6 +23,21 @@ public enum SyntaxType {
         return this == ConstCharArray || this == CharArray;
     }
 
+    public SyntaxType toArray() {
+        switch (this) {
+            case ConstChar:
+                return ConstCharArray;
+            case ConstInt:
+                return ConstIntArray;
+            case Char:
+                return CharArray;
+            case Int:
+                return IntArray;
+            default:
+                return this;
+        }
+    }
+
     public String toString() {
         return name();
     }
