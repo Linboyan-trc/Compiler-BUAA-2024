@@ -5,6 +5,7 @@ import ErrorHandler.ErrorRecord;
 import Lexer.Lexer;
 import Lexer.Pair;
 import Lexer.Token;
+import static Lexer.Token.*;
 import SyntaxTable.SymbolTable;
 import SyntaxTable.SyntaxType;
 import SyntaxTree.*;
@@ -15,69 +16,52 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+
 public class Parser {
-    // 1. lexer + token:指针, 当前token, token表
+    // 1. lexer + 当前pair, 当前token, 当前token指针，token表
     private Lexer lexer;
     private Pair pair;
     private Token token;
     private int tokenIndex = -1;
     private List<Pair> tokens = new ArrayList<>();
-    // 2. 输出文件
-    FileWriter fw;
-    FileWriter fwOrigin;
-    // 3. 错误处理
+    // 2. 错误处理
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
-    // 4. 语义分析
-    private int forDepth = 0;
-    private SymbolTable symbolTable  = new SymbolTable(null,1);
 
-    public Parser(Lexer lexer, FileWriter fw) {
+    public Parser(Lexer lexer) {
         this.lexer = lexer;
-        this.fw = fw;
-        this.fwOrigin = fw;
-    }
-
-    public SymbolTable getSymbolTable() {
-        return symbolTable;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
-    // 1. 第一种getToken用于简单获取下一个
-    // 2. 第二种getToken用于错误处理却少情况:i, j, k
+    // 1. 获取一个新的token，pair, token, tokenIndex指向当前token
     public void getToken() throws IOException {
-        // 1.1 当用到最新token的时候才需要读取新的token
+        // 1.1 当用到tokenIndex = tokens.size()，需要获取新的token
         tokenIndex++;
         if (tokens.size() == tokenIndex) {
             tokens.add(lexer.parseAndGetPair());
         }
-        // 1.2 没有用到最新token从当前token拿就可以
+        // 1.2 更新pair，token
         pair = tokens.get(tokenIndex);
         token = tokens.get(tokenIndex).getToken();
     }
 
+    // 2. 判断当前token是否是指定多个token中的一个
+    // 2.1 如果是更新pair, token, tokenIndex并就返回true
+    // 2.1 如果不是指定多个token中的一个就回退到上一个pair, token, tokenIndex，返回false
     public boolean getToken(Token... tokenExpecteds) throws IOException {
-        // 1.1 当用到最新token的时候才需要读取新的token
-        tokenIndex++;
-        if (tokens.size() == tokenIndex) {
-            tokens.add(lexer.parseAndGetPair());
-        }
-
-        // 1.2 没有用到最新token从当前token拿就可以
-        // 1.2.1 如果符合期望就正常读
+        // 1. 获取新token，判断是否符合条件
+        getToken();
         for(Token tokenExpected:tokenExpecteds) {
-            if(tokens.get(tokenIndex).getToken() == tokenExpected) {
-                pair = tokens.get(tokenIndex);
-                token = tokens.get(tokenIndex).getToken();
+            if(token == tokenExpected) {
                 return true;
             }
         }
 
-        // 1.2.2 如果不符合期望就取消这次token的读取，防止影响后续语法分析
-        tokenIndex--;
+        // 2. 如果不符合条件则回退
+        retract(1);
         return false;
     }
 
-    // 1. 回退
+    // 3. 回退
     public void retract(int stride) {
         tokenIndex -= stride;
         if (tokenIndex >= 0) {
@@ -86,6 +70,7 @@ public class Parser {
         }
     }
 
+    // 4. 回退
     public void retractAbsolutely(int index) {
         tokenIndex = index;
         if (tokenIndex >= 0) {
@@ -96,604 +81,564 @@ public class Parser {
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 1. 解析<CompUnit>
-    public CompUnit parseCompUnit() throws IOException {
-        // 1. 创建顶层语法点
-        CompUnit compUnit = new CompUnit();
+    public ParsedUnit parseCompUnit() throws IOException {
+        // 1. 统一使用<ParsedUnit>作为节点
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
         // 2. 解析<Decl>
-        // 2.1 <Decl>有两种情况
-            // const int|char a = ...; -> 回退 + 解析<ConstDecl>
-            // int a = ...; -> 继续读一个
-                // 如果不是IDENFR，那么可能是int main了，回退 + 结束解析<Decl>
-                // 否则继续读一个
-                    // 是'('说明是函数，回退结束解析<Decl>
-                    // 否则是变量，回退 + 解析<VarDecl>
-            // char a = ...; -> 继续读一个
-                // 继续读一个
-                    // 是'('说明是函数，回退结束解析<Decl>
-                    // 否则是变量，回退 + 解析<VarDecl>
-        // 2. 获取第一个Token
-        getToken();
-        while(token == Token.CONSTTK || token == Token.INTTK || token == Token.CHARTK) {
-            // 1. <ConstDecl>
-            if(token == Token.CONSTTK) {
-                retract(1);
-                compUnit.addDeclNode(parseConstDecl());
+        // 2.1 常量:CONSTTK
+        // 2.2 变量:INTTK, CHARTK
+        // const int|char a = ...; -> 回退 + 解析<ConstDecl>
+        // int main -> 回退 + 结束解析
+        // int sum() | char sum() -> 回退 + 结束解析
+        // int a | char a -> 回退 + 解析<VarDecl>
+        for(int anchor = tokenIndex; getToken(CONSTTK, INTTK, CHARTK); anchor = tokenIndex) {
+            // 1.1 getToken之后:index, curToken都是最新的
+            // 1.1 回到起始帧:解析本Node的前一个位置，然后解析ConstDecl
+            if(token == CONSTTK) {
+                retractAbsolutely(anchor);
+                units.add(parseConstDecl());
             }
-            // 2. <VarDecl>
-            // 2.1 int main + int a() + int a
-            else if (token == Token.INTTK) {
-                // 1. int main
-                getToken();
-                if (token != Token.IDENFR) {
-                    retract(1);
-                    break;
-                }
-                // 2. int a()
-                getToken();
-                if (token == Token.LPARENT) {
-                    retract(2);
-                    break;
-                }
-                // 3. int a
-                retract(3);
-                compUnit.addDeclNode(parseVarDecl());
+
+            // 1.2 如果是int,char 但是下一个又不是IDENFR，说明是main
+            // 1.2 回到起始帧，退出Decl解析
+            else if (!getToken(IDENFR)) {
+                retractAbsolutely(anchor);
+                break;
             }
-            // 2.2 char a() + char a
+
+            // 1.3 如果是int，char + IDENFR，并且下一个是(，说明是FuncDef
+            // 1.3 回到起始帧，退出Decl解析
+            else if (getToken(LPARENT)) {
+                retractAbsolutely(anchor);
+                break;
+            }
+
+            // 1.4 如果是int，char + IDENFR
+            // 1.4 回到起始帧，然后解析VarDecl
             else {
-                // 1. IDENFR
-                getToken();
-                // 2. '('
-                getToken();
-                if (token == Token.LPARENT) {
-                    retract(2);
-                    break;
-                }
-                retract(3);
-                compUnit.addDeclNode(parseVarDecl());
+                // 3. int a
+                retractAbsolutely(anchor);
+                units.add(parseVarDecl());
             }
-            getToken();
         }
 
         // 3. 解析<FuncDef>
-        // 3.1 是void: 回退 + 解析<FuncDef>
-        // 3.2 是int: 继续读一个
-            // 是IDENFR，回退 + 解析<FuncDef>
-            // 不是IDENFR，那么是int main，退回结束解析<FuncDef>
-        // 3.3 是char: 继续读一个
-            // 回退 + 解析<FuncDef>
-        // 3.4 继续获取下一个Token
-        while(token == Token.VOIDTK || token == Token.INTTK || token == Token.CHARTK) {
-            // 1. void
-            if(token == Token.VOIDTK) {
-                retract(1);
-                compUnit.addFuncDefNode(parseFuncDef());
+        // 3.1 类型:VOIDTK, INTTK, CHARTK
+        // void -> 回退 + 解析<FuncDef>
+        // int sum() | char sum() -> 回退 + 解析<FuncDef>
+        // int main() -> 回退 + 结束解析
+        for(int anchor = tokenIndex; getToken(VOIDTK, INTTK, CHARTK); anchor = tokenIndex) {
+            // 3.1 是VOIDTK
+            // 3.1 回到起始帧，解析FuncDef
+            if(token == VOIDTK) {
+                retractAbsolutely(anchor);
+                units.add(parseFuncDef());
             }
-            // 2. int main() 和 int a()
-            else if (token == Token.INTTK) {
-                getToken();
-                if (token != Token.IDENFR) {
-                    retract(1);
-                    break;
-                }
-                retract(2);
-                compUnit.addFuncDefNode(parseFuncDef());
+
+            // 3.2 是INTTK或CHARTK，并且下一个是IDENFR
+            // 3.2 回到起始帧，解析FuncDef
+            else if (getToken(IDENFR)) {
+                retractAbsolutely(anchor);
+                units.add(parseFuncDef());
             }
-            // 3. char a()
+
+            // 3.3 否则是main
+            // 3.3 回到起始帧，退出FuncDef解析
             else {
-                retract(1);
-                compUnit.addFuncDefNode(parseFuncDef());
+                retractAbsolutely(anchor);
+                break;
             }
-            getToken();
         }
 
         // 4. 解析MainFuncDef
-        // 4.1 回退一开始读的int
-        // 4.2 解析<MainFuncDef>
-        // 4.3 最后追加语法成分
-        retract(1);
-        compUnit.setMainFuncDefNode(parseMainFuncDef());
-        fw.write("<CompUnit>\n");
-        return compUnit;
+        units.add(parseMainFuncDef());
+
+        // 5. 返回节点:名称 + 子节点
+        return new ParsedUnit("CompUnit", units);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 2. 解析<ConstDecl>, <ConstDef>, <ConstInitVal>
-    public DeclNode parseConstDecl() throws IOException {
+    // 2.1 <ConstDecl> = const BType <ConstDef> {, <ConstDef>}
+    // 2.1 <ConstDef> = <Def> '=' <ConstInitVal>
+    // 2.1 <ConstInitVal> = <ConstExp>, {<ConstExp>,<ConstExp>}, "StringConst"
+    // 2.2 <Def> = IDENFR [<ConstExp>]
+    public ParsedUnit parseConstDecl() throws IOException {
         // 1. 解析<ConstDecl>
-        // 1. 包含'const' + BType + <ConstDef>:
-            // const int a = 0;
-            // const int a[10] = {0,1,2,...,9};
-            // const char a = 0;
-            // const char a[10] = {'0','1','2',...,'9'};
+        // const int a = 0;
+        // const int a[10] = {0,1,2,...,9};
+        // const char a = 0;
+        // const char a[10] = {'0','1','2',...,'9'};
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1.1 读取'const'
-        getToken();
-        fw.write(pair.toString() + "\n");
-        // 1.2 读取BType
-        // 1.2 创建<DeclNode>
-        getToken();
-        fw.write(pair.toString() + "\n");
-        DeclNode declNode = new DeclNode();
+        // 2.1 const
+        getToken(CONSTTK);
+        units.add(pair);
+
+        // 2.2 BType
+        getToken(INTTK,CHARTK);
+        units.add(pair);
+
+        // 2.2 为<ConstDef> {, <ConstDef>}对应的<DefNode>类型做准备
         SyntaxType syntaxType;
-        if(token == Token.INTTK){
+        if(token == INTTK){
             syntaxType = SyntaxType.ConstInt;
         } else {
             syntaxType = SyntaxType.ConstChar;
         }
 
-        // 1.3 解析<ConstDef>
-        declNode.addDefNode(parseConstDef(syntaxType));
-
-        // 2. 解析完继续获取下一个Token
-        // 2.1 如果是',',那么继续解析<ConstDef>,并不断获取下一个Token
-        // 2.2 输出';'的Token
-        // 2.3 追加语法成分
-        while(getToken(Token.COMMA)) {
-            fw.write(pair.toString() + "\n");
-            declNode.addDefNode(parseConstDef(syntaxType));
+        // 2.3 <ConstDef> {, <ConstDef>}
+        units.add(parseConstDef(syntaxType));
+        while(getToken(COMMA)) {
+            units.add(pair);
+            units.add(parseConstDef(syntaxType));
         }
-        if (getToken(Token.SEMICN)) {
-            fw.write(pair.toString() + "\n");
+
+        // 2.4 ;
+        if (getToken(SEMICN)) {
+            units.add(pair);
         } else {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
         }
-        fw.write("<ConstDecl>\n");
-        return declNode;
+
+        // 2.5 返回节点
+        return new ParsedUnit("ConstDecl", units);
     }
 
-    public DefNode parseConstDef(SyntaxType syntaxType) throws IOException {
-        // 1. 解析<ConstDef>
-        // 1. 包含
-            // IDENFR
-            // 可能有: '[' + <ConstExp> + ']'
-            // '=' + <ConstInitVal>
+    // 2.1 <ConstDecl> = const BType <ConstDef> {, <ConstDef>}
+    // 2.1 <ConstDef> = <Def> '=' <ConstInitVal>
+    // 2.1 <ConstInitVal> = <ConstExp>, {<ConstExp>,<ConstExp>}, "StringConst"
+    // 2.2 <Def> = IDENFR [<ConstExp>]
+    public ParsedUnit parseConstDef(SyntaxType syntaxType) throws IOException {
+        // 1. <Def>
+        LinkedList<ParsedUnit> units = parseDef(syntaxType);
 
-        // 1.读IDENFR的Token
-        // 1. 创建DefNode节点,传入IDENFR
-        getToken();
-        fw.write(pair.toString() + "\n");
-        DefNode defNode = new DefNode(syntaxType,pair);
+        // 2. =
+        getToken(ASSIGN);
+        units.add(pair);
 
-        // 2.读下一个Token
-        // 2.1 如果是'['就是数组
-            // 解析<ConstExp>
-            // ']'
-        if(getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            defNode.setLength(parseConstExp());
-            defNode.toArray();
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
+        // 3. <ConstInitVal>
+        units.add(parseConstInitVal());
+
+        // 4. 返回节点
+        return new ParsedUnit("ConstDef", units);
+    }
+
+    // 2.1 <ConstDecl> = const BType <ConstDef> {, <ConstDef>}
+    // 2.1 <ConstDef> = <Def> '=' <ConstInitVal>
+    // 2.1 <ConstInitVal> = <ConstExp>, {<ConstExp>,<ConstExp>}, "StringConst"
+    // 2.2 <Def> = IDENFR [<ConstExp>]
+    public LinkedList<ParsedUnit> parseDef(SyntaxType syntaxType) throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. IDENFR
+        getToken(IDENFR);
+        units.add(pair);
+
+        // 3. [
+        if(getToken(LBRACK)) {
+            units.add(pair);
+
+            // TODO: 4. IDENFR对应的类型需要转换
+
+            // 5. <ConstExp>
+            units.add(parseConstExp());
+
+            // 6. ]
+            if(getToken(RBRACK)) {
+                units.add(pair);
             } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
 
-        // 3.1 读'=''
-        getToken();
-        fw.write(pair.toString() + "\n");
-
-        // 3.2 解析<ConstInitVal>
-        // 3.3 追加语法成分
-        parseConstInitVal(defNode);
-
-        // 4. 符号表: 添加一个变量
-        symbolTable.addToVariables(defNode);
-        fw.write("<ConstDef>\n");
-        return defNode;
+        // 4. 返回units
+        return units;
     }
 
-    public void parseConstInitVal(DefNode defNode) throws IOException {
-        // 1. 解析<ConstInitVal>
-        // 1.1 有三种可能: <ConstExp> | {<ConstExp>, ... } | <StirngConst> -> "..."
-
+    // 2.1 <ConstDecl> = const BType <ConstDef> {, <ConstDef>}
+    // 2.1 <ConstDef> = <Def> '=' <ConstInitVal>
+    // 2.1 <ConstInitVal> = <ConstExp>, {<ConstExp>,<ConstExp>}, "StringConst"
+    // 2.2 <Def> = IDENFR [<ConstExp>]
+    public ParsedUnit parseConstInitVal() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
         // 1.{
             // 1.1 }
             // 1.2 <ConstExp> }
 
-        // 1. 初始化一个LinkedList<ExpNode>
-        LinkedList<ExpNode> initValues = new LinkedList<>();
-
-        // 1.1 {<ConstExp>, ... }
-        getToken();
-        if (token == Token.LBRACE) {
-            fw.write(pair.toString() + "\n");
-            // 1.1 <ConstExp>, ... }
-            getToken();
-            if (token != Token.RBRACE) {
+        // 2. <ConstExp> 或 "StringConst"
+        if(!getToken(LBRACE)) {
+            if(getToken(STRCON)){
+                units.add(pair);
+            } else {
                 retract(1);
-                initValues.add(parseConstExp());
-                getToken();
-                while(token == Token.COMMA) {
-                    fw.write(pair.toString() + "\n");
-                    initValues.add(parseConstExp());
-                    getToken();
-                }
+                units.add(parseConstExp());
             }
-            // 1.2 '}'
-            fw.write(pair.toString() + "\n");
-        }
-        // 2."..."
-        else if (token == Token.STRCON) {
-            retract(1);
-            defNode.setInitValueForSTRCON(parseStringConst());
-        }
-        // 3. <ConstExp>
-        else {
-            retract(1);
-            initValues.add(parseConstExp());
         }
 
-        // 2. 追加语法成分
-        fw.write("<ConstInitVal>\n");
-        defNode.setInitValues(initValues);
+        // 3. {<ConstExp>,<ConstExp>}
+        else {
+            // 3.1 {
+            units.add(pair);
+
+            // 3.2 <ConstExp>
+            if (!getToken(RBRACE)) {
+                units.add(parseConstExp());
+
+                // 3.3 , <ConstExp>
+                while(getToken(COMMA)) {
+                    units.add(pair);
+                    units.add(parseConstExp());
+                }
+
+                // 3.4 }
+                getToken(RBRACE);
+            }
+            units.add(pair);
+        }
+
+        // 4. 返回节点
+        return new ParsedUnit("ConstInitVal", units);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 3. 解析<VarDecl>, <VarDef>, <InitVal>
-    public DeclNode parseVarDecl() throws IOException {
+    // 3.1 <VarDecl> = BType <VarDef> {, <VarDef>}
+    // 3.1 <VarDef> = <Def> , <Def> '=' <InitVal>
+    // 3.1 <InitVal> = <Exp>, {<Exp>, <Exp>}, "StringConst"
+    // 3.2 <Def> = IDENFR [<ConstExp>]
+    public ParsedUnit parseVarDecl() throws IOException {
         // 1. 解析<VarDecl>
-        // 1. <VarDecl> = BType <VarDef> { ',' <VarDef> } ';'
+        // int a = 0;
+        // int a[10] = {0,1,2,...,9};
+        // char a = 0;
+        // char a[10] = {'0','1','2',...,'9'};
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1. 先读BType
-        getToken();
-        fw.write(pair.toString() + "\n");
-        DeclNode declNode = new DeclNode();
+        // 2.1 BType
+        getToken(INTTK,CHARTK);
+        units.add(pair);
+
+        // 2.2 为<VarDef> {, <VarDef>}对应的<DefNode>类型做准备
         SyntaxType syntaxType;
-        if(token == Token.INTTK) {
+        if(token == INTTK) {
             syntaxType = SyntaxType.Int;
         } else {
             syntaxType = SyntaxType.Char;
         }
 
-        // 2. 解析<VarDef>
-        declNode.addDefNode(parseVarDef(syntaxType));
-
-        // 3. 如果下一个是,继续解析<VarDef>
-        while(getToken(Token.COMMA)) {
-            fw.write(pair.toString() + "\n");
-            declNode.addDefNode(parseVarDef(syntaxType));
+        // 2.3 <VarDef> {, <VarDef>}
+        units.add(parseVarDef(syntaxType));
+        while(getToken(COMMA)) {
+            units.add(pair);
+            units.add(parseVarDef(syntaxType));
         }
 
-        // 4. 解析';'
-        // 4. 最后追加语法成分
-        if (getToken(Token.SEMICN)) {
-            fw.write(pair.toString() + "\n");
+        // 2.4 ;
+        if (getToken(SEMICN)) {
+            units.add(pair);
         } else {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
         }
-        fw.write("<VarDecl>\n");
-        return declNode;
+
+        // 2.5 返回节点
+        return new ParsedUnit("VarDecl", units);
     }
 
-    public DefNode parseVarDef(SyntaxType syntaxType) throws IOException {
-        // 1. 解析<VarDef>
-        // 1. <VarDef>有两种情况
-            // IDENFR 或 IDENFR '[' + <ConstExp> + ']' -> 也就是不赋初值
-            // IDENFR '=' + <InitVal> 或 IDENFR '[' + <ConstExp> + ']' + '=' + <InitVal> -> 也就是赋初值
+    // 3.1 <VarDecl> = BType <VarDef> {, <VarDef>}
+    // 3.1 <VarDef> = <Def> , <Def> '=' <InitVal>
+    // 3.1 <InitVal> = <Exp>, {<Exp>, <Exp>}, "StringConst"
+    // 3.2 <Def> = IDENFR [<ConstExp>]
+    public ParsedUnit parseVarDef(SyntaxType syntaxType) throws IOException {
+        // 1. <Def>
+        LinkedList<ParsedUnit> units = parseDef(syntaxType);
 
-        // 2. 解析IDENFR
-        // 2. 创建<DefNode>
-        getToken();
-        fw.write(pair.toString() + "\n");
-        DefNode defNode = new DefNode(syntaxType,pair);
+        // 2. ('=', <InitVal>)
+        boolean isSpecial = false;
+        if (getToken(ASSIGN)) {
+            // 2.1 '='
+            units.add(pair);
 
-        // 3. 如果是数组
-        // 3.1 解析'['
-        // 3.2 解析<ConstExp>
-        // 3.3 解析']'
-        if(getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            defNode.setLength(parseConstExp());
-            defNode.toArray();
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
+            // 2.2 特殊处理getint(), getchar()
+            if(getToken(GETINTTK,GETCHARTK)) {
+                isSpecial = true;
+                units.add(pair);
+                getToken(LPARENT);
+                units.add(pair);
+                getToken(RPARENT);
+                units.add(pair);
+            }
+
+            // 2.3 <InitVal>
+            else {
+                units.add(parseInitVal());
+            }
+        }
+
+        // 3. 返回节点:Special: getint(), getchat()
+        // 3. 返回节点:<VarDef>
+        return new ParsedUnit(isSpecial? "Special" : "VarDef", units);
+    }
+
+    // 3.1 <VarDecl> = BType <VarDef> {, <VarDef>}
+    // 3.1 <VarDef> = <Def> , <Def> '=' <InitVal>
+    // 3.1 <InitVal> = <Exp>, {<Exp>, <Exp>}, "StringConst"
+    // 3.2 <Def> = IDENFR [<ConstExp>]
+    public ParsedUnit parseInitVal() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. <Exp> 或 "StringConst"
+        if(!getToken(LBRACE)) {
+            if(getToken(STRCON)){
+                units.add(pair);
             } else {
-                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
-            }
-        }
-
-        // 4. 解析'='
-        // 4.1 如果可以解析'=', 说明有<InitVal>
-        // 4.2 追加语法成分
-        if(getToken(Token.ASSIGN)) {
-            fw.write(pair.toString() + "\n");
-            parseInitVal(defNode);
-        }
-
-        // 5. 符号表
-        symbolTable.addToVariables(defNode);
-        fw.write("<VarDef>\n");
-        return defNode;
-    }
-
-    public void parseInitVal(DefNode defNode) throws IOException {
-        // 1. 解析<InitVal>
-        // 2. <InitVal>有三种
-            // <Exp>
-            // { <Exp>, ... }
-            // <StringConst>
-
-        // 1. 初始化一个LinkedList<ExpNode>
-        LinkedList<ExpNode> initValues = new LinkedList<>();
-
-        // 1. 获取第一个Token
-        // 1.1 查看是否是'{'
-        // 不是则回退直接解析<Exp>
-        // 否则解析'{',然后循环解析<Exp>
-        // 1.2 最后追加语法成分
-        // 1.3.1 { <Exp>, ... }
-        getToken();
-        if (token == token.LBRACE) {
-            // 1. '{'
-            fw.write(pair.toString() + "\n");
-            // 2. <Exp>,<Exp>
-            getToken();
-            if (token != Token.RBRACE) {
                 retract(1);
-                initValues.add(parseExp());
-                getToken();
-                while(token == Token.COMMA) {
-                    fw.write(pair.toString() + "\n");
-                    initValues.add(parseExp());
-                    getToken();
-                }
+                units.add(parseExp());
             }
-            // 3. '}'
-            fw.write(pair.toString() + "\n");
-        }
-        // 1.3.2 <StringConst>
-        else if (token == Token.STRCON) {
-            retract(1);
-            defNode.setInitValueForSTRCON(parseStringConst());
-        }
-        // 1.3.3 <Exp>
-        else {
-            retract(1);
-            initValues.add(parseExp());
         }
 
-        // 2. 追加语法成分
-        fw.write("<InitVal>\n");
-        defNode.setInitValues(initValues);
+
+        // 3. {<Exp>,<Exp>}
+        else {
+            // 3.1 {
+            units.add(pair);
+
+            // 3.2 <Exp>
+            if (!getToken(RBRACE)) {
+                units.add(parseExp());
+
+                // 3.3 , <Exp>
+                while(getToken(COMMA)) {
+                    units.add(pair);
+                    units.add(parseExp());
+                }
+
+                // 3.4 }
+                getToken(RBRACE);
+            }
+            units.add(pair);
+        }
+
+        // 4. 返回节点
+        return new ParsedUnit("InitVal", units);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 4. 解析<FuncDef>, <FuncType>, <FuncFParams>, <FuncFParam>
-    public FuncDefNode parseFuncDef() throws IOException {
-        // 1. 解析<FuncDef>
-        // 1. <FuncDef> = <FuncType> IDENFR '(' <FuncFParams>')' <Block>
+    // 4.1 <FuncDef> = <FuncType> IDENFR '(' <FuncFParams> ')' <Block>
+    // 4.1 <FuncType> = void | int | char
+    // 4.1 <FuncFParams> = <FuncFParam> {, <FuncFParam>}
+    // 4.1 <FuncFParam> = BType IDENFR, BType IDENFR '[' ']'
+    public ParsedUnit parseFuncDef() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 2.1 解析<FuncType>
-        // 2.1 初始化一个<FuncDefNode> = funcDefType + pair + 参数列表 + 块
-        parseFuncType();
-        FuncDefNode funcDefNode = null;
-        if(token == Token.VOIDTK){
-            funcDefNode = new FuncDefNode(SyntaxType.VoidFunc);
-        } else if (token == Token.INTTK) {
-            funcDefNode = new FuncDefNode(SyntaxType.IntFunc);
-        } else {
-            funcDefNode = new FuncDefNode(SyntaxType.CharFunc);
-        }
+        // 2. <FuncType>
+        units.add(parseFuncType());
 
-        // 2.2 解析IDENFR
-        getToken();
-        fw.write(pair.toString() + "\n");
-        funcDefNode.setPair(pair);
-        symbolTable.addToFunctions(funcDefNode);
-        symbolTable = new SymbolTable(symbolTable);
-        symbolTable.getParent().addChild(symbolTable);
+        // 3. IDENFR
+        getToken(IDENFR);
+        units.add(pair);
 
-        // 2.3 解析'('
-        getToken();
-        fw.write(pair.toString() + "\n");
+        // 4. '('
+        getToken(LPARENT);
+        units.add(pair);
 
-        // 2.4 解析<FuncFParams>
-        // 2.4 如果不是')', 说明是<FuncFParams>，回退一位然后解析
-        // 2.4 否则就是')', 直接解析即可
-        getToken();
-        if (token != Token.RPARENT && token != Token.LBRACE) {
-            retract(1);
-            funcDefNode.setFuncFParams(parseFuncFParams());
-            getToken();
-        }
-        if(token == Token.RPARENT) {
-            fw.write(pair.toString() + "\n");
-        } else {
+        // 5. 错误处理: ( {
+        if (getToken(LBRACE)) {
             retract(1);
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
         }
-        // 2.5 解析<Block>
-        // 2.5 追加语法成分
-        funcDefNode.setBlockNode(parseBlock());
 
-        // 3. 符号表退栈
-        symbolTable = symbolTable.getParent();
-
-        // 4. 检查funcDefType和<Block>返回值是否一致
-        funcDefNode.checkForError();
-        fw.write("<FuncDef>\n");
-        return funcDefNode;
-    }
-
-    public void parseFuncType() throws IOException {
-        getToken();
-        fw.write(pair.toString() + "\n");
-        fw.write("<FuncType>\n");
-    }
-
-    public LinkedList<FuncFParamNode> parseFuncFParams() throws IOException {
-        // 1. 解析<FuncFParams>
-        // 1. <FuncFParams> = <FuncFParam> { ',' <FuncFParam> }
-
-        // 1. 创建LinkedList<FuncFParamNode>
-        LinkedList<FuncFParamNode> funcFParamNodes = new LinkedList<>();
-
-        // 1. 解析<FuncFParam>
-        funcFParamNodes.add(parseFuncFParam());
-
-        // 2. 循环解析,' <FuncFParam>
-        while(getToken(Token.COMMA)) {
-            fw.write(pair.toString() + "\n");
-            funcFParamNodes.add(parseFuncFParam());
+        // 6. <FuncFParams>
+        else if (!getToken(RPARENT)) {
+            units.add(parseFuncFParams());
+            if (getToken(RPARENT)) {
+                units.add(pair);
+            } else {
+                errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+            }
         }
-        fw.write("<FuncFParams>\n");
-        return funcFParamNodes;
+
+        // 7. ')'
+        else {
+            units.add(pair);
+        }
+
+        // 8. <Block>
+        units.add(parseBlock());
+
+        // 9. 返回节点
+        return new ParsedUnit("FuncDef", units);
     }
 
-    public FuncFParamNode parseFuncFParam() throws IOException {
-        // 1. 解析<FuncFParam>
-        // 1. <FuncFParam>
-            // BType + IDENFR
-            // BType + IDENFR + '[' + ']'
+    // 4.1 <FuncDef> = <FuncType> IDENFR '(' <FuncFParams> ')' <Block>
+    // 4.1 <FuncType> = void | int | char
+    // 4.1 <FuncFParams> = <FuncFParam> {, <FuncFParam>}
+    // 4.1 <FuncFParam> = BType IDENFR, BType IDENFR '[' ']'
+    public ParsedUnit parseFuncType() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        getToken(VOIDTK, INTTK, CHARTK);
+        units.add(pair);
+        return new ParsedUnit("FuncType", units);
+    }
 
-        // 1. BType
-        getToken();
-        fw.write(pair.toString() + "\n");
+    // 4.1 <FuncDef> = <FuncType> IDENFR '(' <FuncFParams> ')' <Block>
+    // 4.1 <FuncType> = void | int | char
+    // 4.1 <FuncFParams> = <FuncFParam> {, <FuncFParam>}
+    // 4.1 <FuncFParam> = BType IDENFR, BType IDENFR '[' ']'
+    public ParsedUnit parseFuncFParams() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. <FuncFParam> {, <FuncFParam>}
+        units.add(parseFuncFParam());
+        while (getToken(COMMA)) {
+            units.add(pair);
+            units.add(parseFuncFParam());
+        }
+
+        // 3. 返回节点
+        return new ParsedUnit("FuncFParams", units);
+    }
+
+    // 4.1 <FuncDef> = <FuncType> IDENFR '(' <FuncFParams> ')' <Block>
+    // 4.1 <FuncType> = void | int | char
+    // 4.1 <FuncFParams> = <FuncFParam> {, <FuncFParam>}
+    // 4.1 <FuncFParam> = BType IDENFR, BType IDENFR '[' ']'
+    public ParsedUnit parseFuncFParam() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. BType
+        getToken(INTTK,CHARTK);
+        units.add(pair);
+
+        // 3. TODO: type judge
         SyntaxType type;
-        if(token == Token.INTTK) {
+        if(token == INTTK) {
             type = SyntaxType.Int;
         } else {
             type = SyntaxType.Char;
         }
 
-        // 2. IDENFR
-        getToken();
-        fw.write(pair.toString() + "\n");
-        FuncFParamNode funcFParamNode = new FuncFParamNode(type,pair);
+        // 4. IDENFR
+        getToken(IDENFR);
+        units.add(pair);
 
-        // 3. '['
-        if (getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            funcFParamNode.toArray();
-            funcFParamNode.setLength(new NumberNode(0));
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
+        // 5. '['
+        if (getToken(LBRACK)) {
+            units.add(pair);
+
+            if(getToken(RBRACK)) {
+                units.add(pair);
             } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
 
-        // 4. 符号表
-        symbolTable.addToVariables(funcFParamNode);
-
-        // 5. 追加语法成分
-        fw.write("<FuncFParam>\n");
-        return funcFParamNode;
+        // 5. 返回节点
+        return new ParsedUnit("FuncFParam", units);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 5. <MainFuncDef>, <Block>, <BlockItem>
-    public FuncDefNode parseMainFuncDef() throws IOException {
-        // 1. 解析<MainFuncDef>
-        // 1. <MainFuncDef> = int main() <Block>
+    // 5.1 <MainFuncDef> = int main '(' ')' <Block>
+    // 5.2 <Block> = '{' <BlockItem> <BlockItem> ... '}'
+    // 5.3 <BlockItem> = <Decl>, <Stmt>
+    public ParsedUnit parseMainFuncDef() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1. int
-        getToken();
-        fw.write(pair.toString() + "\n");
-        FuncDefNode mainFuncDefNode = new FuncDefNode(SyntaxType.IntFunc);
+        // 2. int
+        getToken(INTTK);
+        units.add(pair);
 
-        // 2. main
-        getToken();
-        fw.write(pair.toString() + "\n");
+        // 3. main
+        getToken(MAINTK);
+        units.add(pair);
 
-        // 3. ()
-        getToken();
-        fw.write(pair.toString() + "\n");
-        if (getToken(Token.RPARENT)) {
-            fw.write(pair.toString() + "\n");
+        // 4. '('
+        getToken(LPARENT);
+        units.add(pair);
+
+        // 5. ')'
+        if (getToken(RPARENT)) {
+            units.add(pair);
         } else {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
         }
 
-        // 4. 建立新的符号表
-        symbolTable = new SymbolTable(symbolTable);
-        symbolTable.getParent().addChild(symbolTable);
+        // 6. <Block>
+        units.add(parseBlock());
 
-        // 5. <Block>
-        mainFuncDefNode.setBlockNode(parseBlock());
-
-        // 6. 符号表退栈
-        symbolTable = symbolTable.getParent();
-
-        // 7. 检查返回值是否为int类型
-        mainFuncDefNode.checkForError();
-
-        // 8. 追加语法成分
-        fw.write("<MainFuncDef>\n");
-        return mainFuncDefNode;
+        // 7. 返回节点
+        return new ParsedUnit("MainFuncDef", units);
     }
 
-    public BlockNode parseBlock() throws IOException {
-        // 1. 解析<Block>
-        // 1. <Block> = '{' + {BlockItem} + '}'
+    // 5.1 <MainFuncDef> = int main '(' ')' <Block>
+    // 5.2 <Block> = '{' <BlockItem> <BlockItem> ... '}'
+    // 5.3 <BlockItem> = <Decl>, <Stmt>
+    public ParsedUnit parseBlock() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1. 创建节点
-        BlockNode blockNode = new BlockNode();
+        // 2. '{'
+        getToken(LBRACE);
+        units.add(pair);
 
-        // 1. '{'
-        getToken();
-        fw.write(pair.toString() + "\n");
-
-        // 2. <BlockItem>
-        getToken();
-        while(token != Token.RBRACE) {
-            retract(1);
-            blockNode.addBlockItemNode(parseBlockItem());
-            getToken();
+        // 3. <BlockItem> <BlockItem> ...
+        while(!getToken(RBRACE)) {
+            units.add(parseBlockItem());
         }
 
-        // 3. '}'
-        fw.write(pair.toString() + "\n");
-
-        // 4. 设置<BlockNode>结尾行号
-        blockNode.setEndLineNumber(pair.getLineNumber());
+        // 4. '}'
+        units.add(pair);
 
         // 5. 追加语法成分
-        fw.write("<Block>\n");
-        return blockNode;
+        return new ParsedUnit("Block", units);
     }
 
-    public BlockItemNode parseBlockItem() throws IOException {
-        // 1. 解析<BlockItem>
-        // 1. <BlockItem> = <ConstDecl> | <VarDecl> | <Stmt>
-
+    // 5.1 <MainFuncDef> = int main '(' ')' <Block>
+    // 5.2 <Block> = '{' <BlockItem> <BlockItem> ... '}'
+    // 5.3 <BlockItem> = <Decl>, <Stmt>
+    public ParsedUnit parseBlockItem() throws IOException {
         // 1. <ConstDecl>
-        getToken();
-        if(token == Token.CONSTTK) {
+        if(getToken(CONSTTK)) {
             retract(1);
             return parseConstDecl();
         }
+
         // 2. <VarDecl>
-        else if (token == Token.INTTK || token == Token.CHARTK) {
+        else if (getToken(INTTK,CHARTK)) {
             retract(1);
             return parseVarDecl();
         }
+
         // 3. <Stmt>
         else {
-            retract(1);
             return parseStmt();
         }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 6. <Stmt>, <ForStmt>, <Exp>, <Cond>, <LVal>, <PrimaryExp>, <Number>, <Character>, <StringConst>
-    public StmtNode parseStmt() throws IOException {
-        // 1. 解析<Stmt>
-        // 1. <Stmt> =
-            // <LVal> '=' <Exp> ';'
-            // ';' | <Exp> ';'
-            // <Block>
-            // 'if' '(' <Cond> ')' <Stmt> 可能有:'else' <Stmt>
-            // 'for' '(' <ForStmt> | 没有 ';' <Cond> ｜ 没有 ';' <ForStmt> | 没有 ')' <Stmt>
-            // 'break' ';'
-            // 'continue' ';'
-            // 'return' ';' | 'return' <Exp> ';'
-            // <LVal> '=' 'getint' '(' ')' ';'
-            // <LVal> '=' 'getchar' '(' ')' ';'
-            // 'printf' '(' <StringConst> { ',' <Exp> } ')' ';'
-
+    // 6.1 <Stmt> =
+    //      <LVal> '=' <Exp> ';'
+    //      ';' | <Exp> ';'
+    //      <Block>
+    //      'if' '(' <Cond> ')' <Stmt> 可能有:'else' <Stmt>
+    //      'for' '(' <ForStmt> | 没有 ';' <Cond> ｜ 没有 ';' <ForStmt> | 没有 ')' <Stmt>
+    //      'break' ';'
+    //      'continue' ';'
+    //      'return' ';' | 'return' <Exp> ';'
+    //      <LVal> '=' 'getint' '(' ')' ';'
+    //      <LVal> '=' 'getchar' '(' ')' ';'
+    //      'printf' '(' <StringConst> { ',' <Exp> } ')' ';'
+    public ParsedUnit parseStmt() throws IOException {
         // 1. 分类讨论
         // 1. 讨论顺序
             // ';'
@@ -710,144 +655,115 @@ public class Parser {
                 // <LVal> '=' 'getint' '(' ')' ';'
                 // <LVal> '=' 'getchar' '(' ')' ';'
 
-        // 1. 创建节点
-        StmtNode stmtNode = new NopNode();
+        // 2. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
+        // 3. 分类判断
         getToken();
         switch (token) {
             // ';'
             case SEMICN:
-                fw.write(pair.toString() + "\n");
+                units.add(pair);
                 break;
             // <Blcok>
             case LBRACE:
                 retract(1);
-                symbolTable = new SymbolTable(symbolTable);
-                symbolTable.getParent().addChild(symbolTable);
-                stmtNode = parseBlock();
-                symbolTable = symbolTable.getParent();
+                units.add(parseBlock());
                 break;
             // 'if' '(' <Cond> ')' <Stmt> 可能有:'else' <Stmt>
             case IFTK:
-                // 1. 更新节点
-                stmtNode = new BranchNode();
-                // 2. 'if'
-                fw.write(pair.toString() + "\n");
-                // 3. '('
-                getToken();
-                fw.write(pair.toString() + "\n");
-                // 4. <Conf>
-                ((BranchNode) stmtNode).setCond(parseCond());
-                // 5. ')'
-                if(getToken(Token.RPARENT)) {
-                    fw.write(pair.toString() + "\n");
+                // 1. 'if'
+                units.add(pair);
+                // 2. '('
+                getToken(LPARENT);
+                units.add(pair);
+                // 3. <Conf>
+                units.add(parseCond());
+                // 4. ')'
+                if(getToken(RPARENT)) {
+                    units.add(pair);
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
-                // 6. <Stmt>
-                ((BranchNode) stmtNode).setIfStmt(parseStmt());
-                // 7. 可能有:'else' <Stmt>
-                if (getToken(Token.ELSETK)) {
-                    fw.write(pair.toString() + "\n");
-                    ((BranchNode) stmtNode).setElseStmt(parseStmt());
+                // 5. <Stmt>
+                units.add(parseStmt());
+                // 6. 可能有:'else' <Stmt>
+                if (getToken(ELSETK)) {
+                    // 6.1 'else'
+                    units.add(pair);
+                    // 6.2 <Stmt>
+                    units.add(parseStmt());
                 }
                 break;
             // 'for' '(' 没有 | <ForStmt> ';' 没有 | <Cond> ';' 没有 | <ForStmt> ')' <Stmt>
             case FORTK:
-                // 1. 更新节点
-                stmtNode = new ForNode();
-                // 2. 'for'
-                fw.write(pair.toString() + "\n");
-                // 3. '('
+                // 1. 'for'
+                units.add(pair);
+                // 2. '('
+                getToken(LPARENT);
+                units.add(pair);
+                // 3. 没有 | <ForStmt>
                 getToken();
-                fw.write(pair.toString() + "\n");
-                // 4. 没有 | <ForStmt>
-                getToken();
-                if(token != Token.SEMICN) {
+                if(token != SEMICN) {
                     retract(1);
-                    ((ForNode) stmtNode).setForStmtNodeFirst(parseForStmt());
+                    units.add(parseForStmt());
                     getToken();
                 }
                 // 4. ';'
-                fw.write(pair.toString() + "\n");
+                units.add(pair);
                 // 5. 没有 | <Cond>
                 getToken();
-                if(token != Token.SEMICN) {
+                if(token != SEMICN) {
                     retract(1);
-                    ((ForNode) stmtNode).setCond(parseCond());
+                    units.add(parseCond());
                     getToken();
                 }
                 // 6. ';'
-                fw.write(pair.toString() + "\n");
+                units.add(pair);
                 // 7. 没有 | <ForStmt>
                 getToken();
-                if(token != Token.RPARENT) {
+                if(token != RPARENT) {
                     retract(1);
-                    ((ForNode) stmtNode).setForStmtNodeSecond(parseForStmt());
+                    units.add(parseForStmt());
                     getToken();
                 }
                 // 8. ')'
-                if(token == Token.RPARENT) {
-                    fw.write(pair.toString() + "\n");
+                if(token == RPARENT) {
+                    units.add(pair);
                 } else {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
                 // 9. <Stmt>
-                forDepth++;
-                ((ForNode) stmtNode).setStmt(parseStmt());
-                forDepth--;
+                units.add(parseStmt());
                 break;
             // 'break' ';'
-            case BREAKTK:
-                // 1. 更新节点
-                stmtNode = new BreakNode();
-                // 2. 判断是否在<ForStmt>内
-                if(forDepth == 0) {
-                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'm'));
-                }
-                // 3.
-                fw.write(pair.toString() + "\n");
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
-                } else {
-                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
-                }
-                break;
             // 'continue' ';'
+            case BREAKTK:
             case CONTINUETK:
-                // 1.更新节点
-                stmtNode = new ContinueNode();
-                // 2. 判断是否在<ForStmt>内
-                if(forDepth == 0) {
-                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'm'));
-                }
-                // 3.
-                fw.write(pair.toString() + "\n");
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
+                units.add(pair);
+                if(getToken(SEMICN)) {
+                    units.add(pair);
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
             // 'return' ';' | 'return' <Exp> ';'
             case RETURNTK:
-                // 1. 更新节点
-                stmtNode = new ReturnNode(pair);
-                // 2. 'return'
-                fw.write(pair.toString() + "\n");
-                // 3. 没有 ';' | <Exp> ';'
+                // 1. 'return'
+                units.add(pair);
+                // 2. 没有 ';' | <Exp> ';'
                 getToken();
-                if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
-                        || token == Token.IDENFR || token == Token.LPARENT
-                        || token == Token.INTCON || token == Token.CHRCON) {
+                if(token == PLUS || token == MINU || token == NOT
+                        || token == IDENFR || token == LPARENT
+                        || token == INTCON || token == CHRCON) {
                     retract(1);
-                    ((ReturnNode) stmtNode).setExpNode(parseExp());
+                    units.add(parseExp());
                     getToken();
                 }
-                // 4. ';'
-                if(token == Token.SEMICN) {
-                    fw.write(pair.toString() + "\n");
+                // 3. ';'
+                if(token == SEMICN) {
+                    units.add(pair);
                 } else {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
@@ -855,34 +771,31 @@ public class Parser {
                 break;
             // 'printf' '(' <StringConst> { ',' <Exp> } ')' ';'
             case PRINTFTK:
-                // 1. 更新节点
-                stmtNode = new PrintNode();
-                // 2. 'printf'
-                fw.write(pair.toString() + "\n");
-                // 3. '('
-                getToken();
-                fw.write(pair.toString() + "\n");
-                // 4. <StringConst>
-                ((PrintNode) stmtNode).setString(parseStringConst());
-                // 5. ',' <Exp> ')' 或 ')'
-                while(getToken(Token.COMMA)) {
-                    fw.write(pair.toString() + "\n");
-                    ((PrintNode) stmtNode).addArgument(parseExp());
+                // 1. 'printf'
+                units.add(pair);
+                // 2. '('
+                getToken(LPARENT);
+                units.add(pair);
+                // 3. <StringConst>
+                getToken(STRCON);
+                units.add(pair);
+                // 4. ',' <Exp> ')' 或 ')'
+                while(getToken(COMMA)) {
+                    units.add(pair);
+                    units.add(parseExp());
                 }
-                // 6. ')'
-                if(getToken(Token.RPARENT)) {
-                    fw.write(pair.toString() + "\n");
+                // 5. ')'
+                if(getToken(RPARENT)) {
+                    units.add(pair);
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
-                // 7. ';'
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
+                // 6. ';'
+                if(getToken(SEMICN)) {
+                    units.add(pair);
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
-                // 8. 对printf的格式字符数量和表达式数量进行检查
-                ((PrintNode) stmtNode).checkForError();
                 break;
             // <LVal>
                 // <LVal> '=' <Exp> ';'
@@ -890,67 +803,43 @@ public class Parser {
                 // <LVal> '=' 'getint' '(' ')' ';'
                 // <LVal> '=' 'getchar' '(' ')' ';'
             case IDENFR:
-                // 1. <LVal> -> a = 1;
-                // 2. <Exp> -> a();
+                // 1. <Exp> -> a();
                 int anchor = tokenIndex - 1;
-                if(getToken(Token.LPARENT)) {
+                if(getToken(LPARENT)) {
                     retractAbsolutely(anchor);
-                    parseExp();
-                } else {
+                    units.add(parseExp());
+                }
+                // 2. <LVal> -> a = 1;
+                else {
                     // 1. 先扫一遍会不会出现<LVal>中的a[ = {1};错误
                     // fix: in deeper recursive layer, fw will be set original and errorHandler will be turned on
-                    fw = new FileWriter("temp.txt");
-                    fw.write("///////// in temp /////////\n");
                     errorHandler.turnOff();
                     retractAbsolutely(anchor);
                     parseLVal();
                     errorHandler.turnOn();
-                    fw.write("///////// out temp /////////\n");
-                    fw.close();
-                    fw = fwOrigin;
                     // 2. 读等号
-                    if(getToken(Token.ASSIGN)) {
+                    if(getToken(ASSIGN)) {
                         // 1. 重新扫描
                         retractAbsolutely(anchor);
-                        LValNode lValNode = parseLVal();
+                        units.add(parseLVal());
                         // 2. 读等号
-                        getToken();
-                        fw.write(pair.toString() + "\n");
+                        getToken(ASSIGN);
+                        units.add(pair);
                         // 3. 'getint' | 'getchar' | <Exp>
-                        getToken();
-                        if (token == Token.GETINTTK || token == Token.GETCHARTK) {
-                            // 1. 更新节点
+                        if (getToken(GETINTTK,GETCHARTK)) {
                             // 1. 'getint' | 'getchar'
-                            if(token == Token.GETINTTK) {
-                                stmtNode = new GetIntNode(lValNode);
-                            } else {
-                                stmtNode = new GetCharNode(lValNode);
-                            }
-                            fw.write(pair.toString() + "\n");
+                            units.add(pair);
                             // 2. '('
-                            getToken();
-                            fw.write(pair.toString() + "\n");
+                            getToken(LPARENT);
+                            units.add(pair);
                             // 3. ')'
-                            if (getToken(Token.RPARENT)) {
-                                fw.write(pair.toString() + "\n");
+                            if (getToken(RPARENT)) {
+                                units.add(pair);
                             } else {
                                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                             }
-                            // 4. 对<LValNode>的类型不能为Const进行检查
-                            if(stmtNode instanceof GetIntNode) {
-                                ((GetIntNode) stmtNode).checkForError(symbolTable);
-                            } else {
-                                ((GetCharNode) stmtNode).checkForError(symbolTable);
-                            }
                         } else {
-                            // 1. 更新节点
-                            stmtNode = new AssignNode();
-                            // 2. 设置节点
-                            ((AssignNode) stmtNode).setLValNode(lValNode);
-                            retract(1);
-                            ((AssignNode) stmtNode).setExpNode(parseExp());
-                            // 3. 对两者类型是否匹配进行检查
-                            ((AssignNode) stmtNode).checkForError(symbolTable);
+                            units.add(parseExp());
                         }
                     }
                     // 3. 没有等号就是<Exp>
@@ -958,388 +847,422 @@ public class Parser {
                         // 1. 重新扫描
                         retractAbsolutely(anchor);
                         // 2. <Exp>
-                        stmtNode = parseExp();
+                        units.add(parseExp());
                     }
                 }
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
+                // 3. ;
+                if(getToken(SEMICN)) {
+                    units.add(pair);
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
+            // <Exp> ';'
             default:
                 // 1. 此时只剩其他类型的<Exp>
                 retract(1);
-                stmtNode = parseExp();
-                if(getToken(Token.SEMICN)) {
-                    fw.write(pair.toString() + "\n");
+                units.add(parseExp());
+                if(getToken(SEMICN)) {
+                    units.add(pair);
                 } else {
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'i'));
                 }
                 break;
         }
-        fw.write("<Stmt>\n");
-        return stmtNode;
+
+        // 4. 返回节点
+        return new ParsedUnit("Stmt", units);
     }
 
-    public ForStmtNode parseForStmt() throws IOException {
-        // 1. 解析<ForStmt>
-        // 1. <ForStmt> = <LVal> '=' <Exp>
-        ForStmtNode forStmtNode = new ForStmtNode();
+    // 1. <ForStmt> = <LVal> '=' <Exp>
+    public ParsedUnit parseForStmt() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1. <LVal>
-        forStmtNode.setlValNode(parseLVal());
-        // 2. '='
-        getToken();
-        fw.write(pair.toString() + "\n");
-        // 3. <Exp>
-        forStmtNode.setExpNode(parseExp());
+        // 2. <LVal>
+        units.add(parseLVal());
 
-        // 4. 需要对<LVal>和<Exp>进行类型检查
-        forStmtNode.checkForError(symbolTable);
+        // 3. '='
+        getToken(ASSIGN);
+        units.add(pair);
 
-        // 5. 追加语法成分
-        fw.write("<ForStmt>\n");
-        return forStmtNode;
+        // 4. <Exp>
+        units.add(parseExp());
+
+        // 5. 返回节点
+        return new ParsedUnit("ForStmt", units);
     }
 
-    public ExpNode parseExp() throws IOException {
-        // 1. 解析<Exp>
-        // 2. <Exp> = <AddExp>
-        ExpNode expNode = parseAddExp();
-        fw.write("<Exp>\n");
-        return expNode;
+    // 1. <Exp> = <AddExp>
+    public ParsedUnit parseExp() throws IOException {
+        // 1.units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. <AddExp>
+        units.add(parseAddExp());
+
+        // 3. 返回节点
+        return new ParsedUnit("Exp", units);
     }
 
-    public ExpNode parseCond() throws IOException {
-        // 1. 解析<Cond>
-        // 2. <Cond> = <LOrExp>
-        ExpNode expNode = parseLOrExp();
-        fw.write("<Cond>\n");
-        return expNode;
+    // 2. <Cond> = <LOrExp>
+    public ParsedUnit parseCond() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        units.add(parseLOrExp());
+        return new ParsedUnit("Cond", units);
     }
 
-    public LValNode parseLVal() throws IOException {
-        // 1. 解析<LVal>
-        // 2. <LVal> = IDENFR | IDENFR [ <Exp> ]
-
-        // 1. 创建节点
-        LValNode lValNode = new LValNode();
+    // 3. <LVal> = IDENFR | IDENFR '[' <Exp> ']'
+    public ParsedUnit parseLVal() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
         // 2. IDENFR
-        getToken();
-        fw.write(pair.toString() + "\n");
-        lValNode.setPair(pair);
+        getToken(IDENFR);
+        units.add(pair);
 
-        // 3. 没有 | [ <Exp> ]
-        if (getToken(Token.LBRACK)) {
-            fw.write(pair.toString() + "\n");
-            lValNode.setLength(parseExp());
-            if(getToken(Token.RBRACK)) {
-                fw.write(pair.toString() + "\n");
+        // 3.1 '['
+        if (getToken(LBRACK)) {
+            units.add(pair);
+
+            // 3.2 <Exp>
+            units.add(parseExp());
+
+            // 3.3 ']'
+            if(getToken(RBRACK)) {
+                units.add(pair);
             } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'k'));
             }
         }
 
-        // 4. 检查是否使用未命名变量
-        lValNode.checkForError(symbolTable);
-        fw.write("<LVal>\n");
-        return lValNode;
+        // 4. 返回节点
+        return new ParsedUnit("LVal", units);
     }
 
-    public ExpNode parsePrimaryExp() throws IOException {
-        // 1. 解析<PrimaryExp>
-        // 1. <PrimaryExp>
-            // '(' + <Exp> + ')'
-            // <LVal>
-            // <Number>
-            // <Character>
-
-        // 1. 创建节点
-        ExpNode expNode;
+    // 4. <PrimaryExp> = '(' + <Exp> + ')', <LVal>, <Number>, <Character>
+    public ParsedUnit parsePrimaryExp() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
         // 2. '(' + <Exp> + ')'
-        getToken();
-        if (token == Token.LPARENT) {
-            fw.write(pair.toString() + "\n");
-            expNode = parseExp();
-            if(getToken(Token.RPARENT)) {
-                fw.write(pair.toString() + "\n");
+        if (getToken(LPARENT)) {
+            units.add(pair);
+            units.add(parseExp());
+            if(getToken(RPARENT)) {
+                units.add(pair);
             } else {
                 errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
             }
         }
+
         // 3. <Number>
-        else if (token == Token.INTCON) {
+        else if (getToken(INTCON)) {
             retract(1);
-            expNode = parseNumber();
+            units.add(parseNumber());
         }
+
         // 4. <Character>
-        else if (token == Token.CHRCON) {
+        else if (getToken(CHRCON)) {
             retract(1);
-            expNode = parseCharacter();
+            units.add(parseCharacter());
         }
+
         // 5. <LVal>
         else {
-            retract(1);
-            expNode = parseLVal();
+            units.add(parseLVal());
         }
-        fw.write("<PrimaryExp>\n");
-        return expNode;
+
+
+        // 6. 返回节点
+        return new ParsedUnit("PrimaryExp", units);
     }
 
-    public NumberNode parseNumber() throws IOException {
-        NumberNode numberNode = new NumberNode(pair.getValue());
-        getToken();
-        fw.write(pair.toString() + "\n");
-        fw.write("<Number>\n");
-        return numberNode;
+    // 5. <Number>
+    public ParsedUnit parseNumber() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. <Number>
+        getToken(INTCON);
+        units.add(pair);
+
+        // 3. 返回节点
+        return new ParsedUnit("Number", units);
     }
 
-    public CharacterNode parseCharacter() throws IOException {
-        CharacterNode characterNode = new CharacterNode(pair.getWord());
-        getToken();
-        fw.write(pair.toString() + "\n");
-        fw.write("<Character>\n");
-        return characterNode;
-    }
+    // 6. <Character>
+    public ParsedUnit parseCharacter() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-    public Pair parseStringConst() throws IOException {
-        getToken();
-        fw.write(pair.toString() + "\n");
-        //fw.write("<StringConst>\n");
-        return pair;
+        // 2. <Character>
+        getToken(CHRCON);
+        units.add(pair);
+
+        // 3. 返回节点
+        return new ParsedUnit("Character", units);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // 7. <UnaryExp>, <UnaryOp>, <FuncRParams>, <MulExp>, <AddExp>, <RelExp>, <EqExp>, <LAndExp>, <LOrExp>, <ConstExp>
-    public ExpNode parseUnaryExp() throws IOException {
-        // 1. 解析<UnaryExp>
-        // 1. <UnaryExp>
-            // <PrimaryExp>
-            // IDENFR '(' 没有 | <FuncRParams> ')'
-            // <UnaryOp> <UnaryExp>
+    // 7.1 <UnaryExp> = <PrimaryExp>, IDENFR '(' 没有 | <FuncRParams> ')', <UnaryOp> <UnaryExp>
+    // 7.1 <UnaryOp> = '+', '-', '!'
+    // 7.1 <FuncRParams> = <Exp> {, <Exp>}
+    // 7.2 <MulExp> = <MulExp> */% <UnaryExp>, <UnaryExp>
+    // 7.2 <AddExp> = <AddExp> +- <MulExp>, <MulExp>
+    // 7.3 <RelExp> = <RelExp> <><=>= <AddExp>, <AddExp>
+    // 7.3 <EqExp> = <EqExp> ==!= <RelExp>, <RelExp>
+    // 7.3 <LAndExp> = <LAndExp> && <EqExp>, <EqExp>
+    // 7.3 <LOrExp> = <LOrExp> || <LAndExp>, <LAndExp>
+    // 7.4 <ConstExp> = <AddExp>
+    public ParsedUnit parseUnaryExp() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1. <UnaryOp> <UnaryExp>
-        ExpNode expNode;
-        getToken();
-        if (token == Token.PLUS || token == Token.MINU || token == Token.NOT) {
+        // 2. <UnaryOp> <UnaryExp>
+        if (getToken(PLUS, MINU, NOT)) {
             retract(1);
-            expNode = new UnaryExpNode();
-            ((UnaryExpNode)expNode).setUnaryOp(parseUnaryOp());
-            ((UnaryExpNode)expNode).setExpNode(parseUnaryExp());
+            units.add(parseUnaryOp());
+            units.add(parseUnaryExp());
         }
-        // 2. IDENFR '(' 没有 | <FuncRParams> ')'
-        // 2. <PrimaryExp>的开头也可能是IDENFR
-        // 2. 所以要进一步判断'('
-        else if (token == Token.IDENFR) {
-            // 1. '('
-            getToken();
-            if (token == Token.LPARENT) {
-                // 1. IDENFR
+
+        // 3. IDENFR '(' 没有 | <FuncRParams> ')'
+        else if (getToken(IDENFR)) {
+            // 3.1 IDENFR
+            if (getToken(LPARENT)) {
+                // 3.1 IDENFR
                 retract(1);
-                expNode = new FuncCallNode(pair);
-                fw.write(pair.toString() + "\n");
-                // 2. '('
-                getToken();
-                fw.write(pair.toString() + "\n");
+                units.add(pair);
+
+                // 3.2 '('
+                getToken(LPARENT);
+                units.add(pair);
+
                 // 3. ')' | <FuncRParams> ')'
                 // fix: if errors 'j' happens, missing ')', this will enter <parseFuncRParams> branch
-                getToken();
-                if(token == Token.PLUS || token == Token.MINU || token == Token.NOT
-                        || token == Token.IDENFR || token == Token.LPARENT
-                        || token == Token.INTCON || token == Token.CHRCON) {
+                if(getToken(PLUS,MINU,NOT,IDENFR,LPARENT,INTCON,CHRCON)) {
+                    // 3.3 回退到起始帧，解析<FuncRParams>
                     retract(1);
-                    ((FuncCallNode) expNode).setArgs(parseFuncRParams());
-                    getToken();
+                    units.add(parseFuncRParams());
                 }
-                // 4. ')'
-                if(token == Token.RPARENT) {
-                    fw.write(pair.toString() + "\n");
+
+                // 3.4 ')'
+                if(getToken(RPARENT)) {
+                    units.add(pair);
                 } else {
                     retract(1);
                     errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
                 }
-                // 5. 检查:是否存在使用未定义名字'c'，参数个数不匹配'd'，参数个数匹配但是参数类型不匹配'e'这三类错误
-                ((FuncCallNode) expNode).checkForError(symbolTable);
             } else {
-                retract(2);
-                expNode = parsePrimaryExp();
+                retract(1);
+                units.add(parsePrimaryExp());
             }
         }
-        // 3. <PrimaryExp>
+
+        // 4. <PrimaryExp>
         else {
             retract(1);
-            expNode = parsePrimaryExp();
+            units.add(parsePrimaryExp());
         }
-        fw.write("<UnaryExp>\n");
-        return expNode;
+
+        // 5. 返回节点
+        return new ParsedUnit("UnaryExp", units);
     }
 
-    public Pair parseUnaryOp() throws IOException {
-        // 1. 解析<UnaryOp>
-        // 1. <UnaryOp> = '+' | '-' | '!'
-        getToken();
-        fw.write(pair.toString() + "\n");
-        fw.write("<UnaryOp>\n");
-        return pair;
+    // 7.1 <UnaryExp> = <PrimaryExp>, IDENFR '(' 没有 | <FuncRParams> ')', <UnaryOp> <UnaryExp>
+    // 7.1 <UnaryOp> = '+', '-', '!'
+    // 7.1 <FuncRParams> = <Exp> {, <Exp>}
+    // 7.2 <MulExp> = <MulExp> */% <UnaryExp>, <UnaryExp>
+    // 7.2 <AddExp> = <AddExp> +- <MulExp>, <MulExp>
+    public ParsedUnit parseUnaryOp() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        getToken(PLUS, MINU, NOT);
+        units.add(pair);
+        return new ParsedUnit("UnaryOp", units);
     }
 
-    public LinkedList<ExpNode> parseFuncRParams() throws IOException {
-        // 1. 解析<FuncRParams>
-        // 1. <FuncRParams> = <Exp> { ',' <Exp> }
-
-        // 1. 创建初始列表
-        LinkedList<ExpNode> args = new LinkedList<>();
-
-        // 2. <Exp>
-        args.add(parseExp());
-
-        // 2. { ',' <Exp> }
-        while (getToken(Token.COMMA)) {
-            fw.write(pair.toString() + "\n");
-            args.add(parseExp());
+    // 7.1 <UnaryExp> = <PrimaryExp>, IDENFR '(' 没有 | <FuncRParams> ')', <UnaryOp> <UnaryExp>
+    // 7.1 <UnaryOp> = '+', '-', '!'
+    // 7.1 <FuncRParams> = <Exp> {, <Exp>}
+    // 7.2 <MulExp> = <MulExp> */% <UnaryExp>, <UnaryExp>
+    // 7.2 <AddExp> = <AddExp> +- <MulExp>, <MulExp>
+    public ParsedUnit parseFuncRParams() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        units.add(parseExp());
+        while (getToken(COMMA)) {
+            units.add(pair);
+            units.add(parseExp());
         }
-        fw.write("<FuncRParams>\n");
-        return args;
+        return new ParsedUnit("FuncRParams", units);
     }
 
-    public ExpNode parseMulExp() throws IOException {
-        // 1. 解析<MulExp>
-        // 1. <MulExp>
-            // <UnaryExp>
-            // <MulExp> '*' | '/' | '%' <UnaryExp>
-            // -> 这里存在左递归
-            // -> 文法改写为 <MulExp> = <UnaryExp> {'*' | '/' | '%' <UnaryExp>}
-        // 1. <UnaryExp>
-        ExpNode expNode = parseUnaryExp();
-        fw.write("<MulExp>\n");
-        // 2. '*' | '/' | '%' <UnaryExp> {'*' | '/' | '%' <UnaryExp>}
-        while(getToken(Token.MULT,Token.DIV,Token.MOD)) {
-            BinaryExpNode binaryExpNode = new BinaryExpNode();
-            binaryExpNode.setLeftExp(expNode);
-            binaryExpNode.setBinaryOp(pair);
-            fw.write(pair.toString() + "\n");
+    // 7.1 <UnaryExp> = <PrimaryExp>, IDENFR '(' 没有 | <FuncRParams> ')', <UnaryOp> <UnaryExp>
+    // 7.1 <UnaryOp> = '+', '-', '!'
+    // 7.1 <FuncRParams> = <Exp> {, <Exp>}
+    // 7.2 <MulExp> = <MulExp> */% <UnaryExp>, <UnaryExp>
+    // 7.2 <AddExp> = <AddExp> +- <MulExp>, <MulExp>
+    public ParsedUnit parseMulExp() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-            binaryExpNode.setRightExp(parseUnaryExp());
-            expNode = binaryExpNode;
-            fw.write("<MulExp>\n");
+        // 2. <UnaryExp>
+        units.add(parseUnaryExp());
+
+
+        // 3. {'*' | '/' | '%' <UnaryExp>}
+        while(getToken(MULT,DIV,MOD)) {
+            // 3.1 制作一个preUnits替代subUnits，并且包含了第一个<MulExp>
+            LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
+
+            // 3.2 制作一个preUnit，只包含了此时的preUnits，命名为<MulExp>
+            // 3.2 后续<MulExp>加入到preUnits中
+            ParsedUnit preUnit = new ParsedUnit("MulExp", preUnits);
+
+            // 3.3 清除units
+            units.clear();
+
+            // 3.4 用preUnit，作为<MulExp> = <MulExp> */% <UnaryExp>
+            units.add(preUnit);
+
+            // 3.5 */%
+            units.add(pair);
+
+            // 3.6 <UnaryExp>
+            units.add(parseUnaryExp());
         }
-        return expNode;
+
+        // 4. 返回<MulExp>，则为<MulExp> = <MulExp> */% <UnaryExp>
+        return new ParsedUnit("MulExp", units);
     }
 
-    public ExpNode parseAddExp() throws IOException {
-        // 1. 解析<AddExp>
-        // 1. <AddExp> = <MulExp> | <AddExp> '+' | '-' <MulExp>
-            // 1. 改写文法<AddExp> = <MulExp> {'+' | '-' <MulExp>}
+    // 7.1 <UnaryExp> = <PrimaryExp>, IDENFR '(' 没有 | <FuncRParams> ')', <UnaryOp> <UnaryExp>
+    // 7.1 <UnaryOp> = '+', '-', '!'
+    // 7.1 <FuncRParams> = <Exp> {, <Exp>}
+    // 7.2 <MulExp> = <MulExp> */% <UnaryExp>, <UnaryExp>
+    // 7.2 <AddExp> = <AddExp> +- <MulExp>, <MulExp>
+    public ParsedUnit parseAddExp() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 1. <MulExp>
-        ExpNode expNode = parseMulExp();
-        fw.write("<AddExp>\n");
-        // 2. {'+' | '-' <MulExp>}
-        while(getToken(Token.PLUS,Token.MINU)) {
-            BinaryExpNode binaryExpNode = new BinaryExpNode();
-            binaryExpNode.setLeftExp(expNode);
-            binaryExpNode.setBinaryOp(pair);
-            fw.write(pair.toString() + "\n");
+        // 2. <MulExp>
+        units.add(parseMulExp());
 
-            binaryExpNode.setRightExp(parseMulExp());
-            expNode = binaryExpNode;
-            fw.write("<AddExp>\n");
+        // 3. {'+' | '-' <MulExp>}
+        // 3. 此时要将第一个<MulExp>解析成<AddExp>
+        while(getToken(PLUS,MINU)) {
+            // 3.1 制作一个preUnits替代subUnits，并且包含了第一个<MulExp>
+            LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
+
+            // 3.2 制作一个preUnit，只包含了此时的preUnits，命名为<AddExp>
+            // 3.2 后续<MulExp>加入到preUnits中
+            ParsedUnit preUnit = new ParsedUnit("AddExp", preUnits);
+
+            // 3.3 清除subUnits
+            units.clear();
+
+            // 3.4 用preUnit，作为<AddExp> = <AddExp> +- <MulExp>
+            units.add(preUnit);
+
+            // 3.5 +-
+            units.add(pair);
+
+            // 3.6 <MulExp>
+            units.add(parseMulExp());
         }
-        return expNode;
+
+        // 3.3 返回<AddExp>，则为<AddExp> = <AddExp> +- <MulExp>
+        return new ParsedUnit("AddExp", units);
     }
 
-    public ExpNode parseRelExp() throws IOException {
-        // 1. 解析<RelExp>
-        // 1. <RelExp> = <AddExp> | <RelExp> '<' | '>' | "<=" | ">=" <AddExp>
-            // 1. 改写文法 <RelExp> = <AddExp> {'<' | '>' | "<=" | ">=" <AddExp>}
-        // 1. <AddExp>
-        ExpNode expNode = parseAddExp();
-        fw.write("<RelExp>\n");
-        // 2. {'<' | '>' | "<=" | ">=" <AddExp>}
-        while(getToken(Token.LSS,Token.GRE,Token.LEQ,Token.GEQ)) {
-            BinaryExpNode binaryExpNode = new BinaryExpNode();
-            binaryExpNode.setLeftExp(expNode);
-            binaryExpNode.setBinaryOp(pair);
-            fw.write(pair.toString() + "\n");
-
-            binaryExpNode.setRightExp(parseAddExp());
-            expNode = binaryExpNode;
-            fw.write("<RelExp>\n");
+    // 7.3 <RelExp> = <RelExp> <><=>= <AddExp>, <AddExp>
+    // 7.3 <EqExp> = <EqExp> ==!= <RelExp>, <RelExp>
+    // 7.3 <LAndExp> = <LAndExp> && <EqExp>, <EqExp>
+    // 7.3 <LOrExp> = <LOrExp> || <LAndExp>, <LAndExp>
+    // 7.4 <ConstExp> = <AddExp>
+    public ParsedUnit parseRelExp() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        units.add(parseAddExp());
+        while(getToken(LSS,GRE,LEQ,GEQ)) {
+            LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
+            ParsedUnit preUnit = new ParsedUnit("RelExp", preUnits);
+            units.clear();
+            units.add(preUnit);
+            units.add(pair);
+            units.add(parseAddExp());
         }
-        return expNode;
+        return new ParsedUnit("RelExp", units);
     }
 
-    public ExpNode parseEqExp() throws IOException {
-        // 1. 解析<EqExp>
-        // 1. <EqExp> = <RelExp> | <EqExp> "==" | "!=" <RelExp>
-            // 1. 改写文法: <EqExp> = <RelExp> {"==" | "!=" <RelExp>}
-        // 1. <RelExp>
-        ExpNode expNode = parseRelExp();
-        fw.write("<EqExp>\n");
-        // 2. {"==" | "!=" <RelExp>}
-        while(getToken(Token.EQL,Token.NEQ)) {
-            BinaryExpNode binaryExpNode = new BinaryExpNode();
-            binaryExpNode.setLeftExp(expNode);
-            binaryExpNode.setBinaryOp(pair);
-            fw.write(pair.toString() + "\n");
-
-            binaryExpNode.setRightExp(parseRelExp());
-            expNode = binaryExpNode;
-            fw.write("<EqExp>\n");
+    // 7.3 <RelExp> = <RelExp> <><=>= <AddExp>, <AddExp>
+    // 7.3 <EqExp> = <EqExp> ==!= <RelExp>, <RelExp>
+    // 7.3 <LAndExp> = <LAndExp> && <EqExp>, <EqExp>
+    // 7.3 <LOrExp> = <LOrExp> || <LAndExp>, <LAndExp>
+    // 7.4 <ConstExp> = <AddExp>
+    public ParsedUnit parseEqExp() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        units.add(parseRelExp());
+        while(getToken(EQL,NEQ)) {
+            LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
+            ParsedUnit preUnit = new ParsedUnit("EqExp", preUnits);
+            units.clear();
+            units.add(preUnit);
+            units.add(pair);
+            units.add(parseRelExp());
         }
-        return expNode;
+        return new ParsedUnit("EqExp", units);
     }
 
-    public ExpNode parseLAndExp() throws IOException {
-        // 1. 解析<LAndExp>
-        // 1. <LAndExp> = <EqExp> | <LAndExp> "&&" <EqExp>
-            // 1. 改写文法： <LAndExp> = <EqExp> {"&&" <EqExp>}
-        // 1. <EqExp>
-        ExpNode expNode = parseEqExp();
-        fw.write("<LAndExp>\n");
-        // 2. {"&&" <EqExp>}
-        while(getToken(Token.AND)) {
-            BinaryExpNode binaryExpNode = new BinaryExpNode();
-            binaryExpNode.setLeftExp(expNode);
-            binaryExpNode.setBinaryOp(pair);
-            fw.write(pair.toString() + "\n");
-
-            binaryExpNode.setRightExp(parseEqExp());
-            expNode = binaryExpNode;
-            fw.write("<LAndExp>\n");
+    // 7.3 <RelExp> = <RelExp> <><=>= <AddExp>, <AddExp>
+    // 7.3 <EqExp> = <EqExp> ==!= <RelExp>, <RelExp>
+    // 7.3 <LAndExp> = <LAndExp> && <EqExp>, <EqExp>
+    // 7.3 <LOrExp> = <LOrExp> || <LAndExp>, <LAndExp>
+    // 7.4 <ConstExp> = <AddExp>
+    public ParsedUnit parseLAndExp() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        units.add(parseEqExp());
+        while(getToken(AND)) {
+            LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
+            ParsedUnit preUnit = new ParsedUnit("LAndExp", preUnits);
+            units.clear();
+            units.add(preUnit);
+            units.add(pair);
+            units.add(parseEqExp());
         }
-        return expNode;
+        return new ParsedUnit("LAndExp", units);
     }
 
-    public ExpNode parseLOrExp() throws IOException {
-        // 1. 解析<LOrExp>
-        // 1. <LOrExp> = <LAndExp> | <LOrExp> "||" <LAndExp>
-            // 1. 改写文法: <LOrExp> = <LAndExp> {"||" <LAndExp>}
-        // 1. <LAndExp>
-        ExpNode expNode = parseLAndExp();
-        fw.write("<LOrExp>\n");
-        // 2. {"||" <LAndExp>}
-        while(getToken(Token.OR)) {
-            BinaryExpNode binaryExpNode = new BinaryExpNode();
-            binaryExpNode.setLeftExp(expNode);
-            binaryExpNode.setBinaryOp(pair);
-            fw.write(pair.toString() + "\n");
-
-            binaryExpNode.setRightExp(parseLAndExp());
-            expNode = binaryExpNode;
-            fw.write("<LOrExp>\n");
+    // 7.3 <RelExp> = <RelExp> <><=>= <AddExp>, <AddExp>
+    // 7.3 <EqExp> = <EqExp> ==!= <RelExp>, <RelExp>
+    // 7.3 <LAndExp> = <LAndExp> && <EqExp>, <EqExp>
+    // 7.3 <LOrExp> = <LOrExp> || <LAndExp>, <LAndExp>
+    // 7.4 <ConstExp> = <AddExp>
+    public ParsedUnit parseLOrExp() throws IOException {
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+        units.add(parseLAndExp());
+        while(getToken(OR)) {
+            LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
+            ParsedUnit preUnit = new ParsedUnit("LOrExp", preUnits);
+            units.clear();
+            units.add(preUnit);
+            units.add(pair);
+            units.add(parseLAndExp());
         }
-        return expNode;
+        return new ParsedUnit("LOrExp", units);
     }
 
-    public ExpNode parseConstExp() throws IOException {
-        // 1. 解析<ConstExp>
-        // 1. <ConstExp> = <AddExp>
-        ExpNode expNode = parseAddExp();
-        fw.write("<ConstExp>\n");
-        return expNode;
+    // 7.3 <RelExp> = <RelExp> <><=>= <AddExp>, <AddExp>
+    // 7.3 <EqExp> = <EqExp> ==!= <RelExp>, <RelExp>
+    // 7.3 <LAndExp> = <LAndExp> && <EqExp>, <EqExp>
+    // 7.3 <LOrExp> = <LOrExp> || <LAndExp>, <LAndExp>
+    // 7.4 <ConstExp> = <AddExp>
+    public ParsedUnit parseConstExp() throws IOException {
+        // 1. units
+        LinkedList<ParsedUnit> units = new LinkedList<>();
+
+        // 2. <AddExp>
+        units.add(parseAddExp());
+
+        return new ParsedUnit("ConstExp", units);
     }
 }

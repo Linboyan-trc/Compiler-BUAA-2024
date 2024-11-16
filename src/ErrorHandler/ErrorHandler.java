@@ -1,5 +1,7 @@
 package ErrorHandler;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,5 +38,13 @@ public class ErrorHandler {
 
     public void turnOn() {
         inUse = true;
+    }
+
+    public void print(BufferedWriter errorHandlerFile) throws IOException {
+        errorHandler.sortErrorsByLineNumber();
+        for (ErrorRecord errorRecord : errorHandler.getErrors()) {
+            errorHandlerFile.write(errorRecord + "\n");
+        }
+        errorHandlerFile.close();
     }
 }

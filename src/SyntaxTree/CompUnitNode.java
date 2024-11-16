@@ -2,7 +2,7 @@ package SyntaxTree;
 
 import java.util.LinkedList;
 
-public class CompUnit {
+public class CompUnitNode {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. <CompUnit> = <DeclNode> + <FuncDefNode> + <FuncDefNode:mainFuncDefNode>
     private LinkedList<DeclNode> declNodes = new LinkedList<>();
@@ -10,7 +10,7 @@ public class CompUnit {
     private FuncDefNode mainFuncDefNode;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-    public CompUnit() {
+    public CompUnitNode() {
     }
 
     public void addDeclNode(DeclNode declNode) {

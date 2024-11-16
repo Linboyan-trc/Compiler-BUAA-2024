@@ -1,6 +1,10 @@
 package Lexer;
 
-public class Pair {
+import Parser.ParsedUnit;
+
+import java.util.Collections;
+
+public class Pair extends ParsedUnit {
     // 1. Pair: 类别码 + word/value/charValue + 行号
     // fix: value must be unsigned int
     // fix: but in java there is no unsigned int, so we use long to store the unsigned int value
@@ -11,6 +15,7 @@ public class Pair {
 
     // 1. 三类构造:String, int, EOF
     public Pair(Token token, String word, int lineNumber) {
+        super(token.toString(), Collections.emptyList());
         this.token = token;
         this.word = word;
         this.value = 0;
@@ -18,6 +23,7 @@ public class Pair {
     }
 
     public Pair(Token token, long value, int lineNumber) {
+        super(token.toString(), Collections.emptyList());
         this.token = token;
         this.word = null;
         this.value = value;
@@ -25,6 +31,7 @@ public class Pair {
     }
 
     public Pair(Token token, int lineNumber) {
+        super(token.toString(), Collections.emptyList());
         this.token = token;
         this.word = null;
         this.value = 0;
