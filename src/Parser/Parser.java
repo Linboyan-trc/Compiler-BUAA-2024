@@ -273,7 +273,6 @@ public class Parser {
             if(getToken(STRCON)){
                 units.add(pair);
             } else {
-                retract(1);
                 units.add(parseConstExp());
             }
         }
@@ -395,7 +394,6 @@ public class Parser {
             if(getToken(STRCON)){
                 units.add(pair);
             } else {
-                retract(1);
                 units.add(parseExp());
             }
         }
@@ -1062,7 +1060,6 @@ public class Parser {
 
         // 4. <PrimaryExp>
         else {
-            retract(1);
             units.add(parsePrimaryExp());
         }
 

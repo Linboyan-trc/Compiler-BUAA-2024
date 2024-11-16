@@ -28,7 +28,7 @@ public class Compiler {
         grammarFile.close();
 
         // 4. 语义分析
-        // CompUnitNode compUnitNode = compUnit.toCompUnitNode();
+         CompUnitNode compUnitNode = compUnit.toCompUnitNode();
 
         // 5. 错误处理
         ErrorHandler.getInstance().print(errorHandlerFile);
