@@ -1,14 +1,9 @@
 import java.io.*;
 
-import ErrorHandler.ErrorHandler;
-import ErrorHandler.ErrorRecord;
-import Lexer.Lexer;
-import Parser.*;
-import SyntaxTable.SymbolItem;
-import SyntaxTable.SymbolTable;
-import SyntaxTree.CompUnitNode;
-import SyntaxTree.DefNode;
-import SyntaxTree.FuncDefNode;
+import frontend.ErrorHandler.ErrorHandler;
+import frontend.Lexer.Lexer;
+import frontend.Parser.*;
+import frontend.SyntaxTree.CompUnitNode;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
@@ -28,7 +23,9 @@ public class Compiler {
         grammarFile.close();
 
         // 4. 语义分析
-         CompUnitNode compUnitNode = compUnit.toCompUnitNode();
+        CompUnitNode compUnitNode = compUnit.toCompUnitNode();
+        symbolTableFile.write(compUnitNode.toString());
+        symbolTableFile.close();
 
         // 5. 错误处理
         ErrorHandler.getInstance().print(errorHandlerFile);

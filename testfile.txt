@@ -1,7 +1,12 @@
-int main(){
-    const int a = 1;
-    for(a = 1; a < 10;a = a+1){
-        printf("123");
-    }
+void f1({
+
+}
+
+void f2(){
+
+}
+
+int main() {
+    f2(;
     return 0;
 }

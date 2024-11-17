@@ -1,4 +1,4 @@
 ///////// in temp /////////
-IDENFR b
+IDENFR day
 <LVal>
 ///////// out temp /////////

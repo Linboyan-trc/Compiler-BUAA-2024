@@ -1,1 +1,2 @@
-2 a ConstInt
+1 f1 VoidFunc
+1 f2 VoidFunc
