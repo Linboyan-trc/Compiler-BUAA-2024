@@ -8,4 +8,12 @@ public class ContinueNode implements StmtNode {
     public ContinueNode(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public ContinueNode simplify() {
+        return this;
+    }
+
 }

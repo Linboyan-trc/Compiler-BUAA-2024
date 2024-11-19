@@ -5,7 +5,7 @@ import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 
-public class ForStmtNode implements StmtNode {
+public class ForStmtNode implements SyntaxNode {
     // 1. <ForStmt> = <LVal> '=' <Exp>
     private final SymbolTable symbolTable;
     private LValNode lValNode;
@@ -17,6 +17,14 @@ public class ForStmtNode implements StmtNode {
         this.symbolTable = symbolTable;
         this.lValNode = lValNode;
         this.expNode = expNode;
+    }
+
+    public LValNode getLValNode() {
+        return lValNode;
+    }
+
+    public ExpNode getExpNode() {
+        return expNode;
     }
 
     // 3. 检查
@@ -31,5 +39,14 @@ public class ForStmtNode implements StmtNode {
                 errorHandler.addError(new ErrorRecord(lValNode.getPair().getLineNumber(), 'h'));
             }
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public ForStmtNode simplify() {
+        lValNode = lValNode.compute();
+        expNode = expNode.simplify();
+        return this;
     }
 }

@@ -2,6 +2,7 @@ package frontend.SyntaxTree;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
+import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 
@@ -39,5 +40,42 @@ public class BranchNode implements StmtNode {
         } else if (elseStmt instanceof ReturnNode && ((ReturnNode) elseStmt).hasExpNode()) {
             errorHandler.addError(new ErrorRecord(((ReturnNode) elseStmt).getLineNumber(), 'f'));
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public StmtNode simplify() {
+        // 1. 化简
+        ExpNode simplifiedfCond = cond.simplify();
+        StmtNode simplifiedIfStmt = ifStmt.simplify();
+        StmtNode simplifiedElseStmt = elseStmt == null ? null : elseStmt.simplify();
+
+        // 2. 条件是数字
+        // 2. 选择两者之一返回
+        if (simplifiedfCond instanceof NumberNode || simplifiedfCond instanceof CharacterNode) {
+            long temp;
+            if(simplifiedfCond instanceof NumberNode){
+                temp = ((NumberNode)simplifiedfCond).getValue();
+            } else {
+                temp = ((CharacterNode)simplifiedfCond).getValue();
+            }
+            return temp == 0 ? simplifiedElseStmt == null ? new NopNode() : simplifiedElseStmt : simplifiedIfStmt;
+        }
+
+        // 3. 条件是BinaryNode
+        // 3. 把一层if-else拆成两层if-else，使得每一层cond只有一个表达式
+        else if (simplifiedfCond instanceof BinaryExpNode) {
+            if (((BinaryExpNode) simplifiedfCond).getBinaryOp().isToken(AND)) {
+                StmtNode newIfStmt = new BranchNode(symbolTable, ((BinaryExpNode) simplifiedfCond).getRightExp(), simplifiedIfStmt, simplifiedElseStmt).simplify();
+                return new BranchNode(symbolTable, ((BinaryExpNode) simplifiedfCond).getLeftExp(), newIfStmt, simplifiedElseStmt).simplify();
+            } else if (((BinaryExpNode) simplifiedfCond).getBinaryOp().isToken(OR)) {
+                StmtNode newElse = new BranchNode(symbolTable, ((BinaryExpNode) simplifiedfCond).getRightExp(), simplifiedIfStmt, simplifiedElseStmt).simplify();
+                return new BranchNode(symbolTable, ((BinaryExpNode) simplifiedfCond).getLeftExp(), simplifiedIfStmt, newElse).simplify();
+            }
+        }
+
+        // 4. 返回节点
+        return new BranchNode(symbolTable, simplifiedfCond, simplifiedIfStmt, simplifiedElseStmt);
     }
 }

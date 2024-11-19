@@ -1,4 +1,6 @@
 package frontend.SyntaxTree;
 
-public interface BlockItemNode {
+public interface BlockItemNode extends SyntaxNode{
+    @Override
+    BlockItemNode simplify();
 }

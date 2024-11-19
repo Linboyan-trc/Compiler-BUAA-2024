@@ -7,6 +7,7 @@ import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 public class FuncCallNode implements ExpNode {
     // 1. 函数名 + 参数
@@ -73,5 +74,14 @@ public class FuncCallNode implements ExpNode {
                 return SyntaxType.Char;
             }
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public FuncCallNode simplify() {
+        // 1. 只需要对每个参数化简
+        arguments = arguments.stream().map(ExpNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        return this;
     }
 }

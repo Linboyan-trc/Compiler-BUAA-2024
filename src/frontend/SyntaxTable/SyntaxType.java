@@ -38,6 +38,10 @@ public enum SyntaxType {
         }
     }
 
+    public boolean isVoidFunc() {
+        return this == VoidFunc;
+    }
+
     public String toString() {
         return name();
     }

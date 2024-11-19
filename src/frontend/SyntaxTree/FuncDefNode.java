@@ -1,13 +1,15 @@
 package frontend.SyntaxTree;
 
 import frontend.Lexer.Pair;
+import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
-public class FuncDefNode {
-////////////////////////////////////////////////////////////////////////////////////////////////////
+public class FuncDefNode implements SyntaxNode {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. <FuncDefNode> = [变量类型:需要新开一个枚举类] + Pair:IDENFR + 参数列表 + 块
     private final SymbolTable symbolTable;
     private SyntaxType funcDefType;
@@ -15,7 +17,7 @@ public class FuncDefNode {
     private LinkedList<FuncFParamNode> funcFParamNodes;
     private BlockNode blockNode = null;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. set
     public FuncDefNode(SymbolTable symbolTable,
                        SyntaxType funcDefType, Pair pair, LinkedList<FuncFParamNode> funcFParamNodes) {
@@ -47,4 +49,17 @@ public class FuncDefNode {
     public void checkForError() {
         blockNode.checkForError(funcDefType);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public FuncDefNode simplify() {
+        funcFParamNodes = funcFParamNodes.stream().map(FuncFParamNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        blockNode = blockNode.simplify();
+        if (funcDefType.isVoidFunc()) {
+            blockNode.complete();
+        }
+        return this;
+    }
+
 }

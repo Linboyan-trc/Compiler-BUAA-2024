@@ -6,6 +6,7 @@ import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 public class PrintNode implements StmtNode {
     // 1. <StringConst> + <Exp>
@@ -50,5 +51,13 @@ public class PrintNode implements StmtNode {
         if(cnt != arguments.size()) {
             errorHandler.addError(new ErrorRecord(string.getLineNumber(), 'l'));
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public PrintNode simplify() {
+        arguments = arguments.stream().map(ExpNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        return this;
     }
 }

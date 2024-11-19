@@ -32,4 +32,13 @@ public class AssignNode implements StmtNode {
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public AssignNode simplify() {
+        lValNode = lValNode.compute();
+        expNode = expNode.simplify();
+        return this;
+    }
 }

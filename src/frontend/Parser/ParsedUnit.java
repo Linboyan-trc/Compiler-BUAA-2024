@@ -62,7 +62,7 @@ public class ParsedUnit {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    // 1. <CompUnitNode>, <DeclNode>, <DefNode>, <SpecialNode>
+    // 1. <CompUnitNode>, <DeclNode>, <DefNode>
     // 1. <CompUnitNode>
     public CompUnitNode toCompUnitNode() {
         // 1. 一个<CompUnitNode>包括了:符号表 + <DeclNode> + <FuncDefNode> + <FuncDefNode:mainFuncDefNode>

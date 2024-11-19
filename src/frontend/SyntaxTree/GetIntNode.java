@@ -30,4 +30,12 @@ public class GetIntNode implements StmtNode {
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public GetIntNode simplify() {
+        lValNode = lValNode.compute();
+        return this;
+    }
 }

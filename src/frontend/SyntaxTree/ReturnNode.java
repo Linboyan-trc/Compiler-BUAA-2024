@@ -24,4 +24,14 @@ public class ReturnNode implements StmtNode {
     public boolean hasExpNode() {
         return expNode != null;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public ReturnNode simplify() {
+        if (expNode != null) {
+            expNode = expNode.simplify();
+        }
+        return this;
+    }
 }

@@ -12,9 +12,20 @@ public class NumberNode implements ExpNode {
         this.number = number;
     }
 
+    public long getValue() {
+        return number;
+    }
+
     // 1. 获取SyntaxType
     @Override
     public SyntaxType getSyntaxType(SymbolTable symbolTable) {
         return SyntaxType.Int;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public NumberNode simplify() {
+        return this;
     }
 }

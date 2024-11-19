@@ -6,6 +6,7 @@ import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 public class BlockNode implements StmtNode{
     // 1. 一个<Block>有多个<BlockItem>
@@ -48,6 +49,27 @@ public class BlockNode implements StmtNode{
                     errorHandler.addError(new ErrorRecord(((ReturnNode) blockItemNode).getLineNumber(), 'f'));
                 }
             }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public BlockNode simplify() {
+        LinkedList<BlockItemNode> simplifiedBlockItems = new LinkedList<>();
+        for (BlockItemNode blockItem : blockItemNodes) {
+            BlockItemNode simplified = blockItem.simplify();
+            simplifiedBlockItems.add(simplified);
+        }
+        blockItemNodes = simplifiedBlockItems;
+
+        return this;
+    }
+
+    // 2. 给funcDef的void类型加上一个return
+    public void complete() {
+        if (blockItemNodes.size() == 0 || !(blockItemNodes.getLast() instanceof ReturnNode)) {
+            blockItemNodes.add(new ReturnNode(symbolTable, null, null));
         }
     }
 }

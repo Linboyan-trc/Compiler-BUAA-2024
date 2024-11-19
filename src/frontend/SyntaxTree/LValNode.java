@@ -6,8 +6,13 @@ import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 
+import java.util.LinkedList;
+import java.util.stream.Collectors;
+
 public class LValNode implements ExpNode {
-    // 1. Pair + 维数
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. Pair + 维数:当指定下标的时候length为空
+    // 2. LValNode只会为一个单个的变量，或者指定了下标的数组中的元素
     private final SymbolTable symbolTable;
     private Pair pair;
     private ExpNode length = null;
@@ -59,5 +64,47 @@ public class LValNode implements ExpNode {
                     return null;
             }
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public ExpNode simplify() {
+        // 1. 对维数中的ExpNode化简
+        if(length != null) {
+            length = length.simplify();
+        }
+
+        // 2. 如果是数组，如果每个length都是现成的数字或字符
+        if (length instanceof NumberNode ||length instanceof CharacterNode) {
+
+            // 3. 然后去符号表中找到这个变量
+            DefNode defNode = symbolTable.getVariable(pair.getWord());
+
+            // 4. 如果这个变量是常量，说明一定为const int a[10][10] = {...}这种
+            if (defNode.isFinal()) {
+
+                // 5. 如果是的话说明取出的是单个元素，直接获取这个元素的值返回成一个ExpNode
+                return defNode.getValue(length);
+            }
+        }
+
+        // 3. 考虑单变量
+        else {
+            DefNode defNode = symbolTable.getVariable(pair.getWord());
+            if (defNode.isFinal()) {
+                return defNode.getValue(null);
+            }
+        }
+
+        return this;
+    }
+
+    // 2. 化简length
+    public LValNode compute() {
+        if(length != null) {
+            length = length.simplify();
+        }
+        return this;
     }
 }

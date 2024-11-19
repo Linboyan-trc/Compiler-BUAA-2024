@@ -55,6 +55,10 @@ public class Pair extends ParsedUnit {
         return lineNumber;
     }
 
+    public boolean isToken(Token token) {
+        return this.token == token;
+    }
+
     @Override
     public String toString() {
         if (token == Token.INTCON) {

@@ -1,2 +1,6 @@
-1 f1 VoidFunc
-1 f2 VoidFunc
+1 c IntArray
+1 sum IntFunc
+2 a Int
+2 b Int
+3 a Int
+3 i Int

@@ -29,5 +29,8 @@ public class Compiler {
 
         // 5. 错误处理
         ErrorHandler.getInstance().print(errorHandlerFile);
+
+        // 6. 化简
+        compUnitNode = compUnitNode.simplify();
     }
 }

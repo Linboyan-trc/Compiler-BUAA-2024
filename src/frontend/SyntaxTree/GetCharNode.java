@@ -30,4 +30,12 @@ public class GetCharNode implements StmtNode {
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    @Override
+    public GetCharNode simplify() {
+        lValNode = lValNode.compute();
+        return this;
+    }
 }
