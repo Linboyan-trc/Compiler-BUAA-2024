@@ -37,6 +37,18 @@ public class Declare implements MidCode {
         MidCodeTable.getInstance().addToVarInfo(value, size);
     }
 
+    public Value getValue() {
+        return value;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public LinkedList<Value> getInitValues() {
+        return initValues;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 生成中间代码
     @Override

@@ -1,6 +1,7 @@
 package midend.LabelTable;
 
 import backend.MipsCode.MipsCode;
+import midend.MidCode.MidCode.Jump;
 import midend.MidCode.MidCode.MidCode;
 
 public class Label implements MipsCode {
@@ -49,6 +50,15 @@ public class Label implements MipsCode {
     public void setMidCode(MidCode midCode) {
         this.midCode = midCode;
         LabelTable.getInstance().addToMidCodeToLabels(midCode, this);
+    }
+
+    // 2. 找到跳转的最终目标中间代码
+    public Label getTarget() {
+        if (midCode instanceof Jump) {
+            return ((Jump) midCode).getLabel().getTarget();
+        } else {
+            return this;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,230 @@
+.data
+ZERO: .word 0
+ONE: .word 1
+var2: .word 2
+var3: .word 3
+string0: .asciiz "21373457\n"
+string1: .asciiz "ERROR!\n"
+string2: .asciiz "And success!\n"
+string3: .asciiz "Or pass!\n"
+string4: .asciiz "Or pass!\n"
+string5: .asciiz "Test1 Success!"
+string6: .asciiz "\n"
+.text
+addiu $sp, $sp, -4
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+# EXIT
+li $v0, 10
+syscall
+# main:
+main:
+addiu $sp, $sp, -52
+# PRINT "21373457\n"
+la $a0, string0
+li $v0, 4
+syscall
+# TEMP $0 <- $var2@0
+lw $t1, var2
+addiu $t0, $t1, 0
+# TEMP $1 <- $var3@0
+lw $t3, var3
+addiu $t2, $t3, 0
+# $2 <- -1 ADD $1
+li $fp, -1
+addu $t4, $fp, $t2
+# $3 <- $0 EQ $2
+seq $t5, $t0, $t4
+# BRANCH Label1: IF $3 EQ 0
+sw $t5, 36($sp)
+sw $t0, 48($sp)
+sw $t1, var2
+sw $t2, 44($sp)
+sw $t3, var3
+sw $t4, 40($sp)
+lw $t0, 36($sp)
+beq $t0, $0, Label1
+# TEMP $4 <- $var2@0
+lw $t2, var2
+addiu $t1, $t2, 0
+# $5 <- 2 ADD $4
+li $fp, 2
+addu $t3, $fp, $t1
+# $6 <- $5 LT 0
+li $fp, 0
+slt $t4, $t3, $fp
+# BRANCH Label2: IF $6 EQ 0
+sw $t0, 36($sp)
+sw $t1, 32($sp)
+sw $t2, var2
+sw $t3, 28($sp)
+sw $t4, 24($sp)
+lw $t0, 24($sp)
+beq $t0, $0, Label2
+# PRINT "ERROR!\n"
+la $a0, string1
+li $v0, 4
+syscall
+# JUMP Label3
+sw $t0, 24($sp)
+j Label3
+# NOP
+Label2:
+# PRINT "And success!\n"
+la $a0, string2
+li $v0, 4
+syscall
+# NOP
+Label3:
+# NOP
+Label1:
+# TEMP $7 <- $var3@0
+lw $t1, var3
+addiu $t0, $t1, 0
+# $8 <- $7 NE 3
+li $fp, 3
+sne $t2, $t0, $fp
+# BRANCH Label4: IF $8 EQ 0
+sw $t0, 20($sp)
+sw $t1, var3
+sw $t2, 16($sp)
+lw $t0, 16($sp)
+beq $t0, $0, Label4
+# PRINT "Or pass!\n"
+la $a0, string3
+li $v0, 4
+syscall
+# JUMP Label5
+sw $t0, 16($sp)
+j Label5
+# NOP
+Label4:
+# TEMP $9 <- $var2@0
+lw $t1, var2
+addiu $t0, $t1, 0
+# $10 <- -22 ADD $9
+li $fp, -22
+addu $t2, $fp, $t0
+# $11 <- $10 EQ -20
+li $fp, -20
+seq $t3, $t2, $fp
+# BRANCH Label6: IF $11 EQ 0
+sw $t0, 12($sp)
+sw $t1, var2
+sw $t2, 8($sp)
+sw $t3, 4($sp)
+lw $t0, 4($sp)
+beq $t0, $0, Label6
+# PRINT "Or pass!\n"
+la $a0, string4
+li $v0, 4
+syscall
+# NOP
+sw $t0, 4($sp)
+Label6:
+# NOP
+Label5:
+# PRINT "Test1 Success!"
+la $a0, string5
+li $v0, 4
+syscall
+# CALL fun
+sw $ra, 0($sp)
+jal fun
+lw $ra, 0($sp)
+# CALL fun
+sw $ra, 0($sp)
+jal fun
+lw $ra, 0($sp)
+# CALL fun
+sw $ra, 0($sp)
+jal fun
+lw $ra, 0($sp)
+# CALL fun
+sw $ra, 0($sp)
+jal fun
+lw $ra, 0($sp)
+# CALL fun
+sw $ra, 0($sp)
+jal fun
+lw $ra, 0($sp)
+# CALL fun
+sw $ra, 0($sp)
+jal fun
+lw $ra, 0($sp)
+# RETURN 0
+li $v0, 0
+addiu $sp, $sp, 52
+jr $ra
+# fun:
+fun:
+addiu $sp, $sp, -32
+# LOCAL VAR $i@1 1
+li $t0, 1
+# LOCAL VAR $yuming@2 1
+li $t1, 1
+# NOP
+sw $t0, 28($sp)
+sw $t1, 24($sp)
+Label7:
+# BRANCH Label8: IF 1 EQ 0
+li $fp, 1
+beq $fp, $0, Label8
+# NOP
+# TEMP $12 <- $yuming@2
+lw $t1, 24($sp)
+addiu $t0, $t1, 0
+# $13 <- $12 LT 1000
+li $fp, 1000
+slt $t2, $t0, $fp
+# BRANCH Label9: IF $13 EQ 0
+sw $t0, 20($sp)
+sw $t1, 24($sp)
+sw $t2, 16($sp)
+lw $t0, 16($sp)
+beq $t0, $0, Label9
+# TEMP $14 <- $yuming@2
+lw $t2, 24($sp)
+addiu $t1, $t2, 0
+# $15 <- 2 MUL $14
+li $fp, 2
+mult $fp, $t1
+mflo $t3
+# SAVE $yuming@2 <- $15
+addiu $t2, $t3, 0
+# NOP
+# JUMP Label10
+sw $t0, 16($sp)
+sw $t1, 12($sp)
+sw $t2, 24($sp)
+sw $t3, 8($sp)
+j Label10
+# NOP
+Label9:
+# JUMP Label8
+j Label8
+# NOP
+Label10:
+# JUMP Label7
+j Label7
+# NOP
+Label8:
+# TEMP $16 <- $yuming@2
+lw $t1, 24($sp)
+addiu $t0, $t1, 0
+# PUSH $16
+sw $t0, -4($sp)
+# PRINT "\n%d"
+la $a0, string6
+li $v0, 4
+syscall
+lw $a0, -4($sp)
+li $v0, 1
+syscall
+# RETURN
+sw $t0, 4($sp)
+sw $t1, 24($sp)
+addiu $sp, $sp, 32
+jr $ra

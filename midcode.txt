@@ -1,0 +1,79 @@
+GLOBAL CONST $ZERO@0 0
+GLOBAL CONST $ONE@0 1
+GLOBAL VAR $var2@0 2
+GLOBAL VAR $var3@0 3
+CALL main
+EXIT
+main:
+main:
+PRINT "21373457\n"
+TEMP $0 <- $var2@0
+TEMP $1 <- $var3@0
+$2 <- -1 ADD $1
+$3 <- $0 EQ $2
+BRANCH Label1: IF $3 EQ 0
+TEMP $4 <- $var2@0
+$5 <- 2 ADD $4
+$6 <- $5 LT 0
+BRANCH Label2: IF $6 EQ 0
+PRINT "ERROR!\n"
+JUMP Label3
+Label2:
+NOP
+PRINT "And success!\n"
+Label3:
+NOP
+Label1:
+NOP
+TEMP $7 <- $var3@0
+$8 <- $7 NE 3
+BRANCH Label4: IF $8 EQ 0
+PRINT "Or pass!\n"
+JUMP Label5
+Label4:
+NOP
+TEMP $9 <- $var2@0
+$10 <- -22 ADD $9
+$11 <- $10 EQ -20
+BRANCH Label6: IF $11 EQ 0
+PRINT "Or pass!\n"
+Label6:
+NOP
+Label5:
+NOP
+PRINT "Test1 Success!"
+CALL fun
+CALL fun
+CALL fun
+CALL fun
+CALL fun
+CALL fun
+RETURN 0
+fun:
+fun:
+LOCAL VAR $i@1 1
+LOCAL VAR $yuming@2 1
+Label7:
+NOP
+BRANCH Label8: IF 1 EQ 0
+NOP
+TEMP $12 <- $yuming@2
+$13 <- $12 LT 1000
+BRANCH Label9: IF $13 EQ 0
+TEMP $14 <- $yuming@2
+$15 <- 2 MUL $14
+SAVE $yuming@2 <- $15
+NOP
+JUMP Label10
+Label9:
+NOP
+JUMP Label8
+Label10:
+NOP
+JUMP Label7
+Label8:
+NOP
+TEMP $16 <- $yuming@2
+PUSH $16
+PRINT "\n%d"
+RETURN

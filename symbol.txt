@@ -1,6 +1,7 @@
-1 c IntArray
-1 sum IntFunc
-2 a Int
-2 b Int
-3 a Int
-3 i Int
+1 ZERO ConstInt
+1 ONE ConstInt
+1 var2 Int
+1 var3 Int
+1 fun VoidFunc
+2 i Int
+3 yuming Int

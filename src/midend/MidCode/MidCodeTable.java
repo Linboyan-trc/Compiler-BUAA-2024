@@ -1,11 +1,14 @@
 package midend.MidCode;
 
 import midend.LabelTable.Label;
-import midend.MidCode.MidCode.MidCode;
+import midend.LabelTable.LabelTable;
+import midend.MidCode.MidCode.*;
 import midend.MidCode.Value.Value;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.StringJoiner;
 
 public class MidCodeTable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +49,26 @@ public class MidCodeTable {
         return loopEndLabels.getLast();
     }
 
+    // 3. 获取全局变量
+    public LinkedList<MidCode> getGlobalCodeList() {
+        return globalCodes;
+    }
+
+    // 4. 获取中间代码
+    public LinkedList<MidCode> getMidCodeList() {
+        return midCodes;
+    }
+
+    // 5. 获取变量表
+    public LinkedList<Value> getValInfos(String func) {
+        return funcToVals.get(func);
+    }
+
+    // 6. 获取变量空间
+    public int getValSize(Value value) {
+        return valToSize.get(value);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 设置当前函数，并且在(函数名+变量表)中添加
     public void setFunc(String func) {
@@ -77,5 +100,83 @@ public class MidCodeTable {
     public void addToVarInfo(Value value, int size) {
         funcToVals.get(func).add(value);
         valToSize.put(value, size);
+    }
+
+    // 3. 化简
+    public void simplify() {
+        simplifyNop();
+        simplifyLabel();
+        simplifyExp();
+    }
+
+    // 3.1 化简Nop
+    public void simplifyNop() {
+        int index;
+        for (MidCode midCode : midCodes) {
+            if (midCode instanceof Nop) {
+                index = midCodes.indexOf(midCode);
+                for (Label label : LabelTable.getInstance().getLabelList(midCode)) {
+                    label.setMidCode(midCodes.get(index + 1));
+                }
+                midCodes.remove(index);
+            }
+        }
+    }
+
+    // 3.2 化简Label
+    public void simplifyLabel() {
+        int index;
+        HashSet<Label> usedLabels = new HashSet<>();
+        for (MidCode midCode : midCodes) {
+            if (midCode instanceof Jump) {
+                Jump jump = (Jump) midCode;
+                Label target = jump.getLabel().getTarget();
+                index = midCodes.indexOf(jump);
+                if (midCodes.indexOf(target.getMidCode()) - index == 1) {
+                    midCodes.remove(index);
+                } else {
+                    jump.setLabel(target);
+                    usedLabels.add(target);
+                }
+            } else if (midCode instanceof Branch) {
+                Branch branch = (Branch) midCode;
+                Label target = branch.getBranchLabel().getTarget();
+                index = midCodes.indexOf(branch);
+                if (midCodes.indexOf(target.getMidCode()) - index == 1) {
+                    midCodes.remove(index);
+                } else {
+                    branch.setLabel(target);
+                    usedLabels.add(target);
+                }
+            }
+        }
+        LabelTable.getInstance().removeUnusedLabels(usedLabels);
+    }
+
+    // 3.3 化简Exp
+    public void simplifyExp() {
+        for (MidCode midCode : midCodes) {
+            if (midCode instanceof Assign) {
+                ((Assign) midCode).simplify();
+            } else {
+
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public String toString() {
+        StringJoiner stringJoiner = new StringJoiner("\n");
+        for (MidCode midCode : globalCodes) {
+            stringJoiner.add(midCode.toString());
+        }
+        for (MidCode midCode : midCodes) {
+            for (Label label : LabelTable.getInstance().getLabelList(midCode)) {
+                stringJoiner.add(label.toString());
+            }
+            stringJoiner.add(midCode.toString());
+        }
+        return stringJoiner.toString();
     }
 }

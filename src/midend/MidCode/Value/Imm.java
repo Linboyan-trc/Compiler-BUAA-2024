@@ -1,6 +1,6 @@
 package midend.MidCode.Value;
 
-import backend.ValueMeta;
+import backend.ValueMeta.ValueMeta;
 
 public class Imm extends Value implements ValueMeta  {
     private final long value;

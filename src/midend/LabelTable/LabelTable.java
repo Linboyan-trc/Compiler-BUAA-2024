@@ -3,6 +3,7 @@ package midend.LabelTable;
 import midend.MidCode.MidCode.MidCode;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class LabelTable {
@@ -22,5 +23,15 @@ public class LabelTable {
             midCodeToLabels.put(midCode, new LinkedList<>());
         }
         midCodeToLabels.get(midCode).add(label);
+    }
+
+    public LinkedList<Label> getLabelList(MidCode midCode) {
+        return midCodeToLabels.getOrDefault(midCode, new LinkedList<>());
+    }
+
+    public void removeUnusedLabels(HashSet<Label> usedLabels) {
+        for (LinkedList<Label> labelList : midCodeToLabels.values()) {
+            labelList.removeIf(label -> !usedLabels.contains(label) && label.getLabelId() != 0);
+        }
     }
 }

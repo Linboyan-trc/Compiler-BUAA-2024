@@ -13,6 +13,11 @@ public class FuncCall implements MidCode {
         MidCodeTable.getInstance().addToMidCodes(this);
     }
 
+    // 3. 获取函数名
+    public String getName() {
+        return name;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 生成中间代码
     @Override

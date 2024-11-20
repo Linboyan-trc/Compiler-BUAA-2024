@@ -1,0 +1,22 @@
+package backend.MipsCode;
+
+import backend.ValueMeta.Reg;
+
+public class Div implements MipsCode {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. div指令
+    private Reg rs;
+    private Reg rt;
+
+    public Div(Reg rs, Reg rt) {
+        this.rs = rs;
+        this.rt = rt;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 生成mips代码
+    @Override
+    public String toString() {
+        return "div " + rs + ", " + rt;
+    }
+}
