@@ -53,7 +53,16 @@ public class Declare implements MidCode {
     // 1. 生成中间代码
     @Override
     public String toString() {
-        return (isGlobal ? "GLOBAL" : "LOCAL") + " " + (isFinal ? "CONST" : "VAR") + " " + value + " " +
-                initValues.stream().map(Value::toString).reduce((s1, s2) -> s1 + ", " + s2).orElse("");
+        StringBuilder initValuesString = new StringBuilder();
+        for (int i = 0; i < initValues.size(); i++) {
+            initValuesString.append(initValues.get(i).toString());
+            if (i != initValues.size() - 1) {
+                initValuesString.append(", ");
+            }
+        }
+        return (isGlobal ? "GLOBAL" : "LOCAL") + " " +
+                (isFinal ? "CONST" : "VAR") + " " +
+                value + " " +
+                initValuesString.toString();
     }
 }

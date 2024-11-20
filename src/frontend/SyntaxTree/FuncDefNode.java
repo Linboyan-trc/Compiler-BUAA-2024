@@ -78,7 +78,9 @@ public class FuncDefNode implements SyntaxNode {
         MidCodeTable.getInstance().setFunc(entryLabel.getLabelName());
 
         // 4. 为每个参数生产中间代码
-        funcFParamNodes.forEach(FuncFParamNode::generateMidCode);
+        for(FuncFParamNode funcFParamNode : funcFParamNodes) {
+            funcFParamNode.generateMidCode();
+        }
 
         // 5. <BlockNode>生成中间代码
         blockNode.generateMidCode();

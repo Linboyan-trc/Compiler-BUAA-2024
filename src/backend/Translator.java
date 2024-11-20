@@ -3,7 +3,6 @@ package backend;
 import backend.Address.*;
 import backend.MipsCode.*;
 import backend.MipsCode.IIns.*;
-import backend.MipsCode.JIns.JIns;
 import backend.MipsCode.JIns.JInsJ;
 import backend.MipsCode.JIns.JInsJAL;
 import backend.MipsCode.RIns.RIns2Reg1Imm;
@@ -32,21 +31,21 @@ public class Translator {
     // 1. 单例模式
     private static final Translator instance = new Translator();
     // 2. 生成中间代码时的中间代码 + 标签
-    private static final MidCodeTable midCodeTable = MidCodeTable.getInstance();
-    private static final LabelTable labelTable = LabelTable.getInstance();
+    private MidCodeTable midCodeTable = MidCodeTable.getInstance();
+    private LabelTable labelTable = LabelTable.getInstance();
     // 3. 宏代码 + mips代码段
     // 3. 宏代码中用于记录全局变量的地址
-    private static final LinkedList<MipsCode> macroCodeList = new LinkedList<>();
-    private static final LinkedList<MipsCode> mipsCodeList = new LinkedList<>();
-    private static final HashMap<Value, Address> valueToAddress = new HashMap<>();
+    private LinkedList<MipsCode> macroCodeList = new LinkedList<>();
+    private LinkedList<MipsCode> mipsCodeList = new LinkedList<>();
+    private HashMap<Value, Address> valueToAddress = new HashMap<>();
     // 4. 寄存器使用记录
-    private static final LinkedList<Reg> synchronizedReg = new LinkedList<>();
+    private LinkedList<Reg> synchronizedReg = new LinkedList<>();
 
-    private static final StringBuilder mipsCode = new StringBuilder();
-    private static final RegScheduler scheduler = new RegScheduler();
+    private StringBuilder mipsCode = new StringBuilder();
+    private RegScheduler scheduler = RegScheduler.getInstance();
 
 
-    private final LinkedList<Value> valueFromArg = new LinkedList<>();
+    private LinkedList<Value> valueFromArg = new LinkedList<>();
     private int frameSize;
     private int pushCount = 0;
     private int strCount = 0;

@@ -1,79 +1,174 @@
-GLOBAL CONST $ZERO@0 0
-GLOBAL CONST $ONE@0 1
-GLOBAL VAR $var2@0 2
-GLOBAL VAR $var3@0 3
 CALL main
 EXIT
 main:
 main:
-PRINT "21373457\n"
-TEMP $0 <- $var2@0
-TEMP $1 <- $var3@0
-$2 <- -1 ADD $1
-$3 <- $0 EQ $2
-BRANCH Label1: IF $3 EQ 0
-TEMP $4 <- $var2@0
-$5 <- 2 ADD $4
-$6 <- $5 LT 0
-BRANCH Label2: IF $6 EQ 0
-PRINT "ERROR!\n"
-JUMP Label3
-Label2:
-NOP
-PRINT "And success!\n"
-Label3:
-NOP
+LOCAL VAR $i@1 
+SAVE $i@1 <- 0
 Label1:
 NOP
-TEMP $7 <- $var3@0
-$8 <- $7 NE 3
-BRANCH Label4: IF $8 EQ 0
-PRINT "Or pass!\n"
-JUMP Label5
+BRANCH Label2: IF 1 EQ 0
+TEMP $0 <- $i@1
+$1 <- $0 LT 2
+BRANCH Label3: IF $1 EQ 0
+TEMP $2 <- $i@1
+$3 <- 1 ADD $2
+SAVE $i@1 <- $3
+JUMP Label4
+Label3:
+NOP
+JUMP Label2
 Label4:
 NOP
-TEMP $9 <- $var2@0
-$10 <- -22 ADD $9
-$11 <- $10 EQ -20
-BRANCH Label6: IF $11 EQ 0
-PRINT "Or pass!\n"
-Label6:
 NOP
+JUMP Label1
+Label2:
+NOP
+SAVE $i@1 <- 2
 Label5:
 NOP
-PRINT "Test1 Success!"
-CALL fun
-CALL fun
-CALL fun
-CALL fun
-CALL fun
-CALL fun
-RETURN 0
-fun:
-fun:
-LOCAL VAR $i@1 1
-LOCAL VAR $yuming@2 1
-Label7:
-NOP
-BRANCH Label8: IF 1 EQ 0
-NOP
-TEMP $12 <- $yuming@2
-$13 <- $12 LT 1000
-BRANCH Label9: IF $13 EQ 0
-TEMP $14 <- $yuming@2
-$15 <- 2 MUL $14
-SAVE $yuming@2 <- $15
-NOP
-JUMP Label10
-Label9:
-NOP
-JUMP Label8
-Label10:
-NOP
-JUMP Label7
+BRANCH Label6: IF 1 EQ 0
+BRANCH Label7: IF 1 EQ 0
+TEMP $4 <- $i@1
+$5 <- $4 EQ 4
+BRANCH Label8: IF $5 EQ 0
+JUMP Label6
 Label8:
 NOP
-TEMP $16 <- $yuming@2
-PUSH $16
-PRINT "\n%d"
-RETURN
+JUMP Label9
+Label7:
+NOP
+JUMP Label6
+Label9:
+NOP
+TEMP $6 <- $i@1
+$7 <- 1 ADD $6
+SAVE $i@1 <- $7
+JUMP Label5
+Label6:
+NOP
+PRINT "1"
+NOP
+Label10:
+NOP
+BRANCH Label11: IF 1 EQ 0
+TEMP $8 <- $i@1
+$9 <- $8 LT 5
+BRANCH Label12: IF $9 EQ 0
+TEMP $10 <- $i@1
+$11 <- $10 LT 5
+BRANCH Label13: IF $11 EQ 0
+JUMP Label10
+Label13:
+NOP
+TEMP $12 <- $i@1
+$13 <- 2 ADD $12
+SAVE $i@1 <- $13
+JUMP Label14
+Label12:
+NOP
+JUMP Label11
+Label14:
+NOP
+TEMP $14 <- $i@1
+$15 <- 1 ADD $14
+SAVE $i@1 <- $15
+JUMP Label10
+Label11:
+NOP
+PRINT "2"
+SAVE $i@1 <- 5
+Label15:
+NOP
+BRANCH Label16: IF 1 EQ 0
+BRANCH Label17: IF 1 EQ 0
+TEMP $16 <- $i@1
+$17 <- 1 ADD $16
+SAVE $i@1 <- $17
+TEMP $18 <- $i@1
+$19 <- $18 EQ 6
+BRANCH Label18: IF $19 EQ 0
+JUMP Label16
+Label18:
+NOP
+JUMP Label19
+Label17:
+NOP
+JUMP Label16
+Label19:
+NOP
+NOP
+JUMP Label15
+Label16:
+NOP
+PRINT "3"
+NOP
+Label20:
+NOP
+BRANCH Label21: IF 1 EQ 0
+TEMP $20 <- $i@1
+$21 <- $20 LT 7
+BRANCH Label22: IF $21 EQ 0
+TEMP $22 <- $i@1
+$23 <- 1 ADD $22
+SAVE $i@1 <- $23
+JUMP Label23
+Label22:
+NOP
+JUMP Label21
+Label23:
+NOP
+NOP
+JUMP Label20
+Label21:
+NOP
+PRINT "4"
+NOP
+Label24:
+NOP
+BRANCH Label25: IF 1 EQ 0
+BRANCH Label26: IF 1 EQ 0
+TEMP $24 <- $i@1
+$25 <- $24 EQ 8
+BRANCH Label27: IF $25 EQ 0
+JUMP Label25
+Label27:
+NOP
+JUMP Label28
+Label26:
+NOP
+JUMP Label25
+Label28:
+NOP
+TEMP $26 <- $i@1
+$27 <- 1 ADD $26
+SAVE $i@1 <- $27
+JUMP Label24
+Label25:
+NOP
+PRINT "5"
+NOP
+Label29:
+NOP
+BRANCH Label30: IF 1 EQ 0
+BRANCH Label31: IF 1 EQ 0
+TEMP $28 <- $i@1
+$29 <- 1 ADD $28
+SAVE $i@1 <- $29
+TEMP $30 <- $i@1
+$31 <- $30 EQ 10
+BRANCH Label32: IF $31 EQ 0
+PRINT "One stmt for pass!\n"
+JUMP Label30
+Label32:
+NOP
+JUMP Label33
+Label31:
+NOP
+JUMP Label30
+Label33:
+NOP
+NOP
+JUMP Label29
+Label30:
+NOP
+RETURN 0

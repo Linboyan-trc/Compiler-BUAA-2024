@@ -6,12 +6,16 @@ import java.util.Objects;
 public class WordMacro implements MipsCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 全局变量: label + : + .word + 值/需要的字
-    private final String label;
-    private final int size;
-    private final LinkedList<Long> intValues;
+    private String label;
+    private int size;
+    private LinkedList<Long> intValues;
 
     public WordMacro(String label, int size, LinkedList<Long> intValues) {
-        this.label = label.substring(0, label.indexOf('@') >= 0 ? label.indexOf('@') : label.length());
+        if(label.indexOf('@') >= 0){
+            this.label = label.substring(0, label.indexOf('@'));
+        } else {
+            this.label = label;
+        }
         this.size = size;
         this.intValues = intValues;
     }

@@ -59,14 +59,20 @@ public class PrintNode implements StmtNode {
     // 1. 化简
     @Override
     public PrintNode simplify() {
-        arguments = arguments.stream().map(ExpNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<ExpNode> newArguments = new LinkedList<>();
+        for(ExpNode arg : arguments) {
+            newArguments.add(arg.simplify());
+        }
+        arguments = newArguments;
         return this;
     }
 
     @Override
     public Value generateMidCode() {
         LinkedList<midend.MidCode.Value.Value> values = new LinkedList<>();
-        arguments.forEach(arg -> values.add(arg.generateMidCode()));
+        for(ExpNode arg : arguments) {
+            values.add(arg.generateMidCode());
+        }
         values.forEach(ArgPush::new);
         new Print(string.getWord());
         return null;

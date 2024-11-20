@@ -5,7 +5,7 @@ import backend.ValueMeta.Reg;
 public class Mflo implements MipsCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. mflo指令
-    private final Reg reg;
+    private Reg reg;
 
     public Mflo(Reg reg) {
         this.reg = reg;

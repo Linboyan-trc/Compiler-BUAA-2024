@@ -48,10 +48,18 @@ public class CompUnitNode implements SyntaxNode {
     @Override
     public CompUnitNode simplify() {
         // 1. 对每个<DeclNode>化简
-        declNodes = declNodes.stream().map(DeclNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<DeclNode> simplifiedDeclNodes = new LinkedList<>();
+        for (DeclNode node : declNodes) {
+            simplifiedDeclNodes.add(node.simplify());
+        }
+        declNodes = simplifiedDeclNodes;
 
         // 2. 对每个<FuncDefNode>化简
-        funcDefNodes = funcDefNodes.stream().map(FuncDefNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<FuncDefNode> simplifiedFuncDefNodes = new LinkedList<>();
+        for (FuncDefNode node : funcDefNodes) {
+            simplifiedFuncDefNodes.add(node.simplify());
+        }
+        funcDefNodes = simplifiedFuncDefNodes;
 
         // 3. 对<MainFuncDefNode>化简
         mainFuncDefNode = mainFuncDefNode.simplify();
@@ -63,7 +71,9 @@ public class CompUnitNode implements SyntaxNode {
     @Override
     public Value generateMidCode() {
         // 1. 全局变量生成中间代码
-        declNodes.forEach(DeclNode::generateMidCode);
+        for(DeclNode declNode:declNodes){
+            declNode.generateMidCode();
+        }
 
         // 2. 中间代码设置当前函数:main
         // 2. 然后添加当前函数 + 程序出口
@@ -75,7 +85,9 @@ public class CompUnitNode implements SyntaxNode {
         mainFuncDefNode.generateMidCode();
 
         // 4. 自定义函数生成中间代码
-        funcDefNodes.forEach(FuncDefNode::generateMidCode);
+        for(FuncDefNode funcDefNode:funcDefNodes){
+            funcDefNode.generateMidCode();
+        }
 
         // 5. 不需要返回
         return null;

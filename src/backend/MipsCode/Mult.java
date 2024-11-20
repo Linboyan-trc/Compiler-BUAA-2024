@@ -5,8 +5,8 @@ import backend.ValueMeta.Reg;
 public class Mult implements MipsCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. mult指令
-    private final Reg rs;
-    private final Reg rt;
+    private Reg rs;
+    private Reg rt;
 
     public Mult(Reg rs, Reg rt) {
         this.rs = rs;

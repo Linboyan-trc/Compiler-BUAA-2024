@@ -2,6 +2,7 @@ package backend;
 
 import backend.Address.*;
 import backend.MipsCode.IIns.IIns;
+import backend.MipsCode.IIns.IInsSW;
 import backend.ValueMeta.Reg;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Value;
@@ -22,14 +23,20 @@ public class RegScheduler {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 寄存器到Value的映射，代表寄存器中存储的值
     // 2. 标记正在用的寄存器，标记没有被使用的寄存器
-    private final HashMap<Reg, Value> reg2value = new HashMap<>();
-    private final LinkedList<Reg> busyRegs = new LinkedList<>();
-    private final LinkedList<Reg> freeRegs = new LinkedList<>();
+    private HashMap<Reg, Value> reg2value = new HashMap<>();
+    private LinkedList<Reg> busyRegs = new LinkedList<>();
+    private LinkedList<Reg> freeRegs = new LinkedList<>();
+    // 3. 单例模式
+    private static RegScheduler instance = new RegScheduler();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 构造一个寄存器分配器，只会构造一个
-    public RegScheduler() {
+    private RegScheduler() {
         freeRegs.addAll(regs);
+    }
+
+    public static RegScheduler getInstance() {
+        return instance;
     }
 
     // 2. 获取映射表
@@ -83,7 +90,7 @@ public class RegScheduler {
                     Translator.getInstance()
                             .getMipsCodeList()
                             .add(
-                                    new IIns.sw(
+                                    new IInsSW(
                                             reg,
                                             Translator.getInstance().getValueToAddress().get(oldValue)));
                 }
@@ -109,7 +116,7 @@ public class RegScheduler {
             // 3. 如果是绝对地址 + Word，相对地址 + 不是Addr，就需要写回内存
             if (address instanceof AbsoluteAddress && entry.getValue() instanceof Word
                     || address instanceof RelativeAddress && !(entry.getValue() instanceof Addr)) {
-                Translator.getInstance().getMipsCodeList().add(new IIns.sw(entry.getKey(), address));
+                Translator.getInstance().getMipsCodeList().add(new IInsSW(entry.getKey(), address));
             }
         }
         // 4. 释放所有寄存器

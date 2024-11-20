@@ -76,7 +76,9 @@ public class BlockNode implements StmtNode{
 
     @Override
     public Value generateMidCode() {
-        blockItemNodes.forEach(BlockItemNode::generateMidCode);
+        for(BlockItemNode blockItemNode : blockItemNodes) {
+            blockItemNode.generateMidCode();
+        }
         return null;
     }
 }

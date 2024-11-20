@@ -25,7 +25,11 @@ public class DeclNode implements BlockItemNode {
     @Override
     public DeclNode simplify() {
         // 1. 对每个<DefNode>化简
-        defNodes = defNodes.stream().map(DefNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<DefNode> newDefNodes = new LinkedList<>();
+        for(DefNode defNode : defNodes) {
+            newDefNodes.add(defNode.simplify());
+        }
+        defNodes = newDefNodes;
 
         // 2. 返回化简后的结果
         return this;
@@ -33,7 +37,9 @@ public class DeclNode implements BlockItemNode {
 
     @Override
     public Value generateMidCode() {
-        defNodes.forEach(DefNode::generateMidCode);
+        for(DefNode defNode : defNodes) {
+            defNode.generateMidCode();
+        }
         return null;
     }
 }

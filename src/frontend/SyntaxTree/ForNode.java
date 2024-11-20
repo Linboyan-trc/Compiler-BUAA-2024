@@ -41,11 +41,14 @@ public class ForNode implements StmtNode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 化简
     @Override
-    public LoopNode simplify() {
+    public BlockNode simplify() {
         // 1. 化简
-        ExpNode simCond = cond.simplify();
+        ExpNode simCond = null;
         ForStmtNode simForStmtNodeFirst = null;
         ForStmtNode simForStmtNodeSecond = null;
+        if(cond != null) {
+            simCond = cond.simplify();
+        }
         if(this.forStmtNodeFirst != null) {
             simForStmtNodeFirst = forStmtNodeFirst.simplify();
         }
@@ -62,43 +65,61 @@ public class ForNode implements StmtNode {
                 value = ((CharacterNode) simCond).getValue();
             }
             if(value == 0){
-                return new LoopNode(symbolTable, new NumberNode(1), new BreakNode(symbolTable));
+                return new BlockNode(symbolTable, new LinkedList<>(),0);
             }
         }
 
+        // 2. 是null就直接对simCond至数字1
+        if(simCond == null) {
+            simCond = new NumberNode(1);
+        }
+
         // 3. 否则化成while语句:
-        // while(1){
+        // {
         //  assginNode
-        //  if(cond){
-        //      stmt
+        //  while(1){
+        //      if(cond){
+        //          stmt
+        //      } else {
+        //          breakNode
+        //      }
         //      assignNode
-        //  } else {
-        //      breakNode
         //  }
         // }
-        // 3.1 as1, as2
+        // 3.1 as1
         StmtNode as1 = new NopNode();
-        stmt = stmt.simplify();
-        StmtNode as2 = new NopNode();
         if(simForStmtNodeFirst != null) {
             as1 = (StmtNode) new AssignNode(symbolTable, simForStmtNodeFirst.getLValNode(), simForStmtNodeFirst.getExpNode());
         }
+
+        // 3.2 stmt
+        stmt = stmt.simplify();
+
+        // 3.3 if
+        BranchNode bn = new BranchNode(symbolTable, simCond, stmt, new BreakNode(symbolTable));
+
+        // 3.3 as2
+        StmtNode as2 = new NopNode();
         if(simForStmtNodeSecond != null) {
             as2 = (StmtNode) new AssignNode(symbolTable, simForStmtNodeSecond.getLValNode(), simForStmtNodeSecond.getExpNode());
         }
-        // 3.2 LinkedList<BlockItemNode> for if
+
+        // 3.4 LinkedList<BlockItemNode> for while
         LinkedList<BlockItemNode> bi1 = new LinkedList<>();
-        bi1.add(stmt);
+        bi1.add(bn);
         bi1.add(as2);
         BlockNode bk = new BlockNode(symbolTable, bi1, 0);
-        BranchNode bn = new BranchNode(symbolTable, simCond, bk, new BreakNode(symbolTable));
-        // 3.3 LinkedList<BlockItemNode> for while
+
+        // 3.5 while
+        LoopNode lp = new LoopNode(symbolTable, new NumberNode(1), bk);
+
+        // 3.6 LinkedList<BlockItemNode> for block
         LinkedList<BlockItemNode> bi2 = new LinkedList<>();
         bi2.add(as1);
-        bi2.add(bn);
+        bi2.add(lp);
         BlockNode bk2 = new BlockNode(symbolTable, bi2, 0);
 
-        return new LoopNode(symbolTable, new NumberNode(1), bk2);
+        return bk2;
     }
 
     @Override

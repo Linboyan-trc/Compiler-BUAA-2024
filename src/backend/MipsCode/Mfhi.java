@@ -5,7 +5,7 @@ import backend.ValueMeta.Reg;
 public class Mfhi implements MipsCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. mfhi指令
-    private final Reg reg;
+    private Reg reg;
 
     public Mfhi(Reg reg) {
         this.reg = reg;
