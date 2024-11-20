@@ -5,6 +5,11 @@ import frontend.Lexer.Token;
 import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.MidCode.Assign;
+import midend.MidCode.Operate.BinaryOperate;
+import midend.MidCode.Value.*;
+
+import java.util.HashMap;
 
 public class BinaryExpNode implements ExpNode {
     // 1. 就是()*(), ()+()
@@ -295,5 +300,32 @@ public class BinaryExpNode implements ExpNode {
         } else {
             return ((CharacterNode) node).getValue();
         }
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 建立Token和UnaryOp之间的映射
+        HashMap<Token, BinaryOperate.BinaryOp> map = new HashMap<Token, BinaryOperate.BinaryOp>() {{
+            put(PLUS, BinaryOperate.BinaryOp.ADD);
+            put(MINU, BinaryOperate.BinaryOp.SUB);
+            put(MULT, BinaryOperate.BinaryOp.MUL);
+            put(DIV, BinaryOperate.BinaryOp.DIV);
+            put(MOD, BinaryOperate.BinaryOp.MOD);
+            put(GRE, BinaryOperate.BinaryOp.GT);
+            put(GEQ, BinaryOperate.BinaryOp.GE);
+            put(LSS, BinaryOperate.BinaryOp.LT);
+            put(LEQ, BinaryOperate.BinaryOp.LE);
+            put(EQL, BinaryOperate.BinaryOp.EQ);
+            put(NEQ, BinaryOperate.BinaryOp.NE);
+            put(AND, BinaryOperate.BinaryOp.AND);
+            put(OR, BinaryOperate.BinaryOp.OR);
+        }};
+
+        // 2. 左右两个expNode生成中间代码
+        Value leftValue = leftExp.generateMidCode();
+        Value rightValue = rightExp.generateMidCode();
+        Value value = (leftValue instanceof Addr || rightValue instanceof Addr) ? new Addr() : new Word();
+        new Assign(true, value, new BinaryOperate(map.get(binaryOp.getToken()), leftValue, rightValue));
+        return value;
     }
 }

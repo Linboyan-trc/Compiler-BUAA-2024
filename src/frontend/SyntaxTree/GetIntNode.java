@@ -4,6 +4,16 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.MidCode.Assign;
+import midend.MidCode.MidCode.IntGet;
+import midend.MidCode.MidCode.Move;
+import midend.MidCode.MidCode.Store;
+import midend.MidCode.Operate.BinaryOperate;
+import midend.MidCode.Value.Addr;
+import midend.MidCode.Value.Value;
+import midend.MidCode.Value.Word;
+
+import static midend.MidCode.Operate.BinaryOperate.BinaryOp.ADD;
 
 public class GetIntNode implements StmtNode {
     // 1. <LVal>
@@ -37,5 +47,40 @@ public class GetIntNode implements StmtNode {
     public GetIntNode simplify() {
         lValNode = lValNode.compute();
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 获取左指IDENFR在符号表中的DefNode
+        DefNode defNode = symbolTable.getVariable(lValNode.getPair().getWord()).simplify();
+
+        // 2. 获取作用域id
+        int id = defNode.getScopeId();
+
+        // 3. 获取符号表中变量对应的数组长度
+        ExpNode length = defNode.getLength();
+
+        // 4. 声明一个新的读一个Int的节点
+        new IntGet();
+
+        // 5. 如果变量是单变量
+        if (length == null) {
+            Word value = new Word(lValNode.getPair().getWord() + "@" + id);
+            new Move(false, value, new Word("?"));
+            return null;
+        }
+
+        // 5. 如果变量是数组
+        else {
+            // 5. 获取下标
+            Value offset = lValNode.getLength().generateMidCode();
+            Addr addr = new Addr();
+            new Assign(
+                    true,
+                    addr,
+                    new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset));
+            new Store(addr, new Word("?"));
+            return null;
+        }
     }
 }

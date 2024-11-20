@@ -32,5 +32,7 @@ public class Compiler {
 
         // 6. 化简
         compUnitNode = compUnitNode.simplify();
+
+        compUnitNode.generateMidCode();
     }
 }

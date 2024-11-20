@@ -2,6 +2,8 @@ package frontend.SyntaxTree;
 
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
+import midend.MidCode.MidCode.Return;
+import midend.MidCode.Value.Value;
 
 public class ReturnNode implements StmtNode {
     // 1. Pair + <Exp>
@@ -33,5 +35,15 @@ public class ReturnNode implements StmtNode {
             expNode = expNode.simplify();
         }
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        if (expNode == null) {
+            new Return();
+        } else {
+            new Return(expNode.generateMidCode());
+        }
+        return null;
     }
 }

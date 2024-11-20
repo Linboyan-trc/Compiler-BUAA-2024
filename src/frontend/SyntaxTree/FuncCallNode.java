@@ -5,6 +5,9 @@ import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.Value.Value;
+import midend.MidCode.MidCode.*;
+import midend.MidCode.Value.Word;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -83,5 +86,19 @@ public class FuncCallNode implements ExpNode {
         // 1. 只需要对每个参数化简
         arguments = arguments.stream().map(ExpNode::simplify).collect(Collectors.toCollection(LinkedList::new));
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        LinkedList<Value> values = new LinkedList<>();
+        arguments.forEach(arg -> values.add(arg.generateMidCode()));
+        values.forEach(ArgPush::new);
+        new FuncCall(pair.getWord());
+        if (symbolTable.getFunction(pair.getWord()).getFuncDefType().isIntFunc()) {
+            Word value = new Word();
+            new Move(true, value, new Word("?"));
+            return value;
+        }
+        return null;
     }
 }

@@ -2,6 +2,8 @@ package frontend.SyntaxTree;
 
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.Value.Imm;
+import midend.MidCode.Value.Value;
 
 public class NumberNode implements ExpNode {
     // 1. num
@@ -27,5 +29,10 @@ public class NumberNode implements ExpNode {
     @Override
     public NumberNode simplify() {
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        return new Imm(number);
     }
 }

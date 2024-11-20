@@ -4,6 +4,7 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.Value.Value;
 
 public class ForStmtNode implements SyntaxNode {
     // 1. <ForStmt> = <LVal> '=' <Exp>
@@ -48,5 +49,10 @@ public class ForStmtNode implements SyntaxNode {
         lValNode = lValNode.compute();
         expNode = expNode.simplify();
         return this;
+    }
+
+    @Override
+    public Value generateMidCode(){
+        return null;
     }
 }

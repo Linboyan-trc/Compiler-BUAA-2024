@@ -5,6 +5,10 @@ import frontend.ErrorHandler.ErrorRecord;
 import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.LabelTable.Label;
+import midend.MidCode.Value.Imm;
+import midend.MidCode.Value.Value;
+import midend.MidCode.MidCode.*;
 
 public class BranchNode implements StmtNode {
     // 1. 针对if <Cond> <Stmt> else <Stmt>
@@ -77,5 +81,33 @@ public class BranchNode implements StmtNode {
 
         // 4. 返回节点
         return new BranchNode(symbolTable, simplifiedfCond, simplifiedIfStmt, simplifiedElseStmt);
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 创建Label
+        Label thenEndLabel = new Label();
+        Value condValue = cond.generateMidCode();
+
+
+        new Branch(Branch.BranchOp.EQ, condValue, new Imm(0), thenEndLabel);
+
+
+        ifStmt.generateMidCode();
+
+
+        if (elseStmt == null) {
+            Nop thenEnd = new Nop();
+            thenEndLabel.setMidCode(thenEnd);
+        } else {
+            Label elseEndLabel = new Label();
+            new Jump(elseEndLabel);
+            Nop thenEnd = new Nop();
+            elseStmt.generateMidCode();
+            Nop elseEnd = new Nop();
+            thenEndLabel.setMidCode(thenEnd);
+            elseEndLabel.setMidCode(elseEnd);
+        }
+        return null;
     }
 }

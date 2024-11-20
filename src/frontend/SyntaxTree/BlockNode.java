@@ -4,6 +4,7 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -71,5 +72,11 @@ public class BlockNode implements StmtNode{
         if (blockItemNodes.size() == 0 || !(blockItemNodes.getLast() instanceof ReturnNode)) {
             blockItemNodes.add(new ReturnNode(symbolTable, null, null));
         }
+    }
+
+    @Override
+    public Value generateMidCode() {
+        blockItemNodes.forEach(BlockItemNode::generateMidCode);
+        return null;
     }
 }

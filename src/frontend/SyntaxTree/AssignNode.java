@@ -4,6 +4,15 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.MidCode.Assign;
+import midend.MidCode.MidCode.Move;
+import midend.MidCode.MidCode.Store;
+import midend.MidCode.Operate.BinaryOperate;
+import midend.MidCode.Value.Value;
+import midend.MidCode.Value.*;
+import static midend.MidCode.Operate.BinaryOperate.BinaryOp.*;
+
+import java.util.LinkedList;
 
 public class AssignNode implements StmtNode {
     // 1. <LValNode> + <ExpNode>
@@ -40,5 +49,42 @@ public class AssignNode implements StmtNode {
         lValNode = lValNode.compute();
         expNode = expNode.simplify();
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 获取左指IDENFR在符号表中的DefNode
+        DefNode defNode = symbolTable.getVariable(lValNode.getPair().getWord()).simplify();
+
+        // 2. 获取作用域id
+        int id = defNode.getScopeId();
+
+        // 3. 获取数组长度
+        ExpNode length = defNode.getLength();
+
+        // 4. 右侧赋值生成中间代码
+        Value expValue = expNode.generateMidCode();
+
+        // 5. 如果左值对应的变量是单变量
+        if (length == null) {
+            // 5. 创建一个赋值操作
+            Word value = new Word(lValNode.getPair().getWord() + "@" + id);
+            new Move(false, value, expValue);
+            return null;
+        }
+
+        // 5. 如果左值对应的变量是数组
+        else {
+            // 5. 获取下标
+            // 5. 存储在内存中
+            Value offset = lValNode.getLength().generateMidCode();
+            Addr addr = new Addr();
+            new Assign(
+                    true,
+                    addr,
+                    new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset));
+            new Store(addr, expValue);
+            return null;
+        }
     }
 }

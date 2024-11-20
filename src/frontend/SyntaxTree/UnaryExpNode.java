@@ -5,6 +5,12 @@ import frontend.Lexer.Token;
 import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.MidCode.Assign;
+import midend.MidCode.Operate.UnaryOperate;
+import midend.MidCode.Value.Value;
+import midend.MidCode.Value.Word;
+
+import java.util.HashMap;
 
 public class UnaryExpNode implements ExpNode {
     // 1. <UnaryOP> + <UnaryExp>
@@ -155,5 +161,25 @@ public class UnaryExpNode implements ExpNode {
             default:
                 return null;
         }
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 建立Token和UnaryOp之间的映射
+        HashMap<Token, UnaryOperate.UnaryOp> map = new HashMap<Token, UnaryOperate.UnaryOp>() {{
+            put(PLUS, UnaryOperate.UnaryOp.POS);
+            put(MINU, UnaryOperate.UnaryOp.NEG);
+            put(NOT, UnaryOperate.UnaryOp.NOT);
+        }};
+
+        // 2.expNode生成中间代码
+        Value expValue = expNode.generateMidCode();
+
+        // 3. 作为一个Word
+        Word value = new Word();
+        new Assign(true, value, new UnaryOperate(map.get(unaryOp.getToken()), expValue));
+
+        // 4. 返回一个value
+        return value;
     }
 }

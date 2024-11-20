@@ -3,6 +3,10 @@ package frontend.SyntaxTree;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.MidCode.Declare;
+import midend.MidCode.Value.Addr;
+import midend.MidCode.Value.Value;
+import midend.MidCode.Value.Word;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -33,6 +37,10 @@ public class DefNode implements SyntaxNode {
     }
 
     // 2. get
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
+
     public boolean isFinal() {
         return isFinal;
     }
@@ -47,6 +55,10 @@ public class DefNode implements SyntaxNode {
 
     public ExpNode getLength() {
         return length;
+    }
+
+    public int getScopeId() {
+        return symbolTable.getId();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,5 +106,34 @@ public class DefNode implements SyntaxNode {
                 return temp;
             }
         }
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 判断此<DefNode>:Pair是否是全局变量
+        // 1. 通过此<DefNode>所在的符号表是否有上层符号表来判断
+        boolean isGlobal = symbolTable.getParent() == null;
+
+        // 2. 对每个initValues生成中间代码
+        LinkedList<Value> values = new LinkedList<>();
+        initValues.forEach(initValue -> values.add(initValue.generateMidCode()));
+
+        // 3. 计算此<DefNode>长度
+        int size =  (int) (length == null ? 1 : ((NumberNode) length).getValue());
+
+        // 4.1 如果不是数组，就返回一个Word
+        if (length == null) {
+            Word value = new Word(pair.getWord() + "@" + symbolTable.getId());
+            new Declare(isGlobal, isFinal, value, size, values);
+        }
+
+        // 4.2 如果是数组，就返回一个地址
+        else {
+            Addr value = new Addr(pair.getWord() + "@" + symbolTable.getId());
+            new Declare(isGlobal, isFinal, value, size, values);
+        }
+
+        // 5. 不需要返回
+        return null;
     }
 }

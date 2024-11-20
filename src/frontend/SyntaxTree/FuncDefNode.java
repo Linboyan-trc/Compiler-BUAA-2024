@@ -4,6 +4,10 @@ import frontend.Lexer.Pair;
 import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.LabelTable.Label;
+import midend.MidCode.*;
+import midend.MidCode.MidCode.FuncEntry;
+import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -60,6 +64,28 @@ public class FuncDefNode implements SyntaxNode {
             blockNode.complete();
         }
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 创建入口标签
+        Label entryLabel = new Label(pair.getWord());
+
+        // 2. 创建入口标签的中间代码节点，自动添加到中间代码中
+        FuncEntry funcEntry = new FuncEntry(entryLabel);
+
+        // 3. 设置当前函数，以更新(函数表 = 函数名 + 变量表)
+        MidCodeTable.getInstance().setFunc(entryLabel.getLabelName());
+
+        // 4. 为每个参数生产中间代码
+        funcFParamNodes.forEach(FuncFParamNode::generateMidCode);
+
+        // 5. <BlockNode>生成中间代码
+        blockNode.generateMidCode();
+
+        // 6. 为函数中间代码的入口，添加标签列表
+        entryLabel.setMidCode(funcEntry);
+        return null;
     }
 
 }

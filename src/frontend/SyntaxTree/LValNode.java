@@ -5,6 +5,12 @@ import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.MidCode.Assign;
+import midend.MidCode.MidCode.Load;
+import midend.MidCode.MidCode.Move;
+import midend.MidCode.Operate.BinaryOperate;
+import midend.MidCode.Value.*;
+import static midend.MidCode.Operate.BinaryOperate.BinaryOp.*;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -28,6 +34,10 @@ public class LValNode implements ExpNode {
     // 3. get
     public Pair getPair() {
         return pair;
+    }
+
+    public ExpNode getLength() {
+        return length;
     }
 
     // 4. 检查
@@ -106,5 +116,48 @@ public class LValNode implements ExpNode {
             length = length.simplify();
         }
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 获取在符号表中的变量
+        DefNode defNode = symbolTable.getVariable(pair.getWord()).simplify();
+
+        // 2. 获取作用域id
+        int id = defNode.getScopeId();
+
+        // 3. 获取长度
+        ExpNode length = defNode.getLength();
+
+        // 4. 如果是单变量，添加一个Word
+        // 4. 添加一个赋值语句，从此变量加载到一个临时变量
+        if (length == null) {
+            Word value = new Word();
+            new Move(true, value, new Word(pair.getWord() + "@" + id));
+            return value;
+        }
+
+        // 5. 此变量为一维数组
+        else {
+            // 5. 如果此LValNode没有指定length，说明取此变量对应的数组的地址
+            if (this.length == null) {
+                Addr value = new Addr();
+                new Move(true, value, new Addr(pair.getWord() + "@" + id));
+                return value;
+            }
+
+            // 5. 如果此LValNode指定了length，就需要返回一个加载数组中值的节点
+            else {
+                Value offsetValue = this.length.generateMidCode();
+                Addr addr = new Addr();
+                new Assign(
+                        true,
+                        addr,
+                        new BinaryOperate(ADD, new Addr(pair.getWord() + "@" + id), offsetValue));
+                Word value = new Word();
+                new Load(true, value, addr);
+                return value;
+            }
+        }
     }
 }

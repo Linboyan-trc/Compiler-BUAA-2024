@@ -4,6 +4,8 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
+import midend.MidCode.Value.Value;
+import midend.MidCode.MidCode.*;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -59,5 +61,14 @@ public class PrintNode implements StmtNode {
     public PrintNode simplify() {
         arguments = arguments.stream().map(ExpNode::simplify).collect(Collectors.toCollection(LinkedList::new));
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        LinkedList<midend.MidCode.Value.Value> values = new LinkedList<>();
+        arguments.forEach(arg -> values.add(arg.generateMidCode()));
+        values.forEach(ArgPush::new);
+        new Print(string.getWord());
+        return null;
     }
 }

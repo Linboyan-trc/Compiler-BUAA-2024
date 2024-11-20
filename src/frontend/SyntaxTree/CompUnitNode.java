@@ -2,6 +2,10 @@ package frontend.SyntaxTree;
 
 import frontend.SyntaxTable.SymbolItem;
 import frontend.SyntaxTable.SymbolTable;
+import midend.MidCode.*;
+import midend.MidCode.MidCode.Exit;
+import midend.MidCode.MidCode.FuncCall;
+import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -54,5 +58,26 @@ public class CompUnitNode implements SyntaxNode {
 
         // 4. 返回化简后的结果
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        // 1. 全局变量生成中间代码
+        declNodes.forEach(DeclNode::generateMidCode);
+
+        // 2. 中间代码设置当前函数:main
+        // 2. 然后添加当前函数 + 程序出口
+        MidCodeTable.getInstance().setFunc("main");
+        new FuncCall("main");
+        new Exit();
+
+        // 3. main函数生成中间代码
+        mainFuncDefNode.generateMidCode();
+
+        // 4. 自定义函数生成中间代码
+        funcDefNodes.forEach(FuncDefNode::generateMidCode);
+
+        // 5. 不需要返回
+        return null;
     }
 }

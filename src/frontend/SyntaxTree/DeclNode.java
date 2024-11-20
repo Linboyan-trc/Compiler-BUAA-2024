@@ -1,6 +1,7 @@
 package frontend.SyntaxTree;
 
 import frontend.SyntaxTable.SymbolTable;
+import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -28,5 +29,11 @@ public class DeclNode implements BlockItemNode {
 
         // 2. 返回化简后的结果
         return this;
+    }
+
+    @Override
+    public Value generateMidCode() {
+        defNodes.forEach(DefNode::generateMidCode);
+        return null;
     }
 }

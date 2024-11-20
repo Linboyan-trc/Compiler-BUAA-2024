@@ -4,6 +4,7 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 
@@ -98,5 +99,10 @@ public class ForNode implements StmtNode {
         BlockNode bk2 = new BlockNode(symbolTable, bi2, 0);
 
         return new LoopNode(symbolTable, new NumberNode(1), bk2);
+    }
+
+    @Override
+    public Value generateMidCode(){
+        return null;
     }
 }
