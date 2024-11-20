@@ -2,8 +2,10 @@ package backend;
 
 import backend.Address.*;
 import backend.MipsCode.*;
-import backend.MipsCode.IIns.IIns;
+import backend.MipsCode.IIns.*;
 import backend.MipsCode.JIns.JIns;
+import backend.MipsCode.JIns.JInsJ;
+import backend.MipsCode.JIns.JInsJAL;
 import backend.MipsCode.RIns.RIns2Reg1Imm;
 import backend.MipsCode.RIns.RIns3Reg;
 import backend.MipsCode.RIns.RInsJR;
@@ -23,7 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import static backend.MipsCode.RIns.RInsOpcode.*;
-import static backend.MipsCode.IIns.IIns.IOpCode.*;
+import static backend.MipsCode.IIns.IInsOpcode.*;
 
 public class Translator {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +98,7 @@ public class Translator {
         }
 
         // 2. 压栈
-        mipsCodeList.add(new IIns.IR2I1(addiu, Reg.SP, Reg.SP, new Imm(-4)));
+        mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.SP, Reg.SP, new Imm(-4)));
 
         // 3. 从中间代码中的代码部分获取每一个中间代码节点
         for (MidCode midCode : midCodeTable.getMidCodeList()) {
@@ -198,13 +200,13 @@ public class Translator {
                 if (load) {
                     Address address = valueToAddress.get(value);
                     if (value instanceof Word) {
-                        mipsCodeList.add(new IIns.lw(reg, address));
+                        mipsCodeList.add(new IInsLW(reg, address));
                     } else if (address instanceof AbsoluteAddress) {
-                        mipsCodeList.add(new IIns.la(reg, address));
+                        mipsCodeList.add(new IInsLA(reg, address));
                     } else if (lw || valueFromArg.contains(value) || ((Addr) value).isTemp()) {
-                        mipsCodeList.add(new IIns.lw(reg, address));
+                        mipsCodeList.add(new IInsLW(reg, address));
                     } else {
-                        mipsCodeList.add(new IIns.la(reg, address));
+                        mipsCodeList.add(new IInsLA(reg, address));
                     }
                 }
             }
@@ -217,10 +219,10 @@ public class Translator {
         pushCount++;
         ValueMeta valueMeta = getValueMeta(argPush.getValue(), true, false);
         if (valueMeta instanceof Reg) {
-            mipsCodeList.add(new IIns.sw((Reg) valueMeta, new RelativeAddress(Reg.SP, -pushCount * 4)));
+            mipsCodeList.add(new IInsSW((Reg) valueMeta, new RelativeAddress(Reg.SP, -pushCount * 4)));
         } else {
-            mipsCodeList.add(new IIns.li(Reg.TR, (Imm) valueMeta));
-            mipsCodeList.add(new IIns.sw(Reg.TR, new RelativeAddress(Reg.SP, -pushCount * 4)));
+            mipsCodeList.add(new IInsLI(Reg.TR, (Imm) valueMeta));
+            mipsCodeList.add(new IInsSW(Reg.TR, new RelativeAddress(Reg.SP, -pushCount * 4)));
         }
     }
 
@@ -234,7 +236,7 @@ public class Translator {
             Reg valMeta = (Reg) getValueMeta(assign.getTargetValue(), false, false);
             if (leftValue instanceof Addr) {
                 if (rightMeta instanceof Imm) {
-                    mipsCodeList.add(new IIns.li(Reg.TR, new Imm(((Imm) rightMeta).getValue() * 4)));
+                    mipsCodeList.add(new IInsLI(Reg.TR, new Imm(((Imm) rightMeta).getValue() * 4)));
                     generateMips(binaryOp, valMeta, leftMeta, Reg.TR);
                 } else {
                     mipsCodeList.add(new RIns2Reg1Imm(sll, Reg.TR, (Reg) rightMeta, new Imm(2)));
@@ -242,7 +244,7 @@ public class Translator {
                 }
             } else if (rightValue instanceof Addr) {
                 if (leftMeta instanceof Imm) {
-                    mipsCodeList.add(new IIns.li(Reg.TR, new Imm(((Imm) leftMeta).getValue() * 4)));
+                    mipsCodeList.add(new IInsLI(Reg.TR, new Imm(((Imm) leftMeta).getValue() * 4)));
                     generateMips(binaryOp, valMeta, Reg.TR, rightMeta);
                 } else {
                     mipsCodeList.add(new RIns2Reg1Imm(sll, Reg.TR, (Reg) leftMeta, new Imm(2)));
@@ -261,14 +263,14 @@ public class Translator {
 
     public void generateMips(BinaryOperate.BinaryOp binaryOp, Reg valMeta, ValueMeta leftMeta, ValueMeta rightMeta) {
         if (leftMeta instanceof Imm && rightMeta instanceof Imm) {
-            mipsCodeList.add(new IIns.li(Reg.TR, (Imm) leftMeta));
-            mipsCodeList.add(new IIns.li(valMeta, (Imm) rightMeta));
+            mipsCodeList.add(new IInsLI(Reg.TR, (Imm) leftMeta));
+            mipsCodeList.add(new IInsLI(valMeta, (Imm) rightMeta));
             generateMips(valMeta, binaryOp, Reg.TR, valMeta);
         } else if (leftMeta instanceof Imm) {
-            mipsCodeList.add(new IIns.li(Reg.TR, (Imm) leftMeta));
+            mipsCodeList.add(new IInsLI(Reg.TR, (Imm) leftMeta));
             generateMips(valMeta, binaryOp, Reg.TR, (Reg) rightMeta);
         } else if (rightMeta instanceof Imm) {
-            mipsCodeList.add(new IIns.li(Reg.TR, (Imm) rightMeta));
+            mipsCodeList.add(new IInsLI(Reg.TR, (Imm) rightMeta));
             generateMips(valMeta, binaryOp, (Reg) leftMeta, Reg.TR);
         } else {
             generateMips(valMeta, binaryOp, (Reg) leftMeta, (Reg) rightMeta);
@@ -320,13 +322,13 @@ public class Translator {
         if (rightMeta instanceof Imm) {
             switch (unaryOp) {
                 case POS:
-                    mipsCodeList.add(new IIns.li(valMeta, (Imm) rightMeta));
+                    mipsCodeList.add(new IInsLI(valMeta, (Imm) rightMeta));
                     break;
                 case NEG:
-                    mipsCodeList.add(new IIns.li(valMeta, new Imm(-((Imm) rightMeta).getValue())));
+                    mipsCodeList.add(new IInsLI(valMeta, new Imm(-((Imm) rightMeta).getValue())));
                     break;
                 case NOT:
-                    mipsCodeList.add(new IIns.li(valMeta, new Imm(((Imm) rightMeta).getValue() == 0 ? 1 : 0)));
+                    mipsCodeList.add(new IInsLI(valMeta, new Imm(((Imm) rightMeta).getValue() == 0 ? 1 : 0)));
                     break;
             }
         } else {
@@ -348,16 +350,16 @@ public class Translator {
         Branch.BranchOp branchOp = branch.getBranchOp();
         ValueMeta leftMeta = getValueMeta(branch.getLeftValue(), true, false);
         if (leftMeta instanceof Imm) {
-            mipsCodeList.add(new IIns.li(Reg.TR, (Imm) leftMeta));
+            mipsCodeList.add(new IInsLI(Reg.TR, (Imm) leftMeta));
             if (branchOp == Branch.BranchOp.EQ) {
-                mipsCodeList.add(new IIns.beq(Reg.TR, Reg.ZERO, branch.getBranchLabel().getLabelName()));
+                mipsCodeList.add(new IInsBEQ(Reg.TR, Reg.ZERO, branch.getBranchLabel().getLabelName()));
             } else {
-                mipsCodeList.add(new IIns.bne(Reg.TR, Reg.ZERO, branch.getBranchLabel().getLabelName()));
+                mipsCodeList.add(new IInsBNE(Reg.TR, Reg.ZERO, branch.getBranchLabel().getLabelName()));
             }
         } else if (branchOp == Branch.BranchOp.EQ) {
-            mipsCodeList.add(new IIns.beq((Reg) leftMeta, Reg.ZERO, branch.getBranchLabel().getLabelName()));
+            mipsCodeList.add(new IInsBEQ((Reg) leftMeta, Reg.ZERO, branch.getBranchLabel().getLabelName()));
         } else {
-            mipsCodeList.add(new IIns.bne((Reg) leftMeta, Reg.ZERO, branch.getBranchLabel().getLabelName()));
+            mipsCodeList.add(new IInsBNE((Reg) leftMeta, Reg.ZERO, branch.getBranchLabel().getLabelName()));
         }
     }
 
@@ -368,7 +370,7 @@ public class Translator {
                 Value value = declare.getInitValues().get(0);
                 ValueMeta rightMeta = getValueMeta(value, true, false);
                 if (rightMeta instanceof Imm) {
-                    mipsCodeList.add(new IIns.li(leftMeta, (Imm) rightMeta));
+                    mipsCodeList.add(new IInsLI(leftMeta, (Imm) rightMeta));
                 } else {
                     mipsCodeList.add(new RIns3Reg(addu, leftMeta, (Reg) rightMeta, Reg.ZERO));
                 }
@@ -379,11 +381,11 @@ public class Translator {
                 Value value = declare.getInitValues().get(i);
                 ValueMeta rightMeta = getValueMeta(value, true, false);
                 if (rightMeta instanceof Imm) {
-                    mipsCodeList.add(new IIns.li(Reg.TR, (Imm) rightMeta));
-                    mipsCodeList.add(new IIns.sw(Reg.TR,
+                    mipsCodeList.add(new IInsLI(Reg.TR, (Imm) rightMeta));
+                    mipsCodeList.add(new IInsSW(Reg.TR,
                             new RelativeAddress(addr.getBase(), addr.getOffset() + i * 4)));
                 } else {
-                    mipsCodeList.add(new IIns.sw((Reg) rightMeta,
+                    mipsCodeList.add(new IInsSW((Reg) rightMeta,
                             new RelativeAddress(addr.getBase(), addr.getOffset() + i * 4)));
                 }
             }
@@ -391,7 +393,7 @@ public class Translator {
     }
 
     public void generateMips(Exit exit) {
-        mipsCodeList.add(new IIns.li(Reg.RV, new Imm(10)));
+        mipsCodeList.add(new IInsLI(Reg.RV, new Imm(10)));
         mipsCodeList.add(new Syscall());
     }
 
@@ -401,13 +403,13 @@ public class Translator {
         reg2value.forEach((reg, value) -> {
             if (valueToAddress.containsKey(value)) {
                 if (value instanceof Word || (value instanceof Addr && ((Addr) value).isTemp())) {
-                    mipsCodeList.add(new IIns.sw(reg, valueToAddress.get(value)));
+                    mipsCodeList.add(new IInsSW(reg, valueToAddress.get(value)));
                 }
             }
         });
-        mipsCodeList.add(new IIns.sw(Reg.RA, new RelativeAddress(Reg.SP, 0)));
-        mipsCodeList.add(new JIns.jal(funcCall.getName()));
-        mipsCodeList.add(new IIns.lw(Reg.RA, new RelativeAddress(Reg.SP, 0)));
+        mipsCodeList.add(new IInsSW(Reg.RA, new RelativeAddress(Reg.SP, 0)));
+        mipsCodeList.add(new JInsJAL(funcCall.getName()));
+        mipsCodeList.add(new IInsLW(Reg.RA, new RelativeAddress(Reg.SP, 0)));
         scheduler.clear();
     }
 
@@ -422,43 +424,43 @@ public class Translator {
             System.out.println(values.get(i) + " " + valueToAddress.get(values.get(i)));
         }
         frameSize = fp;
-        mipsCodeList.add(new IIns.IR2I1(addiu, Reg.SP, Reg.SP, new Imm(-fp)));
+        mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.SP, Reg.SP, new Imm(-fp)));
     }
 
     public void generateMips(IntGet intGet) {
-        mipsCodeList.add(new IIns.li(Reg.RV, new Imm(5)));
+        mipsCodeList.add(new IInsLI(Reg.RV, new Imm(5)));
         mipsCodeList.add(new Syscall());
     }
 
     public void generateMips(CharGet charGet) {
-        mipsCodeList.add(new IIns.li(Reg.RV, new Imm(12)));
+        mipsCodeList.add(new IInsLI(Reg.RV, new Imm(12)));
         mipsCodeList.add(new Syscall());
     }
 
     public void generateMips(Jump jump) {
-        mipsCodeList.add(new JIns.j(jump.getLabel().getLabelName()));
+        mipsCodeList.add(new JInsJ(jump.getLabel().getLabelName()));
     }
 
     public void generateMips(Load load) {
         ValueMeta leftMeta = getValueMeta(load.getTargetValue(), false, false);
         ValueMeta rightMeta = getValueMeta(load.getSourceValue(), true, false);
-        mipsCodeList.add(new IIns.lw((Reg) leftMeta, new RelativeAddress((Reg) rightMeta, 0)));
+        mipsCodeList.add(new IInsLW((Reg) leftMeta, new RelativeAddress((Reg) rightMeta, 0)));
     }
 
     public void generateMips(Move move) {
         ValueMeta leftMeta = getValueMeta(move.getTargetValue(), false, false);
         ValueMeta rightMeta = getValueMeta(move.getSourceValue(), true, false);
         if (rightMeta instanceof Reg) {
-            mipsCodeList.add(new IIns.IR2I1(addiu, (Reg) leftMeta, (Reg) rightMeta, new Imm(0)));
+            mipsCodeList.add(new IIns2Reg1Imm(addiu, (Reg) leftMeta, (Reg) rightMeta, new Imm(0)));
         } else {
-            mipsCodeList.add(new IIns.li((Reg) leftMeta, (Imm) rightMeta));
+            mipsCodeList.add(new IInsLI((Reg) leftMeta, (Imm) rightMeta));
         }
     }
 
     public void generateMips(ParaGet paraGet) {
         valueFromArg.add(paraGet.getValue());
         ValueMeta valueMeta = getValueMeta(paraGet.getValue(), false, false);
-        mipsCodeList.add(new IIns.lw((Reg) valueMeta, valueToAddress.get(paraGet.getValue())));
+        mipsCodeList.add(new IInsLW((Reg) valueMeta, valueToAddress.get(paraGet.getValue())));
     }
 
     public void generateMips(Print print) {
@@ -470,12 +472,12 @@ public class Translator {
             if (!out.isEmpty()) {
                 String label = "string" + strCount++;
                 macroCodeList.add(new StringMacro(label, out));
-                mipsCodeList.add(new IIns.la(Reg.AR, new AbsoluteAddress(label)));
-                mipsCodeList.add(new IIns.li(Reg.RV, new Imm(4)));
+                mipsCodeList.add(new IInsLA(Reg.AR, new AbsoluteAddress(label)));
+                mipsCodeList.add(new IInsLI(Reg.RV, new Imm(4)));
                 mipsCodeList.add(new Syscall());
             }
-            mipsCodeList.add(new IIns.lw(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
-            mipsCodeList.add(new IIns.li(Reg.RV, new Imm(1)));
+            mipsCodeList.add(new IInsLW(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
+            mipsCodeList.add(new IInsLI(Reg.RV, new Imm(1)));
             mipsCodeList.add(new Syscall());
             formatString = formatString.substring(index + 2);
             index = formatString.indexOf("%d");
@@ -484,8 +486,8 @@ public class Translator {
         if (!formatString.isEmpty()) {
             String label = "string" + strCount++;
             macroCodeList.add(new StringMacro(label, formatString));
-            mipsCodeList.add(new IIns.la(Reg.AR, new AbsoluteAddress(label)));
-            mipsCodeList.add(new IIns.li(Reg.RV, new Imm(4)));
+            mipsCodeList.add(new IInsLA(Reg.AR, new AbsoluteAddress(label)));
+            mipsCodeList.add(new IInsLI(Reg.RV, new Imm(4)));
             mipsCodeList.add(new Syscall());
         }
         pushCount = 0;
@@ -495,12 +497,12 @@ public class Translator {
         if (ret.getValue() != null) {
             ValueMeta valueMeta = getValueMeta(ret.getValue(), true, false);
             if (valueMeta instanceof Imm) {
-                mipsCodeList.add(new IIns.li(Reg.RV, (Imm) valueMeta));
+                mipsCodeList.add(new IInsLI(Reg.RV, (Imm) valueMeta));
             } else {
-                mipsCodeList.add(new IIns.IR2I1(addiu, Reg.RV, (Reg) valueMeta, new Imm(0)));
+                mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.RV, (Reg) valueMeta, new Imm(0)));
             }
         }
-        mipsCodeList.add(new IIns.IR2I1(addiu, Reg.SP, Reg.SP, new Imm(frameSize)));
+        mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.SP, Reg.SP, new Imm(frameSize)));
         mipsCodeList.add(new RInsJR(Reg.RA));
     }
 
@@ -508,10 +510,10 @@ public class Translator {
         ValueMeta leftMeta = getValueMeta(store.getTargetValue(), true, true);
         ValueMeta rightMeta = getValueMeta(store.getSourceValue(), true, false);
         if (rightMeta instanceof Reg) {
-            mipsCodeList.add(new IIns.sw((Reg) rightMeta, new RelativeAddress((Reg) leftMeta, 0)));
+            mipsCodeList.add(new IInsSW((Reg) rightMeta, new RelativeAddress((Reg) leftMeta, 0)));
         } else {
-            mipsCodeList.add(new IIns.li(Reg.TR, (Imm) rightMeta));
-            mipsCodeList.add(new IIns.sw(Reg.TR, new RelativeAddress((Reg) leftMeta, 0)));
+            mipsCodeList.add(new IInsLI(Reg.TR, (Imm) rightMeta));
+            mipsCodeList.add(new IInsSW(Reg.TR, new RelativeAddress((Reg) leftMeta, 0)));
         }
     }
 
