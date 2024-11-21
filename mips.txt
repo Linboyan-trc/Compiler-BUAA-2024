@@ -1,7 +1,7 @@
 .data
 constInt: .word 10
-constCharA: .word 39
-constCharB: .word 39
+constCharA: .word 65
+constCharB: .word 66
 varInt: .word 0:1
 varIntB: .word 5
 varIntC: .word 15
@@ -58,8 +58,8 @@ mult $t4, $t5
 mflo $t7
 # SAVE $varInt@0 <- $4
 addiu $t8, $t7, 0
-# SAVE $varChar@0 <- 39
-li $t9, 39
+# SAVE $varChar@0 <- 65
+li $t9, 65
 # NOP
 # TEMP $5 <- $a@5
 addiu $s0, $t3, 0
@@ -335,7 +335,7 @@ addiu $sp, $sp, -4
 la $a0, string17
 li $v0, 4
 syscall
-# RETURN 39
-li $v0, 39
+# RETURN 67
+li $v0, 67
 addiu $sp, $sp, 4
 jr $ra

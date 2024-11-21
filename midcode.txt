@@ -1,6 +1,6 @@
 GLOBAL CONST $constInt@0 10
-GLOBAL CONST $constCharA@0 39
-GLOBAL CONST $constCharB@0 39
+GLOBAL CONST $constCharA@0 65
+GLOBAL CONST $constCharB@0 66
 GLOBAL VAR $varInt@0 
 GLOBAL VAR $varIntB@0 5
 GLOBAL VAR $varIntC@0 15
@@ -17,7 +17,7 @@ TEMP $2 <- $a@5
 TEMP $3 <- $varIntC@0
 $4 <- $2 MUL $3
 SAVE $varInt@0 <- $4
-SAVE $varChar@0 <- 39
+SAVE $varChar@0 <- 65
 NOP
 TEMP $5 <- $a@5
 TEMP $6 <- $varInt@0
@@ -91,4 +91,4 @@ RETURN $28
 functionReturnChar:
 functionReturnChar:
 PRINT "Function returning a character\n"
-RETURN 39
+RETURN 67

@@ -525,7 +525,7 @@ public class ParsedUnit {
     }
 
     private CharacterNode toCharacterNode() {
-        return new CharacterNode(getUnit().toPair().getWord());
+        return new CharacterNode(getUnit().toPair().getWord().charAt(1));
     }
 
     ////////////////////////////////////////////////////////////////////////////////
