@@ -1,94 +1,136 @@
-GLOBAL CONST $constInt@0 10
-GLOBAL CONST $constCharA@0 65
-GLOBAL CONST $constCharB@0 66
-GLOBAL VAR $varInt@0 
-GLOBAL VAR $varIntB@0 5
-GLOBAL VAR $varIntC@0 15
-GLOBAL VAR $varChar@0 
+GLOBAL CONST &constIntArray@0 10, 20, 30
+GLOBAL CONST &constCharArray@0 65, 66, 67, 68, 69
+GLOBAL CONST &constCharArray2@0 
+GLOBAL VAR &intArray@0 
+GLOBAL VAR &charArray@0 
 CALL main
 EXIT
 main:
 main:
 PRINT "22373141\n"
-TEMP $0 <- $varIntB@0
-$1 <- 10 ADD $0
-LOCAL VAR $a@5 $1
-TEMP $2 <- $a@5
-TEMP $3 <- $varIntC@0
-$4 <- $2 MUL $3
-SAVE $varInt@0 <- $4
-SAVE $varChar@0 <- 65
-NOP
-TEMP $5 <- $a@5
-TEMP $6 <- $varInt@0
-$7 <- $5 ADD $6
-CALL functionNoParam
-TEMP $8 <- $a@5
-TEMP $9 <- $varChar@0
-PUSH $8
-PUSH $9
-CALL functionWithParams
-TEMP $10 <- $?
-LOCAL VAR $result@5 $10
-TEMP $11 <- $result@5
-PUSH $11
-PRINT "Result of functionWithParams: %d\n"
-CALL functionReturnChar
-TEMP $12 <- $?
-LOCAL VAR $ch@5 $12
-TEMP $13 <- $ch@5
-PUSH $13
-PRINT "Character returned: %c\n"
-TEMP $14 <- $a@5
-PUSH $14
-CALL functionSingleParam
-TEMP $15 <- $?
-LOCAL VAR $singleResult@5 $15
-TEMP $16 <- $singleResult@5
-PUSH $16
-PRINT "Result of functionSingleParam: %d\n"
-LOCAL VAR $inputInt@5 
-CALL GETINT
-SAVE $inputInt@5 <- $?
-TEMP $17 <- $inputInt@5
-PUSH $17
-PRINT "Input integer: %d\n"
-LOCAL VAR $inputChar@5 
-CALL GETCHAR
-SAVE $inputChar@5 <- $?
-TEMP $18 <- $inputChar@5
-PUSH $18
-PRINT "Input character: %c\n"
-RETURN 0
-functionNoParam:
-functionNoParam:
-PRINT "Function with no parameters\n"
-RETURN
-functionSingleParam:
-functionSingleParam:
-PARA $x@2
-TEMP $19 <- $x@2
-PUSH $19
-PRINT "Function with single parameter, x = %d\n"
-TEMP $20 <- $x@2
-TEMP $21 <- $x@2
-$22 <- $20 SUB $21
-$23 <- 8 ADD $22
-RETURN $23
-functionWithParams:
-functionWithParams:
-PARA $a@3
-PARA $b@3
-TEMP $24 <- $a@3
-TEMP $25 <- $b@3
-PUSH $24
+&0 <- &intArray@0 ADD 0
+*&0 <- 10
+&1 <- &intArray@0 ADD 1
+*&1 <- 20
+&2 <- &intArray@0 ADD 2
+*&2 <- 30
+&3 <- &intArray@0 ADD 0
+TEMP $4 <- *&3
+&5 <- &intArray@0 ADD 1
+TEMP $6 <- *&5
+$7 <- $4 ADD $6
+&8 <- &intArray@0 ADD 3
+*&8 <- $7
+&9 <- &intArray@0 ADD 3
+TEMP $10 <- *&9
+&11 <- &intArray@0 ADD 2
+TEMP $12 <- *&11
+$13 <- $10 ADD $12
+&14 <- &intArray@0 ADD 4
+*&14 <- $13
+&15 <- &intArray@0 ADD 0
+TEMP $16 <- *&15
+$17 <- NEG $16
+&18 <- &intArray@0 ADD 0
+*&18 <- $17
+&19 <- &intArray@0 ADD 0
+TEMP $20 <- *&19
+PUSH $20
+PRINT "Negative intArray[0]: %d\n"
+&21 <- &intArray@0 ADD 0
+TEMP $22 <- *&21
+&23 <- &intArray@0 ADD 0
+*&23 <- $22
+&24 <- &intArray@0 ADD 0
+TEMP $25 <- *&24
 PUSH $25
-PRINT "Function with parameters: a = %d, b = %c\n"
-TEMP $26 <- $a@3
-TEMP $27 <- $b@3
-$28 <- $26 ADD $27
-RETURN $28
-functionReturnChar:
-functionReturnChar:
-PRINT "Function returning a character\n"
-RETURN 67
+PRINT "Positive intArray[0]: %d\n"
+&26 <- &intArray@0 ADD 3
+TEMP $27 <- *&26
+&28 <- &intArray@0 ADD 2
+TEMP $29 <- *&28
+$30 <- $27 DIV $29
+&31 <- &intArray@0 ADD 1
+*&31 <- $30
+&32 <- &intArray@0 ADD 3
+TEMP $33 <- *&32
+&34 <- &intArray@0 ADD 2
+TEMP $35 <- *&34
+$36 <- $33 MOD $35
+&37 <- &intArray@0 ADD 2
+*&37 <- $36
+&38 <- &intArray@0 ADD 1
+TEMP $39 <- *&38
+&40 <- &intArray@0 ADD 2
+TEMP $41 <- *&40
+PUSH $39
+PUSH $41
+PRINT "Quotient: %d, Remainder: %d\n"
+&42 <- &charArray@0 ADD 0
+*&42 <- 335
+&43 <- &charArray@0 ADD 0
+TEMP $44 <- *&43
+&45 <- &charArray@0 ADD 0
+TEMP $46 <- *&45
+PUSH $44
+PUSH $46
+PRINT "Sum of ASCII codes1: %d %c\n"
+&47 <- &intArray@0 ADD 0
+TEMP $48 <- *&47
+&49 <- &charArray@0 ADD 0
+TEMP $50 <- *&49
+TEMP &51 <- &intArray@0
+TEMP &52 <- &charArray@0
+PUSH $48
+PUSH $50
+PUSH &51
+PUSH &52
+CALL func_with_param
+TEMP $53 <- $?
+LOCAL VAR $result@2 $53
+LOCAL VAR $asciiSum@2 362
+LOCAL VAR $charSum@2 362
+TEMP $54 <- $asciiSum@2
+TEMP $55 <- $charSum@2
+PUSH $54
+PUSH $55
+PRINT "Sum of ASCII codes2: %d %c\n"
+LOCAL VAR $x1@2 107
+TEMP $56 <- $x1@2
+PUSH $56
+PRINT "x1 = %d\n"
+LOCAL VAR $a1@2 41
+TEMP $57 <- $a1@2
+TEMP $58 <- $a1@2
+PUSH $57
+PUSH $58
+PRINT "a1 = %d, as char: %c\n"
+RETURN 0
+func_with_param:
+func_with_param:
+PARA $a@1
+PARA $b@1
+PARA $arr@1
+PARA $str@1
+TEMP $59 <- $a@1
+TEMP $60 <- $b@1
+TEMP $61 <- $arr@1
+TEMP $62 <- $str@1
+PUSH $59
+PUSH $60
+PUSH $61
+PUSH $62
+PRINT "Function with parameters: a = %d, b = %c arr[0] = %d, str[0] = %c\n"
+TEMP $63 <- $a@1
+TEMP $64 <- $b@1
+$65 <- $63 ADD $64
+TEMP $66 <- $arr@1
+$67 <- $65 ADD $66
+TEMP $68 <- $str@1
+$69 <- $67 ADD $68
+LOCAL VAR $sum@1 $69
+TEMP $70 <- $sum@1
+PUSH $70
+PRINT "Sum in func_with_param: %d\n"
+TEMP $71 <- $sum@1
+RETURN $71

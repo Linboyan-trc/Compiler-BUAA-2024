@@ -490,7 +490,7 @@ public class Translator {
                 mipsCodeList.add(new IInsLI(Reg.RV, new Imm(1)));
                 mipsCodeList.add(new Syscall());
             } else {
-                mipsCodeList.add(new IInsLW(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
+                mipsCodeList.add(new IInsLB(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
                 mipsCodeList.add(new IInsLI(Reg.RV, new Imm(11)));
                 mipsCodeList.add(new Syscall());
             }
