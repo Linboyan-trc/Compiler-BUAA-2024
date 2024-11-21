@@ -467,12 +467,15 @@ public class Translator {
         String formatString = print.getFmtString().substring(1, print.getFmtString().length() - 1);
 
         // 2. 找到%d
-        int index = formatString.indexOf("%d");
+        int index = getIndex(formatString);
 
         // 3. 计数
         int count = 1;
         while (index >= 0) {
+            // 1. 获取字符常量
             String out = formatString.substring(0, index);
+
+            // 2. 加入到全局变量中
             if (!out.isEmpty()) {
                 String label = "string" + strCount++;
                 macroCodeList.add(new StringMacro(label, out));
@@ -480,11 +483,21 @@ public class Translator {
                 mipsCodeList.add(new IInsLI(Reg.RV, new Imm(4)));
                 mipsCodeList.add(new Syscall());
             }
-            mipsCodeList.add(new IInsLW(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
-            mipsCodeList.add(new IInsLI(Reg.RV, new Imm(1)));
-            mipsCodeList.add(new Syscall());
+
+            // 3. 打印int或char
+            if(formatString.charAt(index+1) == 'd'){
+                mipsCodeList.add(new IInsLW(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
+                mipsCodeList.add(new IInsLI(Reg.RV, new Imm(1)));
+                mipsCodeList.add(new Syscall());
+            } else {
+                mipsCodeList.add(new IInsLW(Reg.AR, new RelativeAddress(Reg.SP, -count * 4)));
+                mipsCodeList.add(new IInsLI(Reg.RV, new Imm(11)));
+                mipsCodeList.add(new Syscall());
+            }
+
+            // 4. 截取剩余字符串
             formatString = formatString.substring(index + 2);
-            index = formatString.indexOf("%d");
+            index = getIndex(formatString);
             count++;
         }
 
@@ -497,6 +510,22 @@ public class Translator {
         }
 
         pushCount = 0;
+    }
+
+    private int getIndex(String string){
+        int index1 = string.indexOf("%d");
+        int index2 = string.indexOf("%c");
+        if(index1 == -1){
+            return index2;
+        } else if (index2 == -1){
+            return index1;
+        } else {
+            if(index1 < index2){
+                return index1;
+            } else {
+                return index2;
+            }
+        }
     }
 
     public void generateMips(Return ret) {

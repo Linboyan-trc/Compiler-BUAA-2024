@@ -9,18 +9,21 @@ varChar: .word 0:1
 string0: .asciiz "22373141\n"
 string1: .asciiz "Result of functionWithParams: "
 string2: .asciiz "\n"
-string3: .asciiz "Character returned: %c\n"
-string4: .asciiz "Result of functionSingleParam: "
-string5: .asciiz "\n"
-string6: .asciiz "Input integer: "
-string7: .asciiz "\n"
-string8: .asciiz "Input character: %c\n"
-string9: .asciiz "Function with no parameters\n"
-string10: .asciiz "Function with single parameter, x = "
-string11: .asciiz "\n"
-string12: .asciiz "Function with parameters: a = "
-string13: .asciiz ", b = %c\n"
-string14: .asciiz "Function returning a character\n"
+string3: .asciiz "Character returned: "
+string4: .asciiz "\n"
+string5: .asciiz "Result of functionSingleParam: "
+string6: .asciiz "\n"
+string7: .asciiz "Input integer: "
+string8: .asciiz "\n"
+string9: .asciiz "Input character: "
+string10: .asciiz "\n"
+string11: .asciiz "Function with no parameters\n"
+string12: .asciiz "Function with single parameter, x = "
+string13: .asciiz "\n"
+string14: .asciiz "Function with parameters: a = "
+string15: .asciiz ", b = "
+string16: .asciiz "\n"
+string17: .asciiz "Function returning a character\n"
 .text
 addiu $sp, $sp, -4
 # CALL main
@@ -136,6 +139,12 @@ sw $t2, -4($sp)
 la $a0, string3
 li $v0, 4
 syscall
+lw $a0, -4($sp)
+li $v0, 11
+syscall
+la $a0, string4
+li $v0, 4
+syscall
 # TEMP $14 <- $a@5
 lw $t4, 92($sp)
 addiu $t3, $t4, 0
@@ -159,13 +168,13 @@ addiu $t2, $t1, 0
 # PUSH $16
 sw $t2, -4($sp)
 # PRINT "Result of functionSingleParam: %d\n"
-la $a0, string4
+la $a0, string5
 li $v0, 4
 syscall
 lw $a0, -4($sp)
 li $v0, 1
 syscall
-la $a0, string5
+la $a0, string6
 li $v0, 4
 syscall
 # LOCAL VAR $inputInt@5 
@@ -179,13 +188,13 @@ addiu $t4, $t3, 0
 # PUSH $17
 sw $t4, -4($sp)
 # PRINT "Input integer: %d\n"
-la $a0, string6
+la $a0, string7
 li $v0, 4
 syscall
 lw $a0, -4($sp)
 li $v0, 1
 syscall
-la $a0, string7
+la $a0, string8
 li $v0, 4
 syscall
 # LOCAL VAR $inputChar@5 
@@ -199,7 +208,13 @@ addiu $t6, $t5, 0
 # PUSH $18
 sw $t6, -4($sp)
 # PRINT "Input character: %c\n"
-la $a0, string8
+la $a0, string9
+li $v0, 4
+syscall
+lw $a0, -4($sp)
+li $v0, 11
+syscall
+la $a0, string10
 li $v0, 4
 syscall
 # RETURN 0
@@ -217,7 +232,7 @@ jr $ra
 functionNoParam:
 addiu $sp, $sp, -4
 # PRINT "Function with no parameters\n"
-la $a0, string9
+la $a0, string11
 li $v0, 4
 syscall
 # RETURN
@@ -233,13 +248,13 @@ addiu $t1, $t0, 0
 # PUSH $19
 sw $t1, -4($sp)
 # PRINT "Function with single parameter, x = %d\n"
-la $a0, string10
+la $a0, string12
 li $v0, 4
 syscall
 lw $a0, -4($sp)
 li $v0, 1
 syscall
-la $a0, string11
+la $a0, string13
 li $v0, 4
 syscall
 # TEMP $20 <- $x@2
@@ -279,13 +294,19 @@ sw $t2, -4($sp)
 # PUSH $25
 sw $t3, -8($sp)
 # PRINT "Function with parameters: a = %d, b = %c\n"
-la $a0, string12
+la $a0, string14
 li $v0, 4
 syscall
 lw $a0, -4($sp)
 li $v0, 1
 syscall
-la $a0, string13
+la $a0, string15
+li $v0, 4
+syscall
+lw $a0, -8($sp)
+li $v0, 11
+syscall
+la $a0, string16
 li $v0, 4
 syscall
 # TEMP $26 <- $a@3
@@ -311,7 +332,7 @@ sw $t0, 4($sp)
 functionReturnChar:
 addiu $sp, $sp, -4
 # PRINT "Function returning a character\n"
-la $a0, string14
+la $a0, string17
 li $v0, 4
 syscall
 # RETURN 39
