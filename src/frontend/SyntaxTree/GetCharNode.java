@@ -50,6 +50,11 @@ public class GetCharNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         // 1. 获取左指IDENFR在符号表中的DefNode
         DefNode defNode = symbolTable.getVariable(lValNode.getPair().getWord()).simplify();

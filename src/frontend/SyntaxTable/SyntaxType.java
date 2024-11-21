@@ -42,8 +42,8 @@ public enum SyntaxType {
         return this == VoidFunc;
     }
 
-    public boolean isIntFunc() {
-        return this == IntFunc;
+    public boolean isIntFuncOrChar() {
+        return this == IntFunc || this == CharFunc;
     }
 
     public String toString() {

@@ -20,6 +20,11 @@ public class BreakNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         new Jump(MidCodeTable.getInstance().getLoopEnd());
         return null;

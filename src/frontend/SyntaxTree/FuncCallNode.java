@@ -89,12 +89,17 @@ public class FuncCallNode implements ExpNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode) {
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         LinkedList<Value> values = new LinkedList<>();
         arguments.forEach(arg -> values.add(arg.generateMidCode()));
         values.forEach(ArgPush::new);
         new FuncCall(pair.getWord());
-        if (symbolTable.getFunction(pair.getWord()).getFuncDefType().isIntFunc()) {
+        if (symbolTable.getFunction(pair.getWord()).getFuncDefType().isIntFuncOrChar()) {
             Word value = new Word();
             new Move(true, value, new Word("?"));
             return value;

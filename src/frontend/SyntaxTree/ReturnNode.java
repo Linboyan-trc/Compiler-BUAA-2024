@@ -38,6 +38,11 @@ public class ReturnNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         if (expNode == null) {
             new Return();

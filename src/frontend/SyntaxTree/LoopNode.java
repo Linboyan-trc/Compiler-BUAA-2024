@@ -28,6 +28,11 @@ public class LoopNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         // 1. 创建标签
         Label loopBeginLabel = new Label();

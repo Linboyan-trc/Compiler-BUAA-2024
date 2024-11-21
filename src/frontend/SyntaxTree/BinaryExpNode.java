@@ -303,6 +303,11 @@ public class BinaryExpNode implements ExpNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode) {
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         // 1. 建立Token和UnaryOp之间的映射
         HashMap<Token, BinaryOperate.BinaryOp> map = new HashMap<Token, BinaryOperate.BinaryOp>() {{

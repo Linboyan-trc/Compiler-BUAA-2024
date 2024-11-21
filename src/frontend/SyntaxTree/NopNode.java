@@ -12,6 +12,11 @@ public class NopNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         new Nop();
         return null;

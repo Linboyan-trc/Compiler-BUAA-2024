@@ -164,6 +164,11 @@ public class UnaryExpNode implements ExpNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode) {
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         // 1. 建立Token和UnaryOp之间的映射
         HashMap<Token, UnaryOperate.UnaryOp> map = new HashMap<Token, UnaryOperate.UnaryOp>() {{

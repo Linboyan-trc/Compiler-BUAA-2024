@@ -10,6 +10,8 @@ import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
 
+import java.util.LinkedList;
+
 public class BranchNode implements StmtNode {
     // 1. 针对if <Cond> <Stmt> else <Stmt>
     private final SymbolTable symbolTable;
@@ -81,6 +83,36 @@ public class BranchNode implements StmtNode {
 
         // 4. 返回节点
         return new BranchNode(symbolTable, simplifiedfCond, simplifiedIfStmt, simplifiedElseStmt);
+    }
+
+    @Override
+    public boolean hasContinue(AssignNode assignNode){
+        // 1. 单节点 + continue，包装成block插入
+        boolean flag = false;
+        if(ifStmt instanceof ContinueNode){
+            LinkedList<BlockItemNode> bi1 = new LinkedList<>();
+            bi1.add(assignNode);
+            bi1.add(ifStmt);
+            BlockNode temp1 = new BlockNode(symbolTable,bi1,0);
+            ifStmt = temp1;
+            flag = true;
+        }
+        if(elseStmt instanceof ContinueNode){
+            LinkedList<BlockItemNode> bi2 = new LinkedList<>();
+            bi2.add(assignNode);
+            bi2.add(elseStmt);
+            BlockNode temp2 = new BlockNode(symbolTable,bi2,0);
+            elseStmt = temp2;
+            flag = true;
+        }
+        // 2. 为block，直接进行block插入
+        if(ifStmt instanceof BlockNode){
+            flag = ((BlockNode) ifStmt).hasContinue(assignNode);
+        }
+        if(elseStmt instanceof BlockNode){
+            flag = ((BlockNode) elseStmt).hasContinue(assignNode);
+        }
+        return flag;
     }
 
     @Override

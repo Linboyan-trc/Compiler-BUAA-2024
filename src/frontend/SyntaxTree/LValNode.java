@@ -119,6 +119,11 @@ public class LValNode implements ExpNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode) {
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         // 1. 获取在符号表中的变量
         DefNode defNode = symbolTable.getVariable(pair.getWord()).simplify();

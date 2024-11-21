@@ -75,6 +75,23 @@ public class BlockNode implements StmtNode{
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        for (int i = 0; i < blockItemNodes.size(); i++) {
+            BlockItemNode blockItemNode = blockItemNodes.get(i);
+            if (blockItemNode instanceof StmtNode) {
+                if (((StmtNode) blockItemNode).hasContinue(assignNode)) {
+                    // 在当前位置前插入 assignNode
+                    if(blockItemNode instanceof ContinueNode) {
+                        blockItemNodes.add(i, assignNode);
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         for(BlockItemNode blockItemNode : blockItemNodes) {
             blockItemNode.generateMidCode();

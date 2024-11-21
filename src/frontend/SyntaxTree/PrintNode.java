@@ -68,6 +68,11 @@ public class PrintNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         LinkedList<midend.MidCode.Value.Value> values = new LinkedList<>();
         for(ExpNode arg : arguments) {

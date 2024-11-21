@@ -54,10 +54,12 @@ public class Declare implements MidCode {
     @Override
     public String toString() {
         StringBuilder initValuesString = new StringBuilder();
-        for (int i = 0; i < initValues.size(); i++) {
-            initValuesString.append(initValues.get(i).toString());
-            if (i != initValues.size() - 1) {
-                initValuesString.append(", ");
+        if(initValues != null && !initValues.isEmpty()) {
+            for (int i = 0; i < initValues.size(); i++) {
+                initValuesString.append(initValues.get(i).toString());
+                if (i != initValues.size() - 1) {
+                    initValuesString.append(", ");
+                }
             }
         }
         return (isGlobal ? "GLOBAL" : "LOCAL") + " " +

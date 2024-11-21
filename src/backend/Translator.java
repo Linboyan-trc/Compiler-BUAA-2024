@@ -463,8 +463,13 @@ public class Translator {
     }
 
     public void generateMips(Print print) {
+        // 1. 去除""
         String formatString = print.getFmtString().substring(1, print.getFmtString().length() - 1);
+
+        // 2. 找到%d
         int index = formatString.indexOf("%d");
+
+        // 3. 计数
         int count = 1;
         while (index >= 0) {
             String out = formatString.substring(0, index);
@@ -482,6 +487,7 @@ public class Translator {
             index = formatString.indexOf("%d");
             count++;
         }
+
         if (!formatString.isEmpty()) {
             String label = "string" + strCount++;
             macroCodeList.add(new StringMacro(label, formatString));
@@ -489,6 +495,7 @@ public class Translator {
             mipsCodeList.add(new IInsLI(Reg.RV, new Imm(4)));
             mipsCodeList.add(new Syscall());
         }
+
         pushCount = 0;
     }
 

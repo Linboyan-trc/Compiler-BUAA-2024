@@ -20,6 +20,11 @@ public class ContinueNode implements StmtNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode){
+        return true;
+    }
+
+    @Override
     public Value generateMidCode() {
         new Jump(MidCodeTable.getInstance().getLoopBegin());
         return null;

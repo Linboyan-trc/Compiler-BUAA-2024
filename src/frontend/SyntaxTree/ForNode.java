@@ -92,19 +92,31 @@ public class ForNode implements StmtNode {
             as1 = (StmtNode) new AssignNode(symbolTable, simForStmtNodeFirst.getLValNode(), simForStmtNodeFirst.getExpNode());
         }
 
-        // 3.2 stmt
-        stmt = stmt.simplify();
-
-        // 3.3 if
-        BranchNode bn = new BranchNode(symbolTable, simCond, stmt, new BreakNode(symbolTable));
-
-        // 3.3 as2
+        // 3.2 as2
         StmtNode as2 = new NopNode();
         if(simForStmtNodeSecond != null) {
             as2 = (StmtNode) new AssignNode(symbolTable, simForStmtNodeSecond.getLValNode(), simForStmtNodeSecond.getExpNode());
         }
 
-        // 3.4 LinkedList<BlockItemNode> for while
+        // 3.3 stmt
+        // 3.3 单节点直接包装
+        // 3.3 多节点调用方法
+        if(stmt instanceof ContinueNode){
+            LinkedList<BlockItemNode> bi = new LinkedList<>();
+            bi.add(as2);
+            bi.add(stmt);
+            stmt = new BlockNode(symbolTable, bi, 0);
+        } else {
+            if (as2 instanceof AssignNode) {
+                stmt.hasContinue((AssignNode) as2);
+            }
+        }
+        stmt = stmt.simplify();
+
+        // 3.4 if
+        BranchNode bn = new BranchNode(symbolTable, simCond, stmt, new BreakNode(symbolTable));
+
+        // 3.5 LinkedList<BlockItemNode> for while
         LinkedList<BlockItemNode> bi1 = new LinkedList<>();
         bi1.add(bn);
         bi1.add(as2);
@@ -120,6 +132,11 @@ public class ForNode implements StmtNode {
         BlockNode bk2 = new BlockNode(symbolTable, bi2, 0);
 
         return bk2;
+    }
+
+    @Override
+    public boolean hasContinue(AssignNode assignNode) {
+        return false;
     }
 
     @Override

@@ -32,6 +32,11 @@ public class NumberNode implements ExpNode {
     }
 
     @Override
+    public boolean hasContinue(AssignNode assignNode) {
+        return false;
+    }
+
+    @Override
     public Value generateMidCode() {
         return new Imm(number);
     }
