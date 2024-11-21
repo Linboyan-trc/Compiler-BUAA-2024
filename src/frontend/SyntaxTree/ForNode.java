@@ -79,7 +79,7 @@ public class ForNode implements StmtNode {
         //  assginNode
         //  while(1){
         //      if(cond){
-        //          stmt
+        //          stmt(递归寻找continue，递归的过程中跳过fornode，如果有continue就要在continue前插入一个assginNode)
         //      } else {
         //          breakNode
         //      }

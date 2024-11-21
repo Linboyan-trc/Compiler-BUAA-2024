@@ -47,128 +47,39 @@ JUMP Label5
 Label6:
 NOP
 PRINT "1"
+TEMP $8 <- $i@1
+PUSH $8
+PRINT "%d"
 NOP
 Label10:
 NOP
 BRANCH Label11: IF 1 EQ 0
-TEMP $8 <- $i@1
-$9 <- $8 LT 5
-BRANCH Label12: IF $9 EQ 0
-TEMP $10 <- $i@1
-$11 <- $10 LT 5
-BRANCH Label13: IF $11 EQ 0
+TEMP $9 <- $i@1
+$10 <- $9 LT 5
+BRANCH Label12: IF $10 EQ 0
+TEMP $11 <- $i@1
+PUSH $11
+PRINT "%d"
+TEMP $12 <- $i@1
+$13 <- $12 LT 5
+BRANCH Label13: IF $13 EQ 0
 JUMP Label10
 Label13:
 NOP
-TEMP $12 <- $i@1
-$13 <- 2 ADD $12
-SAVE $i@1 <- $13
+TEMP $14 <- $i@1
+$15 <- 2 ADD $14
+SAVE $i@1 <- $15
 JUMP Label14
 Label12:
 NOP
 JUMP Label11
 Label14:
 NOP
-TEMP $14 <- $i@1
-$15 <- 1 ADD $14
-SAVE $i@1 <- $15
+TEMP $16 <- $i@1
+$17 <- 1 ADD $16
+SAVE $i@1 <- $17
 JUMP Label10
 Label11:
 NOP
 PRINT "2"
-SAVE $i@1 <- 5
-Label15:
-NOP
-BRANCH Label16: IF 1 EQ 0
-BRANCH Label17: IF 1 EQ 0
-TEMP $16 <- $i@1
-$17 <- 1 ADD $16
-SAVE $i@1 <- $17
-TEMP $18 <- $i@1
-$19 <- $18 EQ 6
-BRANCH Label18: IF $19 EQ 0
-JUMP Label16
-Label18:
-NOP
-JUMP Label19
-Label17:
-NOP
-JUMP Label16
-Label19:
-NOP
-NOP
-JUMP Label15
-Label16:
-NOP
-PRINT "3"
-NOP
-Label20:
-NOP
-BRANCH Label21: IF 1 EQ 0
-TEMP $20 <- $i@1
-$21 <- $20 LT 7
-BRANCH Label22: IF $21 EQ 0
-TEMP $22 <- $i@1
-$23 <- 1 ADD $22
-SAVE $i@1 <- $23
-JUMP Label23
-Label22:
-NOP
-JUMP Label21
-Label23:
-NOP
-NOP
-JUMP Label20
-Label21:
-NOP
-PRINT "4"
-NOP
-Label24:
-NOP
-BRANCH Label25: IF 1 EQ 0
-BRANCH Label26: IF 1 EQ 0
-TEMP $24 <- $i@1
-$25 <- $24 EQ 8
-BRANCH Label27: IF $25 EQ 0
-JUMP Label25
-Label27:
-NOP
-JUMP Label28
-Label26:
-NOP
-JUMP Label25
-Label28:
-NOP
-TEMP $26 <- $i@1
-$27 <- 1 ADD $26
-SAVE $i@1 <- $27
-JUMP Label24
-Label25:
-NOP
-PRINT "5"
-NOP
-Label29:
-NOP
-BRANCH Label30: IF 1 EQ 0
-BRANCH Label31: IF 1 EQ 0
-TEMP $28 <- $i@1
-$29 <- 1 ADD $28
-SAVE $i@1 <- $29
-TEMP $30 <- $i@1
-$31 <- $30 EQ 10
-BRANCH Label32: IF $31 EQ 0
-PRINT "One stmt for pass!\n"
-JUMP Label30
-Label32:
-NOP
-JUMP Label33
-Label31:
-NOP
-JUMP Label30
-Label33:
-NOP
-NOP
-JUMP Label29
-Label30:
-NOP
 RETURN 0
