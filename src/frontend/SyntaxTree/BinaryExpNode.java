@@ -245,7 +245,7 @@ public class BinaryExpNode implements ExpNode {
                     } else {
                         return new BinaryExpNode(
                                 symbolTable,
-                                new NumberNode(-((NumberNode) rightExp).getValue()),
+                                new NumberNode(-right.getValue()),
                                 new Pair(PLUS, 0),
                                 leftExp).simplify();
                     }
