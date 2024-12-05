@@ -252,7 +252,9 @@ public class Translator {
         }
     }
 
+    // 6. <Assign>:isTemp, targetValue, sourceValue
     public void generateMips(Assign assign) {
+        // 1. 右侧源值为Binary
         if (assign.getSourceValue() instanceof BinaryOperate) {
             BinaryOperate.BinaryOp binaryOp = ((BinaryOperate) assign.getSourceValue()).getBinaryOp();
             Value leftValue = ((BinaryOperate) assign.getSourceValue()).getLeftValue();
@@ -279,7 +281,9 @@ public class Translator {
             } else {
                 generateMips(binaryOp, valMeta, leftMeta, rightMeta);
             }
-        } else {
+        }
+        // 2. 右侧源值为Unary
+        else {
             UnaryOperate.UnaryOp unaryOp = ((UnaryOperate) assign.getSourceValue()).getUnaryOp();
             Reg valMeta = (Reg) getValueMeta(assign.getTargetValue(), false, false);
             ValueMeta rightMeta = getValueMeta(((UnaryOperate) assign.getSourceValue()).getValue(), true, false);
@@ -357,11 +361,14 @@ public class Translator {
                     mipsCodeList.add(new IInsLI(valMeta, new Imm(((Imm) rightMeta).getValue() == 0 ? 1 : 0)));
                     break;
             }
-        } else {
+        }
+        // 2. 右侧源值是寄存器
+        else {
             switch (unaryOp) {
                 case POS:
                     mipsCodeList.add(new RIns3Reg(addu, valMeta, (Reg) rightMeta, Reg.ZERO));
                     break;
+                // 2.1 -右侧源值
                 case NEG:
                     mipsCodeList.add(new RIns3Reg(subu, valMeta, Reg.ZERO, (Reg) rightMeta));
                     break;

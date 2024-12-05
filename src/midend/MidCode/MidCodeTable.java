@@ -16,26 +16,26 @@ public class MidCodeTable {
     private static final MidCodeTable instance = new MidCodeTable();
 
     // 2. 初始默认当前函数为'@global' + 全局变量 + 函数表 = 函数名+变量表
-    private static String func = "@global";
-    private static final LinkedList<MidCode> globalCodes = new LinkedList<>();
-    private static final HashMap<String, LinkedList<Value>> funcToVals = new HashMap<>();
+    private String func = "@global";
+    private final LinkedList<MidCode> globalCodes = new LinkedList<>();
+    private final HashMap<String, LinkedList<Value>> funcToVals = new HashMap<>();
     // 2.2 中间代码 + 变量表(每个变量会和id关联，有唯一性保证)
-    private static final LinkedList<MidCode> midCodes = new LinkedList<>();
-    private static final HashMap<Value, Integer> valToSize = new HashMap<>();
+    private final LinkedList<MidCode> midCodes = new LinkedList<>();
+    private final HashMap<Value, Integer> valToSize = new HashMap<>();
 
     // 3. 循环
-    private static final LinkedList<Label> loopBeginLabels = new LinkedList<>();
-    private static final LinkedList<Label> loopEndLabels = new LinkedList<>();
+    private final LinkedList<Label> loopBeginLabels = new LinkedList<>();
+    private final LinkedList<Label> loopEndLabels = new LinkedList<>();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 构造
+    private MidCodeTable() {
+        funcToVals.put("@global", new LinkedList<>());
+    }
+
     // 1. 获取单例
     public static MidCodeTable getInstance() {
         return instance;
-    }
-
-    // 2. 加载类的时候执行
-    static {
-        funcToVals.put("@global", new LinkedList<>());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
