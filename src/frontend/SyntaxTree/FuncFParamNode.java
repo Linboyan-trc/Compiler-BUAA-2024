@@ -32,7 +32,11 @@ public class FuncFParamNode extends DefNode {
     @Override
     public Value generateMidCode() {
         // 1. 单变量 + 自动添加到中间代码和变量表
-        if (super.getLength() == null) {
+        // 1. 在FuncFParam中，int a[]的length为null，但仍为数组类型
+        // 1. 首先获取type
+        SyntaxType syntaxType = getDefNodeType();
+
+        if (syntaxType.isVariable()) {
             new ParaGet(new Word(super.getPair().getWord() + "@" + super.getSymbolTable().getId()));
         }
 

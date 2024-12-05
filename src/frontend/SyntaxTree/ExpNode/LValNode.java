@@ -135,7 +135,7 @@ public class LValNode implements ExpNode {
 
         // 4. 如果是单变量，添加一个Word
         // 4. 添加一个赋值语句，从此变量加载到一个临时变量
-        if (length == null) {
+        if (defNode.getDefNodeType().isVariable()) {
             Word value = new Word();
             new Move(true, value, new Word(pair.getWord() + "@" + id));
             return value;
