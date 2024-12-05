@@ -78,21 +78,21 @@ public class Translator {
             }
             Declare declare = (Declare) midCode;
 
-            // 2. 获取Word, Addr, Imm
+            // 2. 获取变量名:Word, Addr
             Value value = declare.getValue();
 
-            // 3. 获取初始值
+            // 3. 获取初始值:Imm列表，转化为long列表
             LinkedList<Value> initValues = declare.getInitValues();
-
-            // 4. 所有初始值转化为Int列表
             LinkedList<Long> intValues = new LinkedList<>();
-            initValues.forEach(item -> intValues.add(((Imm) item).getValue()));
+            for (Value item : initValues) {
+                intValues.add(((Imm) item).getValue());
+            }
 
-            // 5. 在宏代码中添加Word宏
-            // 5. WordMacro:中间代码变量名 + 中间代码变量空间 + 整数初始值
+            // 4. 在宏代码中添加Word宏
+            // 4. WordMacro:中间代码变量名 + 中间代码变量空间 + 整数初始值
             macroCodeList.add(new WordMacro(value.getName(), declare.getSize(), intValues));
 
-            // 6. 为变量分配地址
+            // 5. 记录全局变量的地址:变量名 + 地址:$a1, &a2
             valueToAddress.put(value, new AbsoluteAddress(value.getName()));
         }
 
@@ -554,6 +554,8 @@ public class Translator {
 
     @Override
     public String toString() {
+        // 1. 首先生成.data段
+        // 1. 遍历宏<MipsCode>, 含有WordMacro表示全局变量的声明
         mipsCode.append(".data\n");
         for (MipsCode code : macroCodeList) {
             mipsCode.append(code.toString()).append("\n");

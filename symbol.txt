@@ -1,7 +1,7 @@
-2 c1 ConstChar
-2 c2 ConstCharArray
-2 c3 ConstCharArray
-2 c4 Char
-2 c5 Char
-2 c6 CharArray
-2 c7 CharArray
+1 c1 ConstChar
+1 c2 ConstCharArray
+1 c3 ConstCharArray
+1 c4 Char
+1 c5 Char
+1 c6 CharArray
+1 c7 CharArray
