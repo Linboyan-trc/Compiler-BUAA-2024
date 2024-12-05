@@ -1,41 +1,34 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.ExpNode;
 
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.StmtNode.*;
 import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 
-public class CharacterNode implements ExpNode {
+public class NumberNode implements ExpNode {
     // 1. num
-    private String word;
-    private long value;
+    private long number;
 
-    // 2. 直接构造法 + 赋值转换构造
-    public CharacterNode(String word) {
-        this.word = word;
-        this.value = (long) word.charAt(0);
-    }
-
-    public CharacterNode(long value) {
-        this.value = value & 0xFF;
-        char character = (char) this.value;
-        this.word = String.valueOf(character);
+    // 2.
+    public NumberNode(long number) {
+        this.number = number;
     }
 
     public long getValue() {
-        return value;
+        return number;
     }
 
     // 1. 获取SyntaxType
     @Override
     public SyntaxType getSyntaxType(SymbolTable symbolTable) {
-        return SyntaxType.Char;
+        return SyntaxType.Int;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 化简
     @Override
-    public CharacterNode simplify() {
+    public NumberNode simplify() {
         return this;
     }
 
@@ -46,6 +39,6 @@ public class CharacterNode implements ExpNode {
 
     @Override
     public Value generateMidCode() {
-        return new Imm(value);
+        return new Imm(number);
     }
 }

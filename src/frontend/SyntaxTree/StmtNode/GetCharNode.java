@@ -1,31 +1,30 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
-import midend.MidCode.MidCode.Assign;
+import frontend.SyntaxTree.DefNode;
+import frontend.SyntaxTree.ExpNode.ExpNode;
+import frontend.SyntaxTree.ExpNode.LValNode;
 import midend.MidCode.MidCode.Move;
-import midend.MidCode.MidCode.Store;
-import midend.MidCode.Operate.BinaryOperate;
+import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Value;
-import midend.MidCode.Value.*;
+import midend.MidCode.Value.Word;
+import midend.MidCode.MidCode.*;
+import midend.MidCode.Operate.*;
 import static midend.MidCode.Operate.BinaryOperate.BinaryOp.*;
 
-import java.util.LinkedList;
-
-public class AssignNode implements StmtNode {
-    // 1. <LValNode> + <ExpNode>
+public class GetCharNode implements StmtNode {
+    // 1. <LVal>
     private final SymbolTable symbolTable;
     private LValNode lValNode;
-    private ExpNode expNode;
     private ErrorHandler errorHandler = ErrorHandler.getInstance();
 
-    // 2.
-    public AssignNode(SymbolTable symbolTable, LValNode lValNode, ExpNode toExpNode) {
+    // 2. 构造
+    public GetCharNode(SymbolTable symbolTable, LValNode lValNode) {
         this.symbolTable = symbolTable;
         this.lValNode = lValNode;
-        this.expNode = toExpNode;
     }
 
     // 3. 检查
@@ -45,14 +44,13 @@ public class AssignNode implements StmtNode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 化简
     @Override
-    public AssignNode simplify() {
+    public GetCharNode simplify() {
         lValNode = lValNode.compute();
-        expNode = expNode.simplify();
         return this;
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode) {
+    public boolean hasContinue(AssignNode assignNode){
         return false;
     }
 
@@ -64,31 +62,29 @@ public class AssignNode implements StmtNode {
         // 2. 获取作用域id
         int id = defNode.getScopeId();
 
-        // 3. 获取数组长度
+        // 3. 获取符号表中变量对应的数组长度
         ExpNode length = defNode.getLength();
 
-        // 4. 右侧赋值生成中间代码
-        Value expValue = expNode.generateMidCode();
+        // 4. 声明一个新的读一个Int的节点
+        new CharGet();
 
-        // 5. 如果左值对应的变量是单变量
+        // 5. 如果变量是单变量
         if (length == null) {
-            // 5. 创建一个赋值操作
             Word value = new Word(lValNode.getPair().getWord() + "@" + id);
-            new Move(false, value, expValue);
+            new Move(false, value, new Word("?"));
             return null;
         }
 
-        // 5. 如果左值对应的变量是数组
+        // 5. 如果变量是数组
         else {
             // 5. 获取下标
-            // 5. 存储在内存中
             Value offset = lValNode.getLength().generateMidCode();
             Addr addr = new Addr();
             new Assign(
                     true,
                     addr,
                     new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset));
-            new Store(addr, expValue);
+            new Store(addr, new Word("?"));
             return null;
         }
     }

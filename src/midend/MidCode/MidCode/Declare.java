@@ -53,6 +53,7 @@ public class Declare implements MidCode {
     // 1. 生成中间代码
     @Override
     public String toString() {
+        // 1. initValues转换成字符串: 1,2,3
         StringBuilder initValuesString = new StringBuilder();
         if(initValues != null && !initValues.isEmpty()) {
             for (int i = 0; i < initValues.size(); i++) {
@@ -62,6 +63,11 @@ public class Declare implements MidCode {
                 }
             }
         }
+
+        // 2. 全局变量:GLOBAL, 非全局变量:LOCAL
+        // 2. 常量:CONST,     非常量:VAR
+        // 2. 加上:Word, $a1@0
+        // 2. 加上:initValues 1
         return (isGlobal ? "GLOBAL" : "LOCAL") + " " +
                 (isFinal ? "CONST" : "VAR") + " " +
                 value + " " +

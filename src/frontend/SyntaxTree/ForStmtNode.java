@@ -4,6 +4,8 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.ExpNode.ExpNode;
+import frontend.SyntaxTree.ExpNode.LValNode;
 import midend.MidCode.Value.Value;
 
 public class ForStmtNode implements SyntaxNode {

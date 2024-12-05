@@ -6,6 +6,9 @@ import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 import frontend.SyntaxTree.*;
+import frontend.SyntaxTree.ExpNode.*;
+import frontend.SyntaxTree.StmtNode.*;
+
 import static frontend.SyntaxTable.SyntaxType.*;
 
 import java.util.LinkedList;

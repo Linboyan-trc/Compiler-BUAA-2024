@@ -1,9 +1,13 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.*;
+import frontend.SyntaxTree.ExpNode.CharacterNode;
+import frontend.SyntaxTree.ExpNode.ExpNode;
+import frontend.SyntaxTree.ExpNode.NumberNode;
 import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;

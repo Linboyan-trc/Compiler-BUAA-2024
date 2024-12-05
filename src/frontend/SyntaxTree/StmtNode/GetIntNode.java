@@ -1,9 +1,12 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.DefNode;
+import frontend.SyntaxTree.ExpNode.ExpNode;
+import frontend.SyntaxTree.ExpNode.LValNode;
 import midend.MidCode.MidCode.Assign;
 import midend.MidCode.MidCode.IntGet;
 import midend.MidCode.MidCode.Move;

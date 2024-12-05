@@ -1,19 +1,18 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.ExpNode;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.StmtNode.*;
+import frontend.SyntaxTree.DefNode;
 import midend.MidCode.MidCode.Assign;
 import midend.MidCode.MidCode.Load;
 import midend.MidCode.MidCode.Move;
 import midend.MidCode.Operate.BinaryOperate;
 import midend.MidCode.Value.*;
 import static midend.MidCode.Operate.BinaryOperate.BinaryOp.*;
-
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 public class LValNode implements ExpNode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////

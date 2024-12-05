@@ -3,6 +3,9 @@ package frontend.SyntaxTree;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.ExpNode.CharacterNode;
+import frontend.SyntaxTree.ExpNode.ExpNode;
+import frontend.SyntaxTree.ExpNode.NumberNode;
 import midend.MidCode.MidCode.Declare;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Value;
@@ -116,7 +119,10 @@ public class DefNode implements SyntaxNode {
 
         // 2. 对每个initValues生成中间代码
         LinkedList<Value> values = new LinkedList<>();
-        initValues.forEach(initValue -> values.add(initValue.generateMidCode()));
+        for (ExpNode initValue : initValues) {
+            values.add(initValue.generateMidCode());
+        }
+
 
         // 3. 计算此<DefNode>长度
         int size =  (int) (length == null ? 1 : ((NumberNode) length).getValue());

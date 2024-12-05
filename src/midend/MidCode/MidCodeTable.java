@@ -167,16 +167,19 @@ public class MidCodeTable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public String toString() {
-        StringJoiner stringJoiner = new StringJoiner("\n");
+        StringBuilder stringBuilder = new StringBuilder();
+
         for (MidCode midCode : globalCodes) {
-            stringJoiner.add(midCode.toString());
+            stringBuilder.append(midCode.toString()).append("\n");
         }
+
         for (MidCode midCode : midCodes) {
             for (Label label : LabelTable.getInstance().getLabelList(midCode)) {
-                stringJoiner.add(label.toString());
+                stringBuilder.append(label.toString()).append("\n");
             }
-            stringJoiner.add(midCode.toString());
+            stringBuilder.append(midCode.toString()).append("\n");
         }
-        return stringJoiner.toString();
+
+        return stringBuilder.toString();
     }
 }

@@ -1,4 +1,4 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.SyntaxTable.SymbolTable;
 import midend.MidCode.MidCode.Jump;

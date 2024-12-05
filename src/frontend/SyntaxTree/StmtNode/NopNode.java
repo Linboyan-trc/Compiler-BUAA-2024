@@ -1,4 +1,4 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import midend.MidCode.MidCode.Nop;
 import midend.MidCode.Value.Value;

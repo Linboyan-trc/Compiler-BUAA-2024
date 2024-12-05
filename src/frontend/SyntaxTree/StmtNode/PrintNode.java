@@ -1,14 +1,14 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
 
 import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 public class PrintNode implements StmtNode {
     // 1. <StringConst> + <Exp>

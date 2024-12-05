@@ -1,10 +1,12 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.ExpNode;
 
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.StmtNode.*;
+import frontend.SyntaxTree.FuncDefNode;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
 import midend.MidCode.Value.Word;

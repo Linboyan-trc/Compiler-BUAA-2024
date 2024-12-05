@@ -4,12 +4,12 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.StmtNode.*;
 import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
-import java.util.stream.Collectors;
 
-public class BlockNode implements StmtNode{
+public class BlockNode implements StmtNode {
     // 1. 一个<Block>有多个<BlockItem>
     private final SymbolTable symbolTable;
     private LinkedList<BlockItemNode> blockItemNodes;

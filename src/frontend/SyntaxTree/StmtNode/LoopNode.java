@@ -1,6 +1,7 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.LabelTable.Label;
 import midend.MidCode.MidCode.*;
 import midend.MidCode.MidCodeTable;

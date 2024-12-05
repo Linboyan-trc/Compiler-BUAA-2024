@@ -1,7 +1,8 @@
-package frontend.SyntaxTree;
+package frontend.SyntaxTree.StmtNode;
 
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.MidCode.MidCode.Return;
 import midend.MidCode.Value.Value;
 

@@ -1,5 +1,6 @@
 .data
-charArray: .word 99, 99, 99
+a2: .word 1, 2, 3
+c2: .word 65, 66, 67
 .text
 addiu $sp, $sp, -4
 # CALL main
@@ -12,13 +13,6 @@ syscall
 # main:
 main:
 addiu $sp, $sp, -4
-# PUSH 198
-li $fp, 198
-sw $fp, -4($sp)
-# PRINT "%d"
-lw $a0, -4($sp)
-li $v0, 1
-syscall
 # RETURN 0
 li $v0, 0
 addiu $sp, $sp, 4
