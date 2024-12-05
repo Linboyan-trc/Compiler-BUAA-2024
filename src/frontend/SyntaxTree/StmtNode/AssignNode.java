@@ -73,7 +73,7 @@ public class AssignNode implements StmtNode {
         Value expValue = expNode.generateMidCode();
 
         // 5. 如果左值对应的变量是单变量
-        if (length == null) {
+        if (defNode.getDefNodeType().isVariable()) {
             // 5. 创建一个赋值操作
             // 5. 如果左值对应的变量是char，要截断
             if (defNode.getDefNodeType().isCharType()) {

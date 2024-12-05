@@ -157,7 +157,7 @@ public class DefNode implements SyntaxNode {
         int size =  (int) (length == null ? 1 : ((NumberNode) length).getValue());
 
         // 4.1 如果不是数组，就返回一个Word
-        if (length == null) {
+        if (defNodeType.isVariable()) {
             Word value = new Word(pair.getWord() + "@" + symbolTable.getId());
             new Declare(isGlobal, isFinal, value, size, values);
         }

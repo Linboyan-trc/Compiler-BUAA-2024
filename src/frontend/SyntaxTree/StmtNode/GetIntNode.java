@@ -72,7 +72,7 @@ public class GetIntNode implements StmtNode {
         new IntGet();
 
         // 5. 如果变量是单变量
-        if (length == null) {
+        if (defNode.getDefNodeType().isVariable()) {
             Word value = new Word(lValNode.getPair().getWord() + "@" + id);
             new Move(false, value, new Word("?"));
             return null;
