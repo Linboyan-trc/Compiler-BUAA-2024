@@ -38,6 +38,16 @@ public class DefNode implements SyntaxNode {
         this.length = length;
         this.initValues = initValues;
         this.initValueForSTRCON = initValueForSTRCON;
+        // 1. 字符串转初值
+        if(this.initValueForSTRCON != null) {
+            if(this.initValues == null) {
+              this.initValues = new LinkedList<>();
+            }
+            for(int index = 1; index < (this.initValueForSTRCON.getWord().length() - 1); index++){
+                NumberNode temp = new NumberNode(this.initValueForSTRCON.getWord().charAt(index));
+                this.initValues.add(temp);
+            }
+        }
     }
 
     // 2. get
@@ -75,9 +85,20 @@ public class DefNode implements SyntaxNode {
         }
 
         // 2. 对初始值化简
-        initValues = initValues.stream().map(ExpNode::simplify).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<ExpNode> newInitValues = new LinkedList<>();
+        for (ExpNode node : initValues) {
+            newInitValues.add(node.simplify());
+        }
+        initValues = newInitValues;
 
-        // 3. 返回化简后的结果
+        // 3. 如果length是Number，补齐不足的值
+        if(length instanceof NumberNode) {
+            while(initValues.size() < ((NumberNode)length).getValue()){
+                initValues.add(new NumberNode(0));
+            }
+        }
+
+        // 4. 返回化简后的结果
         return this;
     }
 
