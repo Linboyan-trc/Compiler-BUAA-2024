@@ -1,41 +1,19 @@
-CONSTTK const
 INTTK int
-IDENFR a2
-LBRACK [
-INTCON 3
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<ConstExp>
-RBRACK ]
-ASSIGN =
+MAINTK main
+LPARENT (
+RPARENT )
 LBRACE {
-INTCON 1
-<Number>
+CONSTTK const
+CHARTK char
+IDENFR c1
+ASSIGN =
+CHRCON 'b'
+<Character>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
 <ConstExp>
-COMMA ,
-INTCON 2
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<ConstExp>
-COMMA ,
-INTCON 3
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<ConstExp>
-RBRACE }
 <ConstInitVal>
 <ConstDef>
 SEMICN ;
@@ -82,11 +60,101 @@ RBRACE }
 <ConstDef>
 SEMICN ;
 <ConstDecl>
-INTTK int
-MAINTK main
-LPARENT (
-RPARENT )
+CONSTTK const
+CHARTK char
+IDENFR c3
+LBRACK [
+INTCON 3
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<ConstExp>
+RBRACK ]
+ASSIGN =
+STRCON "ab"
+<ConstInitVal>
+<ConstDef>
+SEMICN ;
+<ConstDecl>
+CHARTK char
+IDENFR c4
+ASSIGN =
+CHRCON 'a'
+<Character>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+<InitVal>
+<VarDef>
+SEMICN ;
+<VarDecl>
+CHARTK char
+IDENFR c5
+<VarDef>
+SEMICN ;
+<VarDecl>
+CHARTK char
+IDENFR c6
+LBRACK [
+INTCON 3
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<ConstExp>
+RBRACK ]
+ASSIGN =
 LBRACE {
+CHRCON 'A'
+<Character>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+COMMA ,
+CHRCON 'B'
+<Character>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+COMMA ,
+CHRCON 'C'
+<Character>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+RBRACE }
+<InitVal>
+<VarDef>
+SEMICN ;
+<VarDecl>
+CHARTK char
+IDENFR c7
+LBRACK [
+INTCON 3
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<ConstExp>
+RBRACK ]
+ASSIGN =
+STRCON "ab"
+<InitVal>
+<VarDef>
+SEMICN ;
+<VarDecl>
 RETURNTK return
 INTCON 0
 <Number>

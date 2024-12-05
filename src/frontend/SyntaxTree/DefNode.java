@@ -8,6 +8,7 @@ import frontend.SyntaxTree.ExpNode.ExpNode;
 import frontend.SyntaxTree.ExpNode.NumberNode;
 import midend.MidCode.MidCode.Declare;
 import midend.MidCode.Value.Addr;
+import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 import midend.MidCode.Value.Word;
 
@@ -117,10 +118,17 @@ public class DefNode implements SyntaxNode {
         // 1. 通过此<DefNode>所在的符号表是否有上层符号表来判断
         boolean isGlobal = symbolTable.getParent() == null;
 
-        // 2. 对每个initValues生成中间代码
+        // 2. 对每个initValues或initValueForSTRCON生成中间代码
         LinkedList<Value> values = new LinkedList<>();
         for (ExpNode initValue : initValues) {
             values.add(initValue.generateMidCode());
+        }
+        if(initValueForSTRCON != null) {
+            String initString = initValueForSTRCON.getWord();
+            for (int i = 1; i < (initString.length()-1); i++) {
+                char ch = initString.charAt(i);
+                values.add(new Imm(ch));
+            }
         }
 
 

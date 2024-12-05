@@ -1,6 +1,4 @@
 .data
-a2: .word 1, 2, 3
-c2: .word 65, 66, 67
 .text
 addiu $sp, $sp, -4
 # CALL main
@@ -12,8 +10,40 @@ li $v0, 10
 syscall
 # main:
 main:
-addiu $sp, $sp, -4
+addiu $sp, $sp, -64
+# LOCAL CONST $c1@1 98
+li $t0, 98
+# LOCAL CONST &c2@1 65, 66, 67
+li $fp, 65
+sw $fp, 48($sp)
+li $fp, 66
+sw $fp, 52($sp)
+li $fp, 67
+sw $fp, 56($sp)
+# LOCAL CONST &c3@1 97, 98
+li $fp, 97
+sw $fp, 36($sp)
+li $fp, 98
+sw $fp, 40($sp)
+# LOCAL VAR $c4@1 97
+li $t1, 97
+# LOCAL VAR $c5@1 
+# LOCAL VAR &c6@1 65, 66, 67
+li $fp, 65
+sw $fp, 16($sp)
+li $fp, 66
+sw $fp, 20($sp)
+li $fp, 67
+sw $fp, 24($sp)
+# LOCAL VAR &c7@1 97, 98
+li $fp, 97
+sw $fp, 4($sp)
+li $fp, 98
+sw $fp, 8($sp)
 # RETURN 0
+sw $t0, 60($sp)
+sw $t2, 28($sp)
+sw $t1, 32($sp)
 li $v0, 0
-addiu $sp, $sp, 4
+addiu $sp, $sp, 64
 jr $ra
