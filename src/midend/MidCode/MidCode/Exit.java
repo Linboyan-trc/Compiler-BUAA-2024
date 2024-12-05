@@ -13,6 +13,7 @@ public class Exit implements MidCode {
     // 1. 生成中间代码
     @Override
     public String toString() {
+        // 1. 调用完一个函数之后退出
         return "EXIT";
     }
 }

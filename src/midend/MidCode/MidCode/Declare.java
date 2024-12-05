@@ -37,14 +37,17 @@ public class Declare implements MidCode {
         MidCodeTable.getInstance().addToVarInfo(value, size);
     }
 
+    // 1. 获取变量名:Value, '$'a1@0, '&'a2@0
     public Value getValue() {
         return value;
     }
 
+    // 2. 获取变量字长度
     public int getSize() {
         return size;
     }
 
+    // 3. 获取变量初始值
     public LinkedList<Value> getInitValues() {
         return initValues;
     }

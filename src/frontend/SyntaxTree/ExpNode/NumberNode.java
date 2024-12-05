@@ -39,6 +39,7 @@ public class NumberNode implements ExpNode {
 
     @Override
     public Value generateMidCode() {
+        // 1. Number生成中间代码就是生成一个Value: Imm
         return new Imm(number);
     }
 }

@@ -5,6 +5,8 @@ public abstract class Value {
 
     public abstract String getName();
 
+    public abstract Void truncTo8();
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Value) {

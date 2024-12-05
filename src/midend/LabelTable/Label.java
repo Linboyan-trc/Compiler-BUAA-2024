@@ -65,6 +65,8 @@ public class Label implements MipsCode {
     // 1. 生成中间代码
     @Override
     public String toString() {
+        // 1. 生成中间代码
+        // 2. 标签 + :
         if (name != null) {
             return name + ":";
         } else {

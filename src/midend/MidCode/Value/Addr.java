@@ -27,6 +27,11 @@ public class Addr extends Value {
         return name;
     }
 
+    @Override
+    public Void truncTo8(){
+        return null;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 生成中间代码
     @Override

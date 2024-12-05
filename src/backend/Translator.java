@@ -47,6 +47,8 @@ public class Translator {
 
     private LinkedList<Value> valueFromArg = new LinkedList<>();
     private int frameSize;
+
+    // 1. $sp的偏移量
     private int pushCount = 0;
     private int strCount = 0;
 
@@ -108,14 +110,20 @@ public class Translator {
             mipsCodeList.add(new Comment(midCode.toString()));
 
             // 3. 分支，返回，跳转需要重置调度器
+            // 3. 返回的时候，需要把临时变量存进栈
             if (midCode instanceof Branch || midCode instanceof Return || midCode instanceof Jump) {
                 scheduler.flush();
             }
 
+            // 1. 遇到<FuncEnrty>:Label
             if (labelTable.getLabelList(midCode).size() != 0) {
+
                 scheduler.flush();
+
+                // 1.2 添加标签
                 mipsCodeList.addAll(labelTable.getLabelList(midCode));
             }
+
             switch (midCode.getClass().toString()) {
                 case "class midend.MidCode.MidCode.ArgPush":
                     assert midCode instanceof ArgPush;
@@ -129,18 +137,22 @@ public class Translator {
                     assert midCode instanceof Branch;
                     generateMips((Branch) midCode);
                     break;
+                // 5. Declare:isGlobal, isFinal, <Value>:Word,Addr, size, initValue:Imm
                 case "class midend.MidCode.MidCode.Declare":
                     assert midCode instanceof Declare;
                     generateMips((Declare) midCode);
                     break;
+                // 2. <Exit>:无
                 case "class midend.MidCode.MidCode.Exit":
                     assert midCode instanceof Exit;
                     generateMips((Exit) midCode);
                     break;
+                // 1. <FuncCall>:name
                 case "class midend.MidCode.MidCode.FuncCall":
                     assert midCode instanceof FuncCall;
                     generateMips((FuncCall) midCode);
                     break;
+                // 3. <FuncEntry>:Label
                 case "class midend.MidCode.MidCode.FuncEntry":
                     assert midCode instanceof FuncEntry;
                     generateMips((FuncEntry) midCode);
@@ -173,6 +185,7 @@ public class Translator {
                     assert midCode instanceof Print;
                     generateMips((Print) midCode);
                     break;
+                // 4. Return:Value
                 case "class midend.MidCode.MidCode.Return":
                     assert midCode instanceof Return;
                     generateMips((Return) midCode);
@@ -186,18 +199,30 @@ public class Translator {
     }
 
     public ValueMeta getValueMeta(Value value, boolean load, boolean lw) {
+        // 1. Imm直接返回
         if (value instanceof Imm) {
             return (Imm) value;
-        } else if (value instanceof Word && value.getName().equals("?")) {
+        }
+        // 2. Word类型
+        else if (value instanceof Word && value.getName().equals("?")) {
             return Reg.RV;
-        } else {
+        }
+        // 3. Word类型
+        else {
+            // 1. 在busyRegs里找有没有寄存器对应Word
             Reg reg;
+            // 2. 如果没有，说明还没有为这个临时变量分配寄存器
             if ((reg = scheduler.find(value)) == null) {
+                // 2.1 分配寄存器，建立寄存器,Word, Addr映射
                 if ((reg = scheduler.alloc(value)) == null) {
                     reg = scheduler.preempt(value);
                 }
+                // 2.2 需要加载到寄存器中
+                // 2.2 首先会获取寄存器在上一次调用getValueMeta的时候分配到的寄存器$t0
                 if (load) {
+                    // 2.3 然后根据<FuncEntry>得到的函数内的所有变量，制定的valueToAddress,拿到这个Word的相对地址4($sp)
                     Address address = valueToAddress.get(value);
+                    // 2.4 Word类型
                     if (value instanceof Word) {
                         mipsCodeList.add(new IInsLW(reg, address));
                     } else if (address instanceof AbsoluteAddress) {
@@ -209,7 +234,9 @@ public class Translator {
                     }
                 }
             }
+            // 3. 加入当前寄存器
             synchronizedReg.add(reg);
+            // 4. 返回寄存器
             return reg;
         }
     }
@@ -362,12 +389,20 @@ public class Translator {
         }
     }
 
+    // 5. 局部的Declare
     public void generateMips(Declare declare) {
+        // 1. Word类型
         if (declare.getValue() instanceof Word) {
+            // 1.1 为这个Value:Word分配一个寄存器，然后拿到寄存器为$t0
             Reg leftMeta = (Reg) getValueMeta(declare.getValue(), false, false);
+            // 1.2 有初始值
             if (!declare.getInitValues().isEmpty()) {
+                // 1.2.1 获取第一个初始值,Imm
                 Value value = declare.getInitValues().get(0);
+                // 1.2.2 将第一个初始值加载到临时寄存器中
+                // 1.2.2 得到的还是Imm
                 ValueMeta rightMeta = getValueMeta(value, true, false);
+                // 1.2.3 对于Imm，li到为变量分配的寄存器中
                 if (rightMeta instanceof Imm) {
                     mipsCodeList.add(new IInsLI(leftMeta, (Imm) rightMeta));
                 } else {
@@ -391,14 +426,25 @@ public class Translator {
         }
     }
 
+    // 2. <Exit>:无
     public void generateMips(Exit exit) {
+        // 1. li $v0, 10 + syscall
         mipsCodeList.add(new IInsLI(Reg.RV, new Imm(10)));
         mipsCodeList.add(new Syscall());
     }
 
+    // 1. <FuncCall>:name
+    // 2. 调用一个函数: 存ra，跳函数，取ra
     public void generateMips(FuncCall funcCall) {
+        // 1. 在一个函数调用中，先对$sp的偏移量pushCount置0
         pushCount = 0;
+
+        // 2. 获取当前25个寄存器和其映射的Value:Word, Addr, Imm
+        // 2. Word:变量名name
+        // 2. Addr:变量名name
+        // 2. Imm:值value
         HashMap<Reg, Value> reg2value = scheduler.getReg2value();
+
         reg2value.forEach((reg, value) -> {
             if (valueToAddress.containsKey(value)) {
                 if (value instanceof Word || (value instanceof Addr && ((Addr) value).isTemp())) {
@@ -406,23 +452,51 @@ public class Translator {
                 }
             }
         });
+
+        // 3. 存ra进0($sp)
+        // 3. 跳转到<FuncCall>:name
+        // 3. 取ra从0($sp)
         mipsCodeList.add(new IInsSW(Reg.RA, new RelativeAddress(Reg.SP, 0)));
         mipsCodeList.add(new JInsJAL(funcCall.getName()));
         mipsCodeList.add(new IInsLW(Reg.RA, new RelativeAddress(Reg.SP, 0)));
+
+
         scheduler.clear();
     }
 
+    // 3. <FuncEntry>:Label
+    // 3.1 对于<FuncEntry>:先将此函数中所有的变量压入栈中，用valueToAddress记录，从后往前进入valueToAddress，然后真正压栈的时候从valueToAddress的最后一个元素开始压栈
+    // 3.2 再对栈帧压栈道栈帧的位置
     public void generateMips(FuncEntry funcEntry) {
+
         scheduler.clear();
+
         valueFromArg.clear();
+
+        // 3. 栈帧
         int fp = 4;
-        LinkedList<Value> values = MidCodeTable.getInstance().getValInfos(funcEntry.getEntryLabel().getLabelName());
+
+        // 1. 获取<FuncEntry>:Label的函数名
+        // 1. 获取这个函数作用于内的变量列表，
+        String funcName = funcEntry.getEntryLabel().getLabelName();
+        LinkedList<Value> values = MidCodeTable.getInstance().getValInfos(funcName);
+
         for (int i = values.size() - 1; i >= 0; i--) {
+            // 1.1 函数中的临时变量存进栈中
+            // 1.1 变量 + 相对地址:a1@1, 4(sp)
             valueToAddress.put(values.get(i), new RelativeAddress(Reg.SP, fp));
+
+            // 1.2 变量存进栈中后改变栈帧
             fp += MidCodeTable.getInstance().getValSize(values.get(i)) * 4;
+
+            // 1.2 调试查看: 当前存进栈帧的临时变量
             System.out.println(values.get(i) + " " + valueToAddress.get(values.get(i)));
         }
+
+        // 4. 记录栈帧大小，用于<FuncEnrty> -> <Return>中的出栈
         frameSize = fp;
+
+        // 2. 压栈addiu sp, sp, -栈帧
         mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.SP, Reg.SP, new Imm(-fp)));
     }
 
@@ -528,16 +602,22 @@ public class Translator {
         }
     }
 
+    // 4. Return:Value
     public void generateMips(Return ret) {
+        // 1. 获取Return:Value, Word, Addr, Imm
         if (ret.getValue() != null) {
+            // 1.1 Imm直接返回
             ValueMeta valueMeta = getValueMeta(ret.getValue(), true, false);
+            // 1.2 Imm添加一个li v0 Imm
             if (valueMeta instanceof Imm) {
                 mipsCodeList.add(new IInsLI(Reg.RV, (Imm) valueMeta));
             } else {
                 mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.RV, (Reg) valueMeta, new Imm(0)));
             }
         }
+        // 2. 根据<FuncEnrty>中设置的栈帧大小出栈
         mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.SP, Reg.SP, new Imm(frameSize)));
+        // 3. jr ra跳转回调用地址
         mipsCodeList.add(new RInsJR(Reg.RA));
     }
 
@@ -560,6 +640,8 @@ public class Translator {
         for (MipsCode code : macroCodeList) {
             mipsCode.append(code.toString()).append("\n");
         }
+
+        // 2. 生成.text段
         mipsCode.append(".text\n");
         for (MipsCode code : mipsCodeList) {
             mipsCode.append(code.toString()).append("\n");

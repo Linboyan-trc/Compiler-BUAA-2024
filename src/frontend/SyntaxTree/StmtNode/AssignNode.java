@@ -69,14 +69,23 @@ public class AssignNode implements StmtNode {
         ExpNode length = defNode.getLength();
 
         // 4. 右侧赋值生成中间代码
+        // 4. NumberNode就是一个Value:Imm
         Value expValue = expNode.generateMidCode();
 
         // 5. 如果左值对应的变量是单变量
         if (length == null) {
             // 5. 创建一个赋值操作
-            Word value = new Word(lValNode.getPair().getWord() + "@" + id);
-            new Move(false, value, expValue);
-            return null;
+            // 5. 如果左值对应的变量是char，要截断
+            if (defNode.getDefNodeType().isCharType()) {
+                Word value = new Word(lValNode.getPair().getWord() + "@" + id);
+                expValue.truncTo8();
+                new Move(false, value, expValue);
+                return null;
+            } else {
+                Word value = new Word(lValNode.getPair().getWord() + "@" + id);
+                new Move(false, value, expValue);
+                return null;
+            }
         }
 
         // 5. 如果左值对应的变量是数组
@@ -89,7 +98,12 @@ public class AssignNode implements StmtNode {
                     true,
                     addr,
                     new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset));
-            new Store(addr, expValue);
+            if (defNode.getDefNodeType().isCharType()) {
+                expValue.truncTo8();
+                new Store(addr, expValue);
+            } else {
+                new Store(addr, expValue);
+            }
             return null;
         }
     }

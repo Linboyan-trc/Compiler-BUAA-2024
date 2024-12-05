@@ -15,6 +15,14 @@ public enum SyntaxType {
         return this == ConstChar || this == ConstInt || this == Char || this == Int;
     }
 
+    public boolean isCharType() {
+        return this == ConstChar || this == ConstCharArray || this == Char || this == CharArray;
+    }
+
+    public boolean isIntType() {
+        return this == ConstInt || this == ConstIntArray || this == Int || this == IntArray;
+    }
+
     public boolean isIntArray() {
         return this == ConstIntArray || this == IntArray;
     }

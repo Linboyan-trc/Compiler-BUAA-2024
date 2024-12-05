@@ -17,8 +17,14 @@ public class Word extends Value {
     }
 
     // 3. 获取变量名字
+    @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Void truncTo8(){
+        return null;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -20,14 +20,14 @@ public class RegScheduler {
             Reg.S5, Reg.S6, Reg.S7, Reg.S8, Reg.S9,
             Reg.S10, Reg.S11, Reg.S12, Reg.S13, Reg.S14
     );
+    // 2. 单例模式
+    private static RegScheduler instance = new RegScheduler();
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 寄存器到Value的映射，代表寄存器中存储的值
     // 2. 标记正在用的寄存器，标记没有被使用的寄存器
     private HashMap<Reg, Value> reg2value = new HashMap<>();
     private LinkedList<Reg> busyRegs = new LinkedList<>();
     private LinkedList<Reg> freeRegs = new LinkedList<>();
-    // 3. 单例模式
-    private static RegScheduler instance = new RegScheduler();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 构造一个寄存器分配器，只会构造一个
@@ -55,21 +55,28 @@ public class RegScheduler {
 
     // 2. 根据Value寻找有没有哪个寄存器里存了这个Value，然后返回这个寄存器
     public Reg find(Value value) {
+        // 1. 在busyRegs里遍历，看有没有变量的名字是现在在找的，有就返回寄存器
         for (Reg reg : busyRegs) {
             if (reg2value.get(reg).equals(value)) {
                 return reg;
             }
         }
+        // 1. 没有就返回null
         return null;
     }
 
     // 3. 为一个Value分配一个寄存器，分配失败的时候返回null
     public Reg alloc(Value value) {
+        // 1. 传入变量名:Word,name, Addr,name
         if (!freeRegs.isEmpty()) {
+            // 1.1 获取一个寄存器
             Reg reg = freeRegs.getFirst();
+            // 1.2 寄存器移入busyRegs中
             freeRegs.removeFirst();
             busyRegs.addLast(reg);
+            // 1.3 记录寄存器到Word, Addr的映射
             reg2value.put(reg, value);
+            // 1.4 返回这个寄存器
             return reg;
         }
         return null;
@@ -113,7 +120,8 @@ public class RegScheduler {
         for (Map.Entry<Reg, Value> entry : reg2value.entrySet()) {
             // 2. 获取变量地址
             Address address = Translator.getInstance().getValueToAddress().get(entry.getValue());
-            // 3. 如果是绝对地址 + Word，相对地址 + 不是Addr，就需要写回内存
+            // 3. 绝对地址 + Word需要写回内存
+            // 3. 相对地址 + Word需要写回栈
             if (address instanceof AbsoluteAddress && entry.getValue() instanceof Word
                     || address instanceof RelativeAddress && !(entry.getValue() instanceof Addr)) {
                 Translator.getInstance().getMipsCodeList().add(new IInsSW(entry.getKey(), address));
