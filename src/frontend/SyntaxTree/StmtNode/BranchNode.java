@@ -115,8 +115,12 @@ public class BranchNode implements StmtNode {
         if(ifStmt instanceof BlockNode){
             flag = ((BlockNode) ifStmt).hasContinue(assignNode);
         }
-        if(elseStmt instanceof BlockNode){
-            flag = ((BlockNode) elseStmt).hasContinue(assignNode);
+        if(elseStmt instanceof BlockNode || elseStmt instanceof BranchNode){
+            if(elseStmt instanceof BlockNode) {
+                flag = ((BlockNode) elseStmt).hasContinue(assignNode);
+            } else {
+                flag = ((BranchNode) elseStmt).hasContinue(assignNode);
+            }
         }
         return flag;
     }
