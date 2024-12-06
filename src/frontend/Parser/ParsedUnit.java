@@ -529,8 +529,36 @@ public class ParsedUnit {
 
     private CharacterNode toCharacterNode() {
         // 1. 转义字符
-
-        return new CharacterNode(getUnit().toPair().getWord().charAt(1));
+        getUnit();
+        if(unit.toPair().getWord().length() == 4){
+            char ch = unit.toPair().getWord().charAt(2);
+            switch (ch){
+                case 'a':
+                    return new CharacterNode(7);
+                case 'b':
+                    return new CharacterNode(8);
+                case 't':
+                    return new CharacterNode(9);
+                case 'n':
+                    return new CharacterNode(10);
+                case 'v':
+                    return new CharacterNode(11);
+                case 'f':
+                    return new CharacterNode(12);
+                case '\"':
+                    return new CharacterNode(34);
+                case '\'':
+                    return new CharacterNode(39);
+                case '\\':
+                    return new CharacterNode(92);
+                case '0':
+                    return new CharacterNode(0);
+                default:
+                    return new CharacterNode(0);
+            }
+        } else {
+            return new CharacterNode(unit.toPair().getWord().charAt(1));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
