@@ -44,8 +44,64 @@ public class DefNode implements SyntaxNode {
               this.initValues = new LinkedList<>();
             }
             for(int index = 1; index < (this.initValueForSTRCON.getWord().length() - 1); index++){
+                // 1. 处理转义字符
+                char ch = this.initValueForSTRCON.getWord().charAt(index);
+                if(ch == '\\'){
+                    if(index < this.initValueForSTRCON.getWord().length() - 1){
+                        char nextCh = this.initValueForSTRCON.getWord().charAt(index + 1);
+                        if(nextCh == 'a' || nextCh == 'b' || nextCh == 't' || nextCh == 'n'
+                        || nextCh == 'v' || nextCh == 'f' || nextCh == '\"' || nextCh == '\''
+                        || nextCh == '\\' || nextCh == '0'){
+                            NumberNode temp;
+                            switch (nextCh){
+                                case 'a':
+                                    temp = new NumberNode(7);
+                                    break;
+                                case 'b':
+                                    temp = new NumberNode(8);
+                                    break;
+                                case 't':
+                                    temp = new NumberNode(9);
+                                    break;
+                                case 'n':
+                                    temp = new NumberNode(10);
+                                    break;
+                                case 'v':
+                                    temp = new NumberNode(11);
+                                    break;
+                                case 'f':
+                                    temp = new NumberNode(12);
+                                    break;
+                                case '\"':
+                                    temp = new NumberNode(34);
+                                    break;
+                                case '\'':
+                                    temp = new NumberNode(39);
+                                    break;
+                                case '\\':
+                                    temp = new NumberNode(92);
+                                    break;
+                                case '0':
+                                    temp = new NumberNode(0);
+                                    break;
+                                default:
+                                    temp = new NumberNode(0);
+                                    break;
+                            }
+                            this.initValues.add(temp);
+                            index++;
+                            continue;
+                        }
+                    }
+                }
                 NumberNode temp = new NumberNode(this.initValueForSTRCON.getWord().charAt(index));
                 this.initValues.add(temp);
+            }
+        }
+        // 2. 如果length是Number，补齐不足的值
+        if(length instanceof NumberNode) {
+            while(initValues.size() < ((NumberNode)length).getValue()){
+                initValues.add(new NumberNode(0));
             }
         }
     }
@@ -84,19 +140,24 @@ public class DefNode implements SyntaxNode {
             length = length.simplify();
         }
 
-        // 2. 对初始值化简
+        // 3. 对初始值化简
         LinkedList<ExpNode> newInitValues = new LinkedList<>();
         for (ExpNode node : initValues) {
             newInitValues.add(node.simplify());
         }
         initValues = newInitValues;
 
-        // 3. 如果length是Number，补齐不足的值
-        if(length instanceof NumberNode) {
-            while(initValues.size() < ((NumberNode)length).getValue()){
-                initValues.add(new NumberNode(0));
-            }
-        }
+//        if(length instanceof NumberNode) {
+//            System.out.print(pair.getWord() + ": " + ((NumberNode) length).getValue() + ": ");
+//            for(ExpNode node : initValues) {
+//                if(node instanceof NumberNode) {
+//                    System.out.print(((NumberNode) node).getValue() + " ");
+//                } else if (node instanceof CharacterNode) {
+//                    System.out.print(((CharacterNode) node).getValue() + " ");
+//                }
+//            }
+//            System.out.println();
+//        }
 
         // 4. 返回化简后的结果
         return this;
@@ -144,14 +205,6 @@ public class DefNode implements SyntaxNode {
         for (ExpNode initValue : initValues) {
             values.add(initValue.generateMidCode());
         }
-        if(initValueForSTRCON != null) {
-            String initString = initValueForSTRCON.getWord();
-            for (int i = 1; i < (initString.length()-1); i++) {
-                char ch = initString.charAt(i);
-                values.add(new Imm(ch));
-            }
-        }
-
 
         // 3. 计算此<DefNode>长度
         int size =  (int) (length == null ? 1 : ((NumberNode) length).getValue());
