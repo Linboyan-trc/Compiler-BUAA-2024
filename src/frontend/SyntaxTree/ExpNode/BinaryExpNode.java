@@ -283,12 +283,12 @@ public class BinaryExpNode implements ExpNode {
                     // 1. 取模，右边为+-1，直接返回0
                     return right.getValue() == 1 || right.getValue() == -1 ? new NumberNode(0) :
                             new BinaryExpNode(symbolTable, leftExp, binaryOp, right);
-                case AND:
+                //case AND:
                     // 1. &&，右边为0，直接返回0
-                    return right.getValue() == 0 ? new NumberNode(0) : leftExp;
-                case OR:
+                    //return right.getValue() == 0 ? new NumberNode(0) : leftExp;
+                //case OR:
                     // 2. ||，右边不为0，直接返回1
-                    return right.getValue() != 0 ? new NumberNode(1) : leftExp;
+                    //return right.getValue() != 0 ? new NumberNode(1) : leftExp;
                 default:
                     return new BinaryExpNode(symbolTable, leftExp, binaryOp, rightExp);
             }
