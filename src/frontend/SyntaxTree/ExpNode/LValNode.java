@@ -100,8 +100,9 @@ public class LValNode implements ExpNode {
 
         // 3. 考虑单变量
         else {
+            // 3.1 当变量是常量，并且不是数组的时候，直接获取值
             DefNode defNode = symbolTable.getVariable(pair.getWord());
-            if (defNode.isFinal()) {
+            if (defNode.isFinal() && defNode.getDefNodeType().isVariable()) {
                 return defNode.getValue(null);
             }
         }
