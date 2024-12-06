@@ -528,6 +528,8 @@ public class ParsedUnit {
     }
 
     private CharacterNode toCharacterNode() {
+        // 1. 转义字符
+
         return new CharacterNode(getUnit().toPair().getWord().charAt(1));
     }
 

@@ -151,14 +151,14 @@ public class UnaryExpNode implements ExpNode {
         }
     }
 
-    public CharacterNode operateCharacter(Pair unaryOp, CharacterNode expNode) {
+    public NumberNode operateCharacter(Pair unaryOp, CharacterNode expNode) {
         switch (unaryOp.getToken()) {
             case PLUS:
-                return new CharacterNode(expNode.getValue());
+                return new NumberNode(expNode.getValue());
             case MINU:
-                return new CharacterNode(-expNode.getValue());
+                return new NumberNode(-expNode.getValue());
             case NOT:
-                return new CharacterNode(expNode.getValue() == 0 ? 1 : 0);
+                return new NumberNode(expNode.getValue() == 0 ? 1 : 0);
             default:
                 return null;
         }
