@@ -34,7 +34,7 @@ public class ForStmtNode implements SyntaxNode {
     // 3. 不能对常量进行修改，对常量进行修改为h类错误
     public void checkForError() {
         DefNode defNode;
-        if((defNode = symbolTable.getVariable(lValNode.getPair().getWord())) != null) {
+        if((defNode = symbolTable.getVariable(lValNode.getPair().getWord(),lValNode.getPair().getLineNumber())) != null) {
             if(defNode.getDefNodeType() == SyntaxType.ConstInt ||
                     defNode.getDefNodeType() == SyntaxType.ConstIntArray ||
                     defNode.getDefNodeType() == SyntaxType.ConstChar ||

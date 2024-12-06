@@ -123,14 +123,15 @@ public class SymbolTable {
         return children;
     }
 
-    public DefNode getVariable(String name) {
+    public DefNode getVariable(String name, int lineNumber) {
         for(SymbolItem<DefNode> item : variables){
-            if(item.getName().equals(name)){
+            if(item.getName().equals(name)
+                    && item.getNode().getPair().getLineNumber() <= lineNumber){
                 return item.getNode();
             }
         }
         if(parent != null){
-            return parent.getVariable(name);
+            return parent.getVariable(name,lineNumber);
         } else {
             return null;
         }

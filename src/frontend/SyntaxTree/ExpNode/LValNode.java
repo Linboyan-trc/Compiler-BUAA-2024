@@ -42,7 +42,7 @@ public class LValNode implements ExpNode {
     // 4. 检查
     // 4. 使用未命名变量，为c类错误
     public void checkForError() {
-        if(symbolTable.getVariable(pair.getWord()) == null) {
+        if(symbolTable.getVariable(pair.getWord(),pair.getLineNumber()) == null) {
             errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'c'));
         }
     }
@@ -51,7 +51,7 @@ public class LValNode implements ExpNode {
     @Override
     public SyntaxType getSyntaxType(SymbolTable symbolTable) {
         // 1. 首先在符号表中获取节点
-        DefNode defNode = symbolTable.getVariable(pair.getWord());
+        DefNode defNode = symbolTable.getVariable(pair.getWord(),pair.getLineNumber());
         // 2. 节点自带类型
         // 2. 对于左值表达式: a, a[10]等
         // 2. 如果length = null,那么类型就和Pair一致
@@ -88,7 +88,7 @@ public class LValNode implements ExpNode {
         if (length instanceof NumberNode ||length instanceof CharacterNode) {
 
             // 3. 然后去符号表中找到这个变量
-            DefNode defNode = symbolTable.getVariable(pair.getWord());
+            DefNode defNode = symbolTable.getVariable(pair.getWord(),pair.getLineNumber());
 
             // 4. 如果这个变量是常量，说明一定为const int a[10][10] = {...}这种
             if (defNode.isFinal()) {
@@ -101,7 +101,7 @@ public class LValNode implements ExpNode {
         // 3. 考虑单变量
         else {
             // 3.1 当变量是常量，并且不是数组的时候，直接获取值
-            DefNode defNode = symbolTable.getVariable(pair.getWord());
+            DefNode defNode = symbolTable.getVariable(pair.getWord(),pair.getLineNumber());
             if (defNode.isFinal() && defNode.getDefNodeType().isVariable()) {
                 return defNode.getValue(null);
             }
@@ -126,7 +126,7 @@ public class LValNode implements ExpNode {
     @Override
     public Value generateMidCode() {
         // 1. 获取在符号表中的变量
-        DefNode defNode = symbolTable.getVariable(pair.getWord()).simplify();
+        DefNode defNode = symbolTable.getVariable(pair.getWord(),pair.getLineNumber()).simplify();
 
         // 2. 获取作用域id
         int id = defNode.getScopeId();

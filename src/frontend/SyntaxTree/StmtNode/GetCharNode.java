@@ -31,7 +31,7 @@ public class GetCharNode implements StmtNode {
     // 3. 不能对常量进行修改，对常量进行修改为h类错误
     public void checkForError() {
         DefNode defNode;
-        if((defNode = symbolTable.getVariable(lValNode.getPair().getWord())) != null) {
+        if((defNode = symbolTable.getVariable(lValNode.getPair().getWord(),lValNode.getPair().getLineNumber())) != null) {
             if(defNode.getDefNodeType() == SyntaxType.ConstInt ||
                     defNode.getDefNodeType() == SyntaxType.ConstIntArray ||
                     defNode.getDefNodeType() == SyntaxType.ConstChar ||
@@ -57,7 +57,7 @@ public class GetCharNode implements StmtNode {
     @Override
     public Value generateMidCode() {
         // 1. 获取左指IDENFR在符号表中的DefNode
-        DefNode defNode = symbolTable.getVariable(lValNode.getPair().getWord()).simplify();
+        DefNode defNode = symbolTable.getVariable(lValNode.getPair().getWord(),lValNode.getPair().getLineNumber()).simplify();
 
         // 2. 获取作用域id
         int id = defNode.getScopeId();

@@ -147,18 +147,6 @@ public class DefNode implements SyntaxNode {
         }
         initValues = newInitValues;
 
-//        if(length instanceof NumberNode) {
-//            System.out.print(pair.getWord() + ": " + ((NumberNode) length).getValue() + ": ");
-//            for(ExpNode node : initValues) {
-//                if(node instanceof NumberNode) {
-//                    System.out.print(((NumberNode) node).getValue() + " ");
-//                } else if (node instanceof CharacterNode) {
-//                    System.out.print(((CharacterNode) node).getValue() + " ");
-//                }
-//            }
-//            System.out.println();
-//        }
-
         // 4. 返回化简后的结果
         return this;
     }
