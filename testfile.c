@@ -1,38 +1,44 @@
-const int constIntArray[3] = {10, 20, 30};
-const char constCharArray[5] = {'A', 'B', 'C', 'D', 'E'};
-int intArray[5];
-char charArray[5];
+const int a1[8] = {100, 0, -100, 10};
+int a2[8] = {99999999, 99999999, 99999999};
+char c1[16] = "ariana grande";
 
-int func_with_param(int a, char b, int arr[], char str[]) {
-    // 1. 取出arr[0], 也就是intArray[0]有问题
-    // 2. intArray[0]本身在内存中的数值没问题
-    printf("Function with parameters: a = %d, b = %c arr[0] = %d, str[0] = %c\n", a, b, arr[0], str[0]);
-    int sum = a + b + arr[0] + str[0];
-    printf("Sum in func_with_param: %d\n", sum);
-    return sum;
+int func1(int temp){
+    return temp;
 }
 
 int main() {
-    // calculate
-    // intArray[5]:10, 20, 30, 30, 60
-    // intArray[5]:10, 1, 0, 30, 60
-    // charArray[5]:79, 0, 0, 0, 0
-    intArray[0] = constIntArray[0];
-    intArray[1] = constIntArray[1];
-    intArray[2] = constIntArray[2];
-    intArray[3] = intArray[0] + intArray[1];
-    intArray[4] = intArray[3] + intArray[2];
+    if(0){
 
-    intArray[0] = -intArray[0];
+    }else if(!func1(a2[1])){
 
-    intArray[0] = +intArray[0];
+    }else if(!2){
 
-    intArray[1] = intArray[3] / intArray[2];
-    intArray[2] = intArray[3] % intArray[2];
+    }else if(!0){
+        int i;
+        for(i = 0; i < a1[3];i = i+1){
+            printf("%c",c1[i]);
+        }
+    }
 
-    charArray[0] = constCharArray[0] + constCharArray[1] + constCharArray[2] + constCharArray[3] + constCharArray[4];
+    int a,b,c;
+    a = getint();
+    b = getint();
+    c = getint();
 
-    int result = func_with_param(intArray[0], charArray[0], intArray, charArray);
+    printf("%d\n",a+b+c);
+
+    char c2[10];
+    int i;
+    for(i = 0; i < 10; i = i+1){
+        c2[i] = getchar();
+    }
+
+    char temp = '\n';
+    printf("%c",temp);
+
+    for(i = 0; i < 10; i = i+1){
+        printf("%c",c2[i]);
+    }
 
     return 0;
 }

@@ -1,95 +1,119 @@
-GLOBAL CONST &constIntArray@0 10, 20, 30
-GLOBAL CONST &constCharArray@0 65, 66, 67, 68, 69
-GLOBAL VAR &intArray@0 
-GLOBAL VAR &charArray@0 
+GLOBAL CONST &a1@0 100, 0, -100, 10, 0, 0, 0, 0
+GLOBAL VAR &a2@0 99999999, 99999999, 99999999, 0, 0, 0, 0, 0
+GLOBAL VAR &c1@0 97, 114, 105, 97, 110, 97, 32, 103, 114, 97, 110, 100, 101, 0, 0, 0
 CALL main
 EXIT
 main:
 main:
-&0 <- &intArray@0 ADD 0
-*&0 <- 10
-&1 <- &intArray@0 ADD 1
-*&1 <- 20
-&2 <- &intArray@0 ADD 2
-*&2 <- 30
-&3 <- &intArray@0 ADD 0
-TEMP $4 <- *&3
-&5 <- &intArray@0 ADD 1
-TEMP $6 <- *&5
-$7 <- $4 ADD $6
-&8 <- &intArray@0 ADD 3
-*&8 <- $7
-&9 <- &intArray@0 ADD 3
-TEMP $10 <- *&9
-&11 <- &intArray@0 ADD 2
-TEMP $12 <- *&11
-$13 <- $10 ADD $12
-&14 <- &intArray@0 ADD 4
-*&14 <- $13
-&15 <- &intArray@0 ADD 0
-TEMP $16 <- *&15
-$17 <- NEG $16
-&18 <- &intArray@0 ADD 0
-*&18 <- $17
-&19 <- &intArray@0 ADD 0
-TEMP $20 <- *&19
-&21 <- &intArray@0 ADD 0
-*&21 <- $20
-&22 <- &intArray@0 ADD 3
-TEMP $23 <- *&22
-&24 <- &intArray@0 ADD 2
-TEMP $25 <- *&24
-$26 <- $23 DIV $25
-&27 <- &intArray@0 ADD 1
-*&27 <- $26
-&28 <- &intArray@0 ADD 3
-TEMP $29 <- *&28
-&30 <- &intArray@0 ADD 2
-TEMP $31 <- *&30
-$32 <- $29 MOD $31
-&33 <- &intArray@0 ADD 2
-*&33 <- $32
-&34 <- &charArray@0 ADD 0
-*&34 <- 79
-&35 <- &intArray@0 ADD 0
-TEMP $36 <- *&35
-&37 <- &charArray@0 ADD 0
-TEMP $38 <- *&37
-TEMP &39 <- &intArray@0
-TEMP &40 <- &charArray@0
-PUSH $36
-PUSH $38
-PUSH &39
-PUSH &40
-CALL func_with_param
-TEMP $41 <- $?
-LOCAL VAR $result@2 $41
+&0 <- &a2@0 ADD 1
+TEMP $1 <- *&0
+PUSH $1
+CALL func1
+TEMP $2 <- $?
+$3 <- NOT $2
+BRANCH Label1: IF $3 EQ 0
+JUMP Label2
+Label1:
+NOP
+LOCAL VAR $i@6 
+SAVE $i@6 <- 0
+Label3:
+NOP
+BRANCH Label4: IF 1 EQ 0
+TEMP $4 <- $i@6
+$5 <- $4 LT 10
+BRANCH Label5: IF $5 EQ 0
+TEMP $6 <- $i@6
+&7 <- &c1@0 ADD $6
+TEMP $8 <- *&7
+PUSH $8
+PRINT "%c"
+JUMP Label6
+Label5:
+NOP
+JUMP Label4
+Label6:
+NOP
+TEMP $9 <- $i@6
+$10 <- 1 ADD $9
+SAVE $i@6 <- $10
+JUMP Label3
+Label4:
+NOP
+Label2:
+NOP
+LOCAL VAR $a@2 
+LOCAL VAR $b@2 
+LOCAL VAR $c@2 
+CALL GETINT
+SAVE $a@2 <- $?
+CALL GETINT
+SAVE $b@2 <- $?
+CALL GETINT
+SAVE $c@2 <- $?
+TEMP $11 <- $a@2
+TEMP $12 <- $b@2
+$13 <- $11 ADD $12
+TEMP $14 <- $c@2
+$15 <- $13 ADD $14
+PUSH $15
+PRINT "%d\n"
+LOCAL VAR &c2@2 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+LOCAL VAR $i@2 
+SAVE $i@2 <- 0
+Label7:
+NOP
+BRANCH Label8: IF 1 EQ 0
+TEMP $16 <- $i@2
+$17 <- $16 LT 10
+BRANCH Label9: IF $17 EQ 0
+CALL GETCHAR
+TEMP $18 <- $i@2
+&19 <- &c2@2 ADD $18
+*&19 <- $?
+JUMP Label10
+Label9:
+NOP
+JUMP Label8
+Label10:
+NOP
+TEMP $20 <- $i@2
+$21 <- 1 ADD $20
+SAVE $i@2 <- $21
+JUMP Label7
+Label8:
+NOP
+LOCAL VAR $temp@2 10
+TEMP $22 <- $temp@2
+PUSH $22
+PRINT "%c"
+SAVE $i@2 <- 0
+Label11:
+NOP
+BRANCH Label12: IF 1 EQ 0
+TEMP $23 <- $i@2
+$24 <- $23 LT 10
+BRANCH Label13: IF $24 EQ 0
+TEMP $25 <- $i@2
+&26 <- &c2@2 ADD $25
+TEMP $27 <- *&26
+PUSH $27
+PRINT "%c"
+JUMP Label14
+Label13:
+NOP
+JUMP Label12
+Label14:
+NOP
+TEMP $28 <- $i@2
+$29 <- 1 ADD $28
+SAVE $i@2 <- $29
+JUMP Label11
+Label12:
+NOP
 RETURN 0
-func_with_param:
-func_with_param:
-PARA $a@1
-PARA $b@1
-PARA $arr@1
-PARA $str@1
-TEMP $42 <- $a@1
-TEMP $43 <- $b@1
-TEMP $44 <- $arr@1
-TEMP $45 <- $str@1
-PUSH $42
-PUSH $43
-PUSH $44
-PUSH $45
-PRINT "Function with parameters: a = %d, b = %c arr[0] = %d, str[0] = %c\n"
-TEMP $46 <- $a@1
-TEMP $47 <- $b@1
-$48 <- $46 ADD $47
-TEMP $49 <- $arr@1
-$50 <- $48 ADD $49
-TEMP $51 <- $str@1
-$52 <- $50 ADD $51
-LOCAL VAR $sum@1 $52
-TEMP $53 <- $sum@1
-PUSH $53
-PRINT "Sum in func_with_param: %d\n"
-TEMP $54 <- $sum@1
-RETURN $54
+func1:
+func1:
+PARA $temp@1
+TEMP $30 <- $temp@1
+RETURN $30

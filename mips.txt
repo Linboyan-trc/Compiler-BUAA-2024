@@ -1,0 +1,327 @@
+.data
+a1: .word 100, 0, -100, 10, 0, 0, 0, 0
+a2: .word 99999999, 99999999, 99999999, 0, 0, 0, 0, 0
+c1: .word 97, 114, 105, 97, 110, 97, 32, 103, 114, 97, 110, 100, 101, 0, 0, 0
+string0: .asciiz "\n"
+.text
+addiu $sp, $sp, -4
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+# EXIT
+li $v0, 10
+syscall
+# main:
+main:
+addiu $sp, $sp, -188
+# &0 <- &a2@0 ADD 1
+la $t0, a2
+li $fp, 4
+addu $t1, $t0, $fp
+# TEMP $1 <- *&0
+lw $t2, 0($t1)
+# PUSH $1
+sw $t2, -4($sp)
+# CALL func1
+sw $t1, 184($sp)
+sw $t2, 180($sp)
+sw $ra, 0($sp)
+jal func1
+lw $ra, 0($sp)
+# TEMP $2 <- $?
+addiu $t0, $v0, 0
+# $3 <- NOT $2
+seq $t1, $t0, $0
+# BRANCH Label1: IF $3 EQ 0
+sw $t0, 176($sp)
+sw $t1, 172($sp)
+lw $t0, 172($sp)
+beq $t0, $0, Label1
+# JUMP Label2
+sw $t0, 172($sp)
+j Label2
+# NOP
+Label1:
+# LOCAL VAR $i@6 
+# SAVE $i@6 <- 0
+li $t0, 0
+# NOP
+sw $t0, 168($sp)
+Label3:
+# BRANCH Label4: IF 1 EQ 0
+li $fp, 1
+beq $fp, $0, Label4
+# TEMP $4 <- $i@6
+lw $t1, 168($sp)
+addiu $t0, $t1, 0
+# $5 <- $4 LT 10
+li $fp, 10
+slt $t2, $t0, $fp
+# BRANCH Label5: IF $5 EQ 0
+sw $t0, 164($sp)
+sw $t1, 168($sp)
+sw $t2, 160($sp)
+lw $t0, 160($sp)
+beq $t0, $0, Label5
+# TEMP $6 <- $i@6
+lw $t2, 168($sp)
+addiu $t1, $t2, 0
+# &7 <- &c1@0 ADD $6
+la $t3, c1
+sll $fp, $t1, 2
+addu $t4, $t3, $fp
+# TEMP $8 <- *&7
+lw $t5, 0($t4)
+# PUSH $8
+sw $t5, -4($sp)
+# PRINT "%c"
+lb $a0, -4($sp)
+li $v0, 11
+syscall
+# JUMP Label6
+sw $t0, 160($sp)
+sw $t1, 156($sp)
+sw $t2, 168($sp)
+sw $t5, 148($sp)
+j Label6
+# NOP
+Label5:
+# JUMP Label4
+j Label4
+# NOP
+Label6:
+# TEMP $9 <- $i@6
+lw $t1, 168($sp)
+addiu $t0, $t1, 0
+# $10 <- 1 ADD $9
+li $fp, 1
+addu $t2, $fp, $t0
+# SAVE $i@6 <- $10
+addiu $t1, $t2, 0
+# JUMP Label3
+sw $t0, 144($sp)
+sw $t1, 168($sp)
+sw $t2, 140($sp)
+j Label3
+# NOP
+Label4:
+# NOP
+Label2:
+# LOCAL VAR $a@2 
+# LOCAL VAR $b@2 
+# LOCAL VAR $c@2 
+# CALL GETINT
+li $v0, 5
+syscall
+# SAVE $a@2 <- $?
+addiu $t0, $v0, 0
+# CALL GETINT
+li $v0, 5
+syscall
+# SAVE $b@2 <- $?
+addiu $t1, $v0, 0
+# CALL GETINT
+li $v0, 5
+syscall
+# SAVE $c@2 <- $?
+addiu $t2, $v0, 0
+# TEMP $11 <- $a@2
+addiu $t3, $t0, 0
+# TEMP $12 <- $b@2
+addiu $t4, $t1, 0
+# $13 <- $11 ADD $12
+addu $t5, $t3, $t4
+# TEMP $14 <- $c@2
+addiu $t6, $t2, 0
+# $15 <- $13 ADD $14
+addu $t7, $t5, $t6
+# PUSH $15
+sw $t7, -4($sp)
+# PRINT "%d\n"
+lw $a0, -4($sp)
+li $v0, 1
+syscall
+la $a0, string0
+li $v0, 4
+syscall
+# LOCAL VAR &c2@2 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+li $fp, 0
+sw $fp, 68($sp)
+li $fp, 0
+sw $fp, 72($sp)
+li $fp, 0
+sw $fp, 76($sp)
+li $fp, 0
+sw $fp, 80($sp)
+li $fp, 0
+sw $fp, 84($sp)
+li $fp, 0
+sw $fp, 88($sp)
+li $fp, 0
+sw $fp, 92($sp)
+li $fp, 0
+sw $fp, 96($sp)
+li $fp, 0
+sw $fp, 100($sp)
+li $fp, 0
+sw $fp, 104($sp)
+# LOCAL VAR $i@2 
+# SAVE $i@2 <- 0
+li $t8, 0
+# NOP
+sw $t0, 136($sp)
+sw $t4, 120($sp)
+sw $t1, 132($sp)
+sw $t3, 124($sp)
+sw $t8, 64($sp)
+sw $t6, 112($sp)
+sw $t2, 128($sp)
+sw $t5, 116($sp)
+sw $t7, 108($sp)
+Label7:
+# BRANCH Label8: IF 1 EQ 0
+li $fp, 1
+beq $fp, $0, Label8
+# TEMP $16 <- $i@2
+lw $t1, 64($sp)
+addiu $t0, $t1, 0
+# $17 <- $16 LT 10
+li $fp, 10
+slt $t2, $t0, $fp
+# BRANCH Label9: IF $17 EQ 0
+sw $t0, 60($sp)
+sw $t1, 64($sp)
+sw $t2, 56($sp)
+lw $t0, 56($sp)
+beq $t0, $0, Label9
+# CALL GETCHAR
+li $v0, 12
+syscall
+# TEMP $18 <- $i@2
+lw $t2, 64($sp)
+addiu $t1, $t2, 0
+# &19 <- &c2@2 ADD $18
+la $t3, 68($sp)
+sll $fp, $t1, 2
+addu $t4, $t3, $fp
+# *&19 <- $?
+sw $v0, 0($t4)
+# JUMP Label10
+sw $t0, 56($sp)
+sw $t1, 52($sp)
+sw $t2, 64($sp)
+j Label10
+# NOP
+Label9:
+# JUMP Label8
+j Label8
+# NOP
+Label10:
+# TEMP $20 <- $i@2
+lw $t1, 64($sp)
+addiu $t0, $t1, 0
+# $21 <- 1 ADD $20
+li $fp, 1
+addu $t2, $fp, $t0
+# SAVE $i@2 <- $21
+addiu $t1, $t2, 0
+# JUMP Label7
+sw $t0, 44($sp)
+sw $t1, 64($sp)
+sw $t2, 40($sp)
+j Label7
+# NOP
+Label8:
+# LOCAL VAR $temp@2 10
+li $t0, 10
+# TEMP $22 <- $temp@2
+addiu $t1, $t0, 0
+# PUSH $22
+sw $t1, -4($sp)
+# PRINT "%c"
+lb $a0, -4($sp)
+li $v0, 11
+syscall
+# SAVE $i@2 <- 0
+li $t2, 0
+# NOP
+sw $t0, 36($sp)
+sw $t1, 32($sp)
+sw $t2, 64($sp)
+Label11:
+# BRANCH Label12: IF 1 EQ 0
+li $fp, 1
+beq $fp, $0, Label12
+# TEMP $23 <- $i@2
+lw $t1, 64($sp)
+addiu $t0, $t1, 0
+# $24 <- $23 LT 10
+li $fp, 10
+slt $t2, $t0, $fp
+# BRANCH Label13: IF $24 EQ 0
+sw $t0, 28($sp)
+sw $t1, 64($sp)
+sw $t2, 24($sp)
+lw $t0, 24($sp)
+beq $t0, $0, Label13
+# TEMP $25 <- $i@2
+lw $t2, 64($sp)
+addiu $t1, $t2, 0
+# &26 <- &c2@2 ADD $25
+la $t3, 68($sp)
+sll $fp, $t1, 2
+addu $t4, $t3, $fp
+# TEMP $27 <- *&26
+lw $t5, 0($t4)
+# PUSH $27
+sw $t5, -4($sp)
+# PRINT "%c"
+lb $a0, -4($sp)
+li $v0, 11
+syscall
+# JUMP Label14
+sw $t0, 24($sp)
+sw $t1, 20($sp)
+sw $t2, 64($sp)
+sw $t5, 12($sp)
+j Label14
+# NOP
+Label13:
+# JUMP Label12
+j Label12
+# NOP
+Label14:
+# TEMP $28 <- $i@2
+lw $t1, 64($sp)
+addiu $t0, $t1, 0
+# $29 <- 1 ADD $28
+li $fp, 1
+addu $t2, $fp, $t0
+# SAVE $i@2 <- $29
+addiu $t1, $t2, 0
+# JUMP Label11
+sw $t0, 8($sp)
+sw $t1, 64($sp)
+sw $t2, 4($sp)
+j Label11
+# NOP
+Label12:
+# RETURN 0
+li $v0, 0
+addiu $sp, $sp, 188
+jr $ra
+# func1:
+func1:
+addiu $sp, $sp, -12
+# PARA $temp@1
+lw $t0, 8($sp)
+# TEMP $30 <- $temp@1
+addiu $t1, $t0, 0
+# RETURN $30
+sw $t0, 8($sp)
+sw $t1, 4($sp)
+lw $t0, 4($sp)
+addiu $v0, $t0, 0
+addiu $sp, $sp, 12
+jr $ra
