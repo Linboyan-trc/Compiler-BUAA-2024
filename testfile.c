@@ -1,44 +1,68 @@
-const int a1[8] = {100, 0, -100, 10};
-int a2[8] = {99999999, 99999999, 99999999};
-char c1[16] = "ariana grande";
+int global_var1 = 10;
+char global_char = 'A';
+int global_arr[5] = {1, 2, 3, 4, 5};
+char global_str[5] = {'H', 'e', 'l', 'l', 'o'};
 
-int func1(int temp){
-    return temp;
+int compute_sum(int a, int b, int c, int d) {
+    if (a > b || c < d) {
+        return a + b + c + d;
+    } else {
+        return a - b + c - d;
+    }
+}
+
+char find_max_char(char arr[], int size) {
+    char max = arr[0];
+    int i;
+    for (i = 1; i < size; i = i + 1) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+int process_array(int arr[], int size, int threshold) {
+    int sum = 0;
+    int i;
+    for (i = 0; i < size; i = i + 1) {
+        if (arr[i] > threshold && arr[i] % 2 == 0) {
+            sum = sum + arr[i];
+        } else {
+            sum = sum - arr[i];
+        }
+    }
+    return sum;
+}
+
+void print_global_data() {
+    printf("%d\n", global_var1);
+    printf("%c\n", global_char);
+    printf("%c\n", find_max_char(global_str, 5));
+}
+
+int calculate_complex(int a, int b, int c, int d, int threshold, char sample[]) {
+    int sum = compute_sum(a, b, c, d);
+    int arr_result = process_array(global_arr, 5, threshold);
+    char max_char = find_max_char(sample, 5);
+    if (arr_result > sum || max_char == 'Z') {
+        return arr_result + sum;
+    }
+    if (arr_result < sum && max_char != 'Z') {
+        return sum - arr_result;
+    } else {
+        return 0;
+    }
 }
 
 int main() {
-    if(0){
-
-    }else if(!func1(a2[1])){
-
-    }else if(!2){
-
-    }else if(!0){
-        int i;
-        for(i = 0; i < a1[3];i = i+1){
-            printf("%c",c1[i]);
-        }
-    }
-
-    int a,b,c;
-    a = getint();
-    b = getint();
-    c = getint();
-
-    printf("%d\n",a+b+c);
-
-    char c2[10];
-    int i;
-    for(i = 0; i < 10; i = i+1){
-        c2[i] = getchar();
-    }
-
-    char temp = '\n';
-    printf("%c",temp);
-
-    for(i = 0; i < 10; i = i+1){
-        printf("%c",c2[i]);
-    }
-
+    int a = 5;
+    int b = 10;
+    int c = 15;
+    int d = 20;
+    char sample[5] = {'a', 'b', 'c', 'd', 'e'};
+    int result = calculate_complex(a, b, c, d, 8, sample);
+    print_global_data();
+    printf("%d\n", result);
     return 0;
 }

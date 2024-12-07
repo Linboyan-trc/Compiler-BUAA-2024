@@ -111,9 +111,77 @@ SAVE $i@2 <- $29
 JUMP Label11
 Label12:
 NOP
+LOCAL VAR $i@10 10
+NOP
+Label15:
+NOP
+BRANCH Label16: IF 1 EQ 0
+BRANCH Label17: IF 1 EQ 0
+SAVE $i@10 <- 1
+Label18:
+NOP
+BRANCH Label19: IF 1 EQ 0
+BRANCH Label20: IF 1 EQ 0
+TEMP $30 <- $i@10
+PUSH $30
+PRINT "%d "
+TEMP $31 <- $i@10
+$32 <- $31 EQ 10
+BRANCH Label21: IF $32 EQ 0
+PRINT "\n"
+JUMP Label19
+Label21:
+NOP
+JUMP Label22
+Label20:
+NOP
+JUMP Label19
+Label22:
+NOP
+TEMP $33 <- $i@10
+$34 <- 1 ADD $33
+SAVE $i@10 <- $34
+JUMP Label18
+Label19:
+NOP
+NOP
+Label23:
+NOP
+BRANCH Label24: IF 1 EQ 0
+TEMP $35 <- $i@10
+$36 <- $35 EQ 10
+BRANCH Label25: IF $36 EQ 0
+PRINT "another forNode\n"
+JUMP Label24
+JUMP Label26
+Label25:
+NOP
+JUMP Label24
+Label26:
+NOP
+NOP
+JUMP Label23
+Label24:
+NOP
+TEMP $37 <- $i@10
+$38 <- $37 EQ 10
+BRANCH Label27: IF $38 EQ 0
+JUMP Label16
+Label27:
+NOP
+JUMP Label28
+Label17:
+NOP
+JUMP Label16
+Label28:
+NOP
+NOP
+JUMP Label15
+Label16:
+NOP
 RETURN 0
 func1:
 func1:
 PARA $temp@1
-TEMP $30 <- $temp@1
-RETURN $30
+TEMP $39 <- $temp@1
+RETURN $39
