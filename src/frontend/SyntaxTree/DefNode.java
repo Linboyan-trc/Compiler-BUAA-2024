@@ -200,7 +200,7 @@ public class DefNode implements SyntaxNode {
         // 4.1 如果不是数组，就返回一个Word
         if (defNodeType.isVariable()) {
             Word value = new Word(pair.getWord() + "@" + symbolTable.getId());
-            new Declare(isGlobal, isFinal, value, size, values);
+            new Declare(isGlobal, isFinal, value, 1, values);
         }
 
         // 4.2 如果是数组，就返回一个地址

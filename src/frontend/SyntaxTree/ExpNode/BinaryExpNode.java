@@ -115,9 +115,9 @@ public class BinaryExpNode implements ExpNode {
                 return new NumberNode(value1 != value2 ? 1 : 0);
             // 5. && ||
             case AND:
-                return new NumberNode(value1 != 0 && value2 != 0 ? 1 : 0);
+                return new NumberNode((value1 != 0 && value2 != 0) ? 1 : 0);
             case OR:
-                return new NumberNode(value1 != 0 || value2 != 0 ? 1 : 0);
+                return new NumberNode((value1 != 0 || value2 != 0) ? 1 : 0);
             default:
                 return null;
         }
@@ -151,7 +151,7 @@ public class BinaryExpNode implements ExpNode {
                         }
                     }
                     return new BinaryExpNode(
-                            symbolTable, leftExp, binaryOp, rightExp);
+                            symbolTable, left, binaryOp, rightExp);
                 case MINU:
                     // 1. 减法，且左边是0，直接返回Unary，op为-，exp为右边
                     if (left.getValue() == 0) {
@@ -171,7 +171,7 @@ public class BinaryExpNode implements ExpNode {
                                     right.rightExp).simplify();
                         }
                     }
-                    return new BinaryExpNode(symbolTable, leftExp, binaryOp, rightExp);
+                    return new BinaryExpNode(symbolTable, left, binaryOp, rightExp);
                 case MULT:
                     // 1. 乘法，左侧为0，直接返回0
                     if (left.getValue() == 0) {
