@@ -100,7 +100,7 @@ public class UnaryExpNode implements ExpNode {
                     if (simBinary.getBinaryOp().isToken(PLUS)) {
                         return new BinaryExpNode(
                                 symbolTable,
-                                new CharacterNode(-left.getValue()),
+                                new NumberNode(-left.getValue()),
                                 new Pair(MINU, 0),
                                 simBinary.getRightExp());
                     }
@@ -108,7 +108,7 @@ public class UnaryExpNode implements ExpNode {
                     else if (simBinary.getBinaryOp().isToken(MINU)) {
                         return new BinaryExpNode(
                                 symbolTable,
-                                new CharacterNode(-left.getValue()),
+                                new NumberNode(-left.getValue()),
                                 new Pair(PLUS, 0),
                                 simBinary.getRightExp());
                     }
@@ -116,7 +116,7 @@ public class UnaryExpNode implements ExpNode {
                     else if (simBinary.getBinaryOp().isToken(MULT)) {
                         return new BinaryExpNode(
                                 symbolTable,
-                                new CharacterNode(-left.getValue()),
+                                new NumberNode(-left.getValue()),
                                 new Pair(MULT, 0),
                                 simBinary.getRightExp());
                     }
@@ -124,7 +124,7 @@ public class UnaryExpNode implements ExpNode {
             }
 
             // 5.2 如果此符号是!，说明必定是条件表达式，对条件表达式化简，返回新的BinaryNode
-            else if (unaryOp.isToken(NOT)) {
+            else if (unaryOp.isToken(NOT) && (simBinary.getBinaryOp().isToken(AND) || simBinary.getBinaryOp().isToken(OR))) {
                 // 5.3 对Binary两侧化简
                 ExpNode left = new UnaryExpNode(symbolTable, unaryOp, simBinary.getLeftExp()).simplify();
                 ExpNode right = new UnaryExpNode(symbolTable, unaryOp, simBinary.getRightExp()).simplify();
