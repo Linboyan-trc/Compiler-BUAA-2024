@@ -5,6 +5,7 @@ import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTree.ExpNode.ExpNode;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
 
@@ -74,12 +75,21 @@ public class PrintNode implements StmtNode {
 
     @Override
     public Value generateMidCode() {
+        // 1. 获取参数
         LinkedList<midend.MidCode.Value.Value> values = new LinkedList<>();
         for(ExpNode arg : arguments) {
             values.add(arg.generateMidCode());
         }
-        values.forEach(ArgPush::new);
+
+        // 2. 参数入栈
+        for (Value value : values) {
+            MidCodeTable.getInstance().addToMidCodes(new ArgPush(value));
+        }
+
+        // 3. 打印字符串
         new Print(string.getWord());
+
+        // 4. 不需要返回
         return null;
     }
 }

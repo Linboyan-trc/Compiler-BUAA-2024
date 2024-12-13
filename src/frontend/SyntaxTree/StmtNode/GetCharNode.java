@@ -8,6 +8,7 @@ import frontend.SyntaxTree.DefNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import frontend.SyntaxTree.ExpNode.LValNode;
 import midend.MidCode.MidCode.Move;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Value;
 import midend.MidCode.Value.Word;
@@ -80,10 +81,13 @@ public class GetCharNode implements StmtNode {
             // 5. 获取下标
             Value offset = lValNode.getLength().generateMidCode();
             Addr addr = new Addr();
-            new Assign(
-                    true,
-                    addr,
-                    new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset));
+            MidCodeTable.getInstance().addToMidCodes(
+                new Assign(
+                        true,
+                        addr,
+                        new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset))
+            );
+            MidCodeTable.getInstance().addToVarInfo(addr, 1);
             new Store(addr, new Word("?"));
             return null;
         }

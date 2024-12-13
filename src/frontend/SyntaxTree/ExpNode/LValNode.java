@@ -10,6 +10,7 @@ import frontend.SyntaxTree.DefNode;
 import midend.MidCode.MidCode.Assign;
 import midend.MidCode.MidCode.Load;
 import midend.MidCode.MidCode.Move;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Operate.BinaryOperate;
 import midend.MidCode.Value.*;
 import static midend.MidCode.Operate.BinaryOperate.BinaryOp.*;
@@ -155,10 +156,13 @@ public class LValNode implements ExpNode {
             else {
                 Value offsetValue = this.length.generateMidCode();
                 Addr addr = new Addr();
-                new Assign(
-                        true,
-                        addr,
-                        new BinaryOperate(ADD, new Addr(pair.getWord() + "@" + id), offsetValue));
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Assign(
+                            true,
+                            addr,
+                            new BinaryOperate(ADD, new Addr(pair.getWord() + "@" + id), offsetValue))
+                );
+                MidCodeTable.getInstance().addToVarInfo(addr, 1);
                 Word value = new Word();
                 new Load(true, value, addr);
                 return value;

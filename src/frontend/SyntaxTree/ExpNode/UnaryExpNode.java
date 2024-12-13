@@ -7,6 +7,7 @@ import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 import frontend.SyntaxTree.StmtNode.*;
 import midend.MidCode.MidCode.Assign;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Operate.UnaryOperate;
 import midend.MidCode.Value.Value;
 import midend.MidCode.Value.Word;
@@ -183,7 +184,10 @@ public class UnaryExpNode implements ExpNode {
 
         // 3. 作为一个Word
         Word value = new Word();
-        new Assign(true, value, new UnaryOperate(map.get(unaryOp.getToken()), expValue));
+        MidCodeTable.getInstance().addToMidCodes(
+            new Assign(true, value, new UnaryOperate(map.get(unaryOp.getToken()), expValue))
+        );
+        MidCodeTable.getInstance().addToVarInfo(value, 1);
 
         // 4. 返回一个value
         return value;

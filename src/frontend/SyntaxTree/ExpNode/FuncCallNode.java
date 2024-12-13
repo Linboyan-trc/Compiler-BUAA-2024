@@ -7,6 +7,7 @@ import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 import frontend.SyntaxTree.StmtNode.*;
 import frontend.SyntaxTree.FuncDefNode;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
 import midend.MidCode.Value.Word;
@@ -97,15 +98,26 @@ public class FuncCallNode implements ExpNode {
 
     @Override
     public Value generateMidCode() {
+        // 1. 获取参数
         LinkedList<Value> values = new LinkedList<>();
         arguments.forEach(arg -> values.add(arg.generateMidCode()));
-        values.forEach(ArgPush::new);
+
+        // 2. 参数入栈
+        for (Value value : values) {
+            MidCodeTable.getInstance().addToMidCodes(new ArgPush(value));
+        }
+
+        // 3. 函数调用
         new FuncCall(pair.getWord());
+
+        // 4. 是Int或者Char类型，需要返回值
         if (symbolTable.getFunction(pair.getWord()).getFuncDefType().isIntFuncOrChar()) {
             Word value = new Word();
             new Move(true, value, new Word("?"));
             return value;
         }
+
+        // 5. 不需要返回
         return null;
     }
 }

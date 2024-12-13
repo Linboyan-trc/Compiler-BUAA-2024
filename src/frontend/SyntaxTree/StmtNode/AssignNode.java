@@ -10,6 +10,7 @@ import frontend.SyntaxTree.ExpNode.LValNode;
 import midend.MidCode.MidCode.Assign;
 import midend.MidCode.MidCode.Move;
 import midend.MidCode.MidCode.Store;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Operate.BinaryOperate;
 import midend.MidCode.Value.Value;
 import midend.MidCode.Value.*;
@@ -94,10 +95,13 @@ public class AssignNode implements StmtNode {
             // 5. 存储在内存中
             Value offset = lValNode.getLength().generateMidCode();
             Addr addr = new Addr();
-            new Assign(
-                    true,
-                    addr,
-                    new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset));
+            MidCodeTable.getInstance().addToMidCodes(
+                new Assign(
+                        true,
+                        addr,
+                        new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset))
+            );
+            MidCodeTable.getInstance().addToVarInfo(addr, 1);
             if (defNode.getDefNodeType().isCharType()) {
                 expValue.truncTo8();
                 new Store(addr, expValue);

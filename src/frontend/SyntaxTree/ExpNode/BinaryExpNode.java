@@ -7,6 +7,7 @@ import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 import frontend.SyntaxTree.StmtNode.*;
 import midend.MidCode.MidCode.Assign;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Operate.BinaryOperate;
 import midend.MidCode.Value.*;
 
@@ -331,7 +332,10 @@ public class BinaryExpNode implements ExpNode {
         Value leftValue = leftExp.generateMidCode();
         Value rightValue = rightExp.generateMidCode();
         Value value = (leftValue instanceof Addr || rightValue instanceof Addr) ? new Addr() : new Word();
-        new Assign(true, value, new BinaryOperate(map.get(binaryOp.getToken()), leftValue, rightValue));
+        MidCodeTable.getInstance().addToMidCodes(
+                new Assign(true, value, new BinaryOperate(map.get(binaryOp.getToken()), leftValue, rightValue))
+        );
+        MidCodeTable.getInstance().addToVarInfo(value, 1);
         return value;
     }
 }

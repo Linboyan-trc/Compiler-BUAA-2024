@@ -21,7 +21,6 @@ public class Branch implements MidCode {
         this.leftValue = leftValue;
         this.rightValue = rightValue;
         this.branchLabel = branchLabel;
-        MidCodeTable.getInstance().addToMidCodes(this);
     }
 
     public BranchOp getBranchOp() {

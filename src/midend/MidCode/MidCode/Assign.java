@@ -16,10 +16,6 @@ public class Assign implements MidCode {
         this.isTemp = isTemp;
         this.targetValue = targetValue;
         this.sourceValue = sourceValue;
-        MidCodeTable.getInstance().addToMidCodes(this);
-        if (isTemp) {
-            MidCodeTable.getInstance().addToVarInfo(targetValue, 1);
-        }
     }
 
     public boolean isTemp() {

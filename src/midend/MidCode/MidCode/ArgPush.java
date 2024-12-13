@@ -10,7 +10,6 @@ public class ArgPush implements MidCode {
 
     public ArgPush(Value value) {
         this.value = value;
-        MidCodeTable.getInstance().addToMidCodes(this);
     }
 
     public Value getValue() {
