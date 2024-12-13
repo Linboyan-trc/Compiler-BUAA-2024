@@ -2,10 +2,8 @@ package midend.MidCode.MidCode;
 
 import midend.MidCode.MidCodeTable;
 
-public class CharGet implements MidCode {
-    public CharGet() {
-        MidCodeTable.getInstance().addToMidCodes(this);
-    }
+public class CharGet extends MidCode {
+    public CharGet() { }
 
     @Override
     public String toString() {

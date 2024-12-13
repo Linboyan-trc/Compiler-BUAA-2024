@@ -3,13 +3,12 @@ package midend.MidCode.MidCode;
 import midend.LabelTable.Label;
 import midend.MidCode.MidCodeTable;
 
-public class Jump implements MidCode {
+public class Jump extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     private Label label;
 
     public Jump(Label label) {
         this.label = label;
-        MidCodeTable.getInstance().addToMidCodes(this);
     }
 
     public Label getLabel() {

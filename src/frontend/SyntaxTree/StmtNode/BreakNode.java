@@ -26,7 +26,9 @@ public class BreakNode implements StmtNode {
 
     @Override
     public Value generateMidCode() {
-        new Jump(MidCodeTable.getInstance().getLoopEnd());
+        MidCodeTable.getInstance().addToMidCodes(
+            new Jump(MidCodeTable.getInstance().getLoopEnd())
+        );
         return null;
     }
 }

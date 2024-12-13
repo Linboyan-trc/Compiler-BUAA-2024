@@ -7,6 +7,7 @@ import frontend.SyntaxTree.ExpNode.CharacterNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import frontend.SyntaxTree.ExpNode.NumberNode;
 import midend.MidCode.MidCode.Declare;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
@@ -200,13 +201,19 @@ public class DefNode implements SyntaxNode {
         // 4.1 如果不是数组，就返回一个Word
         if (defNodeType.isVariable()) {
             Word value = new Word(pair.getWord() + "@" + symbolTable.getId());
-            new Declare(isGlobal, isFinal, value, 1, values);
+            MidCodeTable.getInstance().addToMidCodes(
+                new Declare(isGlobal, isFinal, value, 1, values)
+            );
+            MidCodeTable.getInstance().addToVarInfo(value, size);
         }
 
         // 4.2 如果是数组，就返回一个地址
         else {
             Addr value = new Addr(pair.getWord() + "@" + symbolTable.getId());
-            new Declare(isGlobal, isFinal, value, size, values);
+            MidCodeTable.getInstance().addToMidCodes(
+                new Declare(isGlobal, isFinal, value, size, values)
+            );
+            MidCodeTable.getInstance().addToVarInfo(value, size);
         }
 
         // 5. 不需要返回

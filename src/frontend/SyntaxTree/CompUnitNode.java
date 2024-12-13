@@ -78,8 +78,6 @@ public class CompUnitNode implements SyntaxNode {
         // 2. 中间代码设置当前函数:main
         // 2. 然后添加当前函数 + 程序出口
         MidCodeTable.getInstance().setFunc("main");
-        new FuncCall("main");
-        new Exit();
 
         // 3. main函数生成中间代码
         mainFuncDefNode.generateMidCode();

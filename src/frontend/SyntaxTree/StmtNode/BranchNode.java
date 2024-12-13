@@ -12,6 +12,7 @@ import frontend.SyntaxTree.ExpNode.CharacterNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import frontend.SyntaxTree.ExpNode.NumberNode;
 import midend.LabelTable.Label;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
@@ -132,7 +133,9 @@ public class BranchNode implements StmtNode {
         Value condValue = cond.generateMidCode();
 
 
-        new Branch(Branch.BranchOp.EQ, condValue, new Imm(0), thenEndLabel);
+        MidCodeTable.getInstance().addToMidCodes(
+            new Branch(Branch.BranchOp.EQ, condValue, new Imm(0), thenEndLabel)
+        );
 
 
         ifStmt.generateMidCode();
@@ -140,13 +143,24 @@ public class BranchNode implements StmtNode {
 
         if (elseStmt == null) {
             Nop thenEnd = new Nop();
+            MidCodeTable.getInstance().addToMidCodes(thenEnd);
+
             thenEndLabel.setMidCode(thenEnd);
         } else {
             Label elseEndLabel = new Label();
-            new Jump(elseEndLabel);
+
+            MidCodeTable.getInstance().addToMidCodes(
+                    new Jump(elseEndLabel)
+            );
+
             Nop thenEnd = new Nop();
+            MidCodeTable.getInstance().addToMidCodes(thenEnd);
+
             elseStmt.generateMidCode();
+
             Nop elseEnd = new Nop();
+            MidCodeTable.getInstance().addToMidCodes(elseEnd);
+
             thenEndLabel.setMidCode(thenEnd);
             elseEndLabel.setMidCode(elseEnd);
         }

@@ -2,7 +2,7 @@ package midend.MidCode.MidCode;
 
 import midend.MidCode.MidCodeTable;
 
-public class FuncCall implements MidCode {
+public class FuncCall extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 用于调用一个函数
     public final String name;
@@ -11,8 +11,6 @@ public class FuncCall implements MidCode {
     public FuncCall(String name) {
         // 1. 指定函数名字
         this.name = name;
-        // 2. 添加到中间代码
-        MidCodeTable.getInstance().addToMidCodes(this);
     }
 
     // 3. 获取函数名

@@ -5,7 +5,7 @@ import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 
-public class Declare implements MidCode {
+public class Declare extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 声明一个变量的中间代码
     // 1. 是否是全局变量 + 是否是常量
@@ -29,12 +29,6 @@ public class Declare implements MidCode {
         this.value = value;
         this.size = size;
         this.initValues = initValues;
-
-        // 2. 在中间代码中添加变量节点
-        MidCodeTable.getInstance().addToMidCodes(this);
-
-        // 3. 在变量表中记录变量
-        MidCodeTable.getInstance().addToVarInfo(value, size);
     }
 
     // 1. 获取变量名:Value, '$'a1@0, '&'a2@0

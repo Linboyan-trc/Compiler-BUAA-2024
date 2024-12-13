@@ -4,7 +4,7 @@ import midend.LabelTable.Label;
 import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 
-public class Branch implements MidCode {
+public class Branch extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 跳转操作符:>, >=, <, <=, ==, !=
     // 2. 跳转: 左值 + branchOp + 右值 + 标签

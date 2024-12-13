@@ -2,12 +2,11 @@ package midend.MidCode.MidCode;
 
 import midend.MidCode.MidCodeTable;
 
-public class Print implements MidCode {
+public class Print extends MidCode {
     private final String fmtString;
 
     public Print(String fmtString) {
         this.fmtString = fmtString;
-        MidCodeTable.getInstance().addToMidCodes(this);
     }
 
     public String getFmtString() {

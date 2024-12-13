@@ -87,7 +87,9 @@ public class PrintNode implements StmtNode {
         }
 
         // 3. 打印字符串
-        new Print(string.getWord());
+        MidCodeTable.getInstance().addToMidCodes(
+            new Print(string.getWord())
+        );
 
         // 4. 不需要返回
         return null;

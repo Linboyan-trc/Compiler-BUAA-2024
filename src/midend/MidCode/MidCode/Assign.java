@@ -4,7 +4,7 @@ import midend.MidCode.MidCodeTable;
 import midend.MidCode.Operate.Operate;
 import midend.MidCode.Value.Value;
 
-public class Assign implements MidCode {
+public class Assign extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 不用加载，直接变量之间的赋值
     // 1. 是否是临时变量 + 目标值 + 源值

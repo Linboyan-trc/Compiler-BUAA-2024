@@ -139,7 +139,10 @@ public class LValNode implements ExpNode {
         // 4. 添加一个赋值语句，从此变量加载到一个临时变量
         if (defNode.getDefNodeType().isVariable()) {
             Word value = new Word();
-            new Move(true, value, new Word(pair.getWord() + "@" + id));
+            MidCodeTable.getInstance().addToMidCodes(
+                new Move(true, value, new Word(pair.getWord() + "@" + id))
+            );
+            MidCodeTable.getInstance().addToVarInfo(value, 1);
             return value;
         }
 
@@ -148,7 +151,10 @@ public class LValNode implements ExpNode {
             // 5. 如果此LValNode没有指定length，说明取此变量对应的数组的地址
             if (this.length == null) {
                 Addr value = new Addr();
-                new Move(true, value, new Addr(pair.getWord() + "@" + id));
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Move(true, value, new Addr(pair.getWord() + "@" + id))
+                );
+                MidCodeTable.getInstance().addToVarInfo(value, 1);
                 return value;
             }
 
@@ -164,7 +170,10 @@ public class LValNode implements ExpNode {
                 );
                 MidCodeTable.getInstance().addToVarInfo(addr, 1);
                 Word value = new Word();
-                new Load(true, value, addr);
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Load(true, value, addr)
+                );
+                MidCodeTable.getInstance().addToVarInfo(value, 1);
                 return value;
             }
         }

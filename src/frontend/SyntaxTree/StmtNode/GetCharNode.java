@@ -67,12 +67,16 @@ public class GetCharNode implements StmtNode {
         ExpNode length = defNode.getLength();
 
         // 4. 声明一个新的读一个Int的节点
-        new CharGet();
+        MidCodeTable.getInstance().addToMidCodes(
+            new CharGet()
+        );
 
         // 5. 如果变量是单变量
         if (defNode.getDefNodeType().isVariable()) {
             Word value = new Word(lValNode.getPair().getWord() + "@" + id);
-            new Move(false, value, new Word("?"));
+            MidCodeTable.getInstance().addToMidCodes(
+                new Move(false, value, new Word("?"))
+            );
             return null;
         }
 
@@ -88,7 +92,9 @@ public class GetCharNode implements StmtNode {
                         new BinaryOperate(ADD, new Addr(lValNode.getPair().getWord() + "@" + id), offset))
             );
             MidCodeTable.getInstance().addToVarInfo(addr, 1);
-            new Store(addr, new Word("?"));
+            MidCodeTable.getInstance().addToMidCodes(
+                new Store(addr, new Word("?"))
+            );
             return null;
         }
     }

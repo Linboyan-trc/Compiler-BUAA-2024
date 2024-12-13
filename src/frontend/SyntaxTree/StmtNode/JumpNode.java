@@ -1,14 +1,19 @@
 package frontend.SyntaxTree.StmtNode;
 
-import midend.MidCode.MidCode.Nop;
+import midend.LabelTable.Label;
+import midend.MidCode.MidCode.Jump;
 import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 
-public class NopNode implements StmtNode {
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 1. 化简
+public class JumpNode implements StmtNode {
+    private Label label;
+
+    public JumpNode(Label label) {
+        this.label = label;
+    }
+
     @Override
-    public NopNode simplify() {
+    public StmtNode simplify() {
         return this;
     }
 
@@ -19,7 +24,7 @@ public class NopNode implements StmtNode {
 
     @Override
     public Value generateMidCode() {
-        MidCodeTable.getInstance().addToMidCodes(new Nop());
+        MidCodeTable.getInstance().addToMidCodes(new Jump(label));
         return null;
     }
 }

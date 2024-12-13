@@ -1,5 +1,6 @@
 package midend.MidCode;
 
+import backend.Block.FuncBlock;
 import midend.LabelTable.Label;
 import midend.LabelTable.LabelTable;
 import midend.MidCode.MidCode.*;
@@ -26,6 +27,12 @@ public class MidCodeTable {
     // 3. 循环
     private final LinkedList<Label> loopBeginLabels = new LinkedList<>();
     private final LinkedList<Label> loopEndLabels = new LinkedList<>();
+
+    // 4. 新定义的
+    private final LinkedList<FuncBlock> funcBlockList = new LinkedList<>();
+    private final HashSet<Label> loopMark = new HashSet<>();
+    private final MidCode head = new Nop();
+    private MidCode tail = head;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 构造
@@ -90,6 +97,14 @@ public class MidCodeTable {
         loopEndLabels.removeLast();
     }
 
+    public void markLoop(Label stmtBegin) {
+        loopMark.add(stmtBegin);
+    }
+
+    public HashSet<Label> getLoopMark() {
+        return loopMark;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 添加中间代码
     public void addToMidCodes(MidCode midCode) {
@@ -99,8 +114,14 @@ public class MidCodeTable {
         }
         // 2. 到main函数的时候，func是main
         // 2. 加入到midCodes
+        else if (func.equals("main") && midCode instanceof Return) {
+            Exit exit = new Exit();
+            midCodes.add(exit);
+            tail = tail.link(exit);
+        }
         else {
             midCodes.add(midCode);
+            tail = tail.link(midCode);
         }
     }
 
@@ -206,4 +227,29 @@ public class MidCodeTable {
 
         return stringBuilder.toString();
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    public LinkedList<FuncBlock> getFuncBlockList() {
+        return funcBlockList;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -80,11 +80,15 @@ public class AssignNode implements StmtNode {
             if (defNode.getDefNodeType().isCharType()) {
                 Word value = new Word(lValNode.getPair().getWord() + "@" + id);
                 expValue.truncTo8();
-                new Move(false, value, expValue);
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Move(false, value, expValue)
+                );
                 return null;
             } else {
                 Word value = new Word(lValNode.getPair().getWord() + "@" + id);
-                new Move(false, value, expValue);
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Move(false, value, expValue)
+                );
                 return null;
             }
         }
@@ -104,9 +108,13 @@ public class AssignNode implements StmtNode {
             MidCodeTable.getInstance().addToVarInfo(addr, 1);
             if (defNode.getDefNodeType().isCharType()) {
                 expValue.truncTo8();
-                new Store(addr, expValue);
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Store(addr, expValue)
+                );
             } else {
-                new Store(addr, expValue);
+                MidCodeTable.getInstance().addToMidCodes(
+                    new Store(addr, expValue)
+                );
             }
             return null;
         }

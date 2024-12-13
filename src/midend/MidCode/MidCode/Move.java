@@ -3,7 +3,7 @@ package midend.MidCode.MidCode;
 import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 
-public class Move implements MidCode {
+public class Move extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 赋值的中间代码
     // 1. 是否是临时变量，目标值，源值
@@ -17,10 +17,6 @@ public class Move implements MidCode {
         this.isTemp = isTemp;
         this.targetValue = targetValue;
         this.sourceValue = sourceValue;
-        MidCodeTable.getInstance().addToMidCodes(this);
-        if (isTemp) {
-            MidCodeTable.getInstance().addToVarInfo(targetValue, 1);
-        }
     }
 
     public boolean isTemp() {

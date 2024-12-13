@@ -2,10 +2,8 @@ package midend.MidCode.MidCode;
 
 import midend.MidCode.MidCodeTable;
 
-public class Nop implements MidCode {
-    public Nop() {
-        MidCodeTable.getInstance().addToMidCodes(this);
-    }
+public class Nop extends MidCode {
+    public Nop() { }
 
     @Override
     public String toString() {

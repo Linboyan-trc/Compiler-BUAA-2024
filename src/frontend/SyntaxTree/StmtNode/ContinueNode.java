@@ -26,7 +26,9 @@ public class ContinueNode implements StmtNode {
 
     @Override
     public Value generateMidCode() {
-        new Jump(MidCodeTable.getInstance().getLoopBegin());
+        MidCodeTable.getInstance().addToMidCodes(
+            new Jump(MidCodeTable.getInstance().getLoopBegin())
+        );
         return null;
     }
 }

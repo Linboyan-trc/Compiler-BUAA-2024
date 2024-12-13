@@ -4,6 +4,7 @@ import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.MidCode.MidCode.Return;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 
 public class ReturnNode implements StmtNode {
@@ -46,9 +47,13 @@ public class ReturnNode implements StmtNode {
     @Override
     public Value generateMidCode() {
         if (expNode == null) {
-            new Return();
+            MidCodeTable.getInstance().addToMidCodes(
+                new Return()
+            );
         } else {
-            new Return(expNode.generateMidCode());
+            MidCodeTable.getInstance().addToMidCodes(
+                new Return(expNode.generateMidCode())
+            );
         }
         return null;
     }

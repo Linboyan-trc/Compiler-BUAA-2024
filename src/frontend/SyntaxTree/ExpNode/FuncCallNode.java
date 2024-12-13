@@ -108,12 +108,17 @@ public class FuncCallNode implements ExpNode {
         }
 
         // 3. 函数调用
-        new FuncCall(pair.getWord());
+        MidCodeTable.getInstance().addToMidCodes(
+            new FuncCall(pair.getWord())
+        );
 
         // 4. 是Int或者Char类型，需要返回值
         if (symbolTable.getFunction(pair.getWord()).getFuncDefType().isIntFuncOrChar()) {
             Word value = new Word();
-            new Move(true, value, new Word("?"));
+            MidCodeTable.getInstance().addToMidCodes(
+                new Move(true, value, new Word("?"))
+            );
+            MidCodeTable.getInstance().addToVarInfo(value, 1);
             return value;
         }
 

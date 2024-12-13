@@ -3,7 +3,7 @@ package midend.MidCode.MidCode;
 import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
 
-public class ArgPush implements MidCode {
+public class ArgPush extends MidCode {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 作为参数传递的变量入栈
     private final Value value;

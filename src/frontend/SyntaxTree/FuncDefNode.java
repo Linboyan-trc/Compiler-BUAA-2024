@@ -73,6 +73,7 @@ public class FuncDefNode implements SyntaxNode {
 
         // 2. 创建入口标签的中间代码节点，自动添加到中间代码中
         FuncEntry funcEntry = new FuncEntry(entryLabel);
+        MidCodeTable.getInstance().addToMidCodes(funcEntry);
 
         // 3. 设置当前函数，以更新(函数表 = 函数名 + 变量表)
         MidCodeTable.getInstance().setFunc(entryLabel.getLabelName());

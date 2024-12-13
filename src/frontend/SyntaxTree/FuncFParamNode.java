@@ -4,6 +4,7 @@ import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 import midend.MidCode.MidCode.ParaGet;
+import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Value;
 import midend.MidCode.Value.Word;
@@ -37,12 +38,20 @@ public class FuncFParamNode extends DefNode {
         SyntaxType syntaxType = getDefNodeType();
 
         if (syntaxType.isVariable()) {
-            new ParaGet(new Word(super.getPair().getWord() + "@" + super.getSymbolTable().getId()));
+            Word value = new Word(super.getPair().getWord() + "@" + super.getSymbolTable().getId());
+            MidCodeTable.getInstance().addToMidCodes(
+                new ParaGet(value)
+            );
+            MidCodeTable.getInstance().addToVarInfo(value, 1);
         }
 
         // 2. 数组 + 自动添加到中间代码和变量表
         else {
-            new ParaGet(new Addr(super.getPair().getWord() + "@" + super.getSymbolTable().getId()));
+            Addr value = new Addr(super.getPair().getWord() + "@" + super.getSymbolTable().getId());
+            MidCodeTable.getInstance().addToMidCodes(
+                new ParaGet(value)
+            );
+            MidCodeTable.getInstance().addToVarInfo(value, 1);
         }
         return null;
     }
