@@ -143,55 +143,98 @@ public class MidCodeTable {
 
     // 3.1 化简Nop
     public void simplifyNop() {
-        int index;
-        for (MidCode midCode : midCodes) {
-            if (midCode instanceof Nop) {
-                index = midCodes.indexOf(midCode);
-                for (Label label : LabelTable.getInstance().getLabelList(midCode)) {
-                    label.setMidCode(midCodes.get(index + 1));
-                }
-                midCodes.remove(index);
+        // 1. 不断获取中间代码，删除Nop()
+        for(MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
+            if(midCode instanceof Nop) {
+                midCode.delete();
             }
         }
     }
 
     // 3.2 化简Label
     public void simplifyLabel() {
-        int index;
+        // 3.1 记录使用的标签
         HashSet<Label> usedLabels = new HashSet<>();
-        for (MidCode midCode : midCodes) {
+
+        // 3.2 遍历所有中间代码
+        for (MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
+
+            // 3.3 如果是跳转
             if (midCode instanceof Jump) {
+                // 3.4 获取跳转
                 Jump jump = (Jump) midCode;
+
+                // 3.5 获取跳转目的标签
                 Label target = jump.getLabel().getTarget();
-                index = midCodes.indexOf(jump);
-                if (midCodes.indexOf(target.getMidCode()) - index == 1) {
-                    midCodes.remove(index);
-                } else {
+
+                // 3.6 如果本来下一个就是跳转目标，就删除这个跳转，自然进入下一个中间代码即可
+                if (midCode.getNext() == target.getMidCode()) {
+                    midCode.delete();
+                }
+
+                // 3.7 否则Jump的跳转目的标签不变，记录跳转目的的标签使用过
+                else {
                     jump.setLabel(target);
                     usedLabels.add(target);
                 }
-            } else if (midCode instanceof Branch) {
+            }
+
+            // 3.3 如果是分支
+            else if (midCode instanceof Branch){
+
+                // 3.4 获取分支
                 Branch branch = (Branch) midCode;
+
+                // 3.5 获取分支跳转目的标签
                 Label target = branch.getBranchLabel().getTarget();
-                index = midCodes.indexOf(branch);
-                if (midCodes.indexOf(target.getMidCode()) - index == 1) {
-                    midCodes.remove(index);
-                } else {
+
+                // 3.6 如果本来下一个就是跳转目标，就删除这个跳转，自然进入下一个中间代码即可
+                if (midCode.getNext() == target.getMidCode()) {
+                    midCode.delete();
+                }
+
+                // 3.7 否则获取分支的下一个中间代码
+                else if (midCode.getNext() != null) {
+
+                    // 3.8 获取分支的下一个中间代码
+                    MidCode nextCode = midCode.getNext();
+
+                    // 3.9 如果是跳转，并且跳转的下一个中间代码是分支跳转目标的中间代码，那么无论这个分支跳转成不成功，都会进入这个分支跳转的目的标签
+                    // 3.9 不懂
+                    if (nextCode instanceof Jump
+                            && nextCode.getNext() == branch.getBranchLabel().getMidCode()
+                            && LabelTable.getInstance().getLabelList(nextCode).isEmpty()) {
+                        ((Branch) midCode).changeBranchOp(((Jump) nextCode).getLabel());
+                        usedLabels.add(((Jump) nextCode).getLabel());
+                        nextCode.delete();
+                    }
+
+                    // 3.9 不懂
+                    else {
+                        branch.setLabel(target);
+                        usedLabels.add(target);
+                    }
+                }
+
+                // 3.9 不懂
+                else {
                     branch.setLabel(target);
                     usedLabels.add(target);
                 }
             }
         }
-        LabelTable.getInstance().removeUnusedLabels(usedLabels);
     }
 
     // 3.3 化简Exp
     public void simplifyExp() {
-        for (MidCode midCode : midCodes) {
+        // 3.3 化简:Assign, Branch, Move
+        for (MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
             if (midCode instanceof Assign) {
                 ((Assign) midCode).simplify();
-            } else {
-
+            } else if (midCode instanceof Branch) {
+                ((Branch) midCode).simplify();
+            } else if (midCode instanceof Move) {
+                ((Move) midCode).simplify();
             }
         }
     }

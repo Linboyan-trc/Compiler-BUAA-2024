@@ -55,6 +55,9 @@ public class Label implements MipsCode {
     // 2. 找到跳转的最终目标中间代码
     public Label getTarget() {
         if (midCode instanceof Jump) {
+            if (((Jump) midCode).getLabel() == this) {
+                return this;
+            }
             return ((Jump) midCode).getLabel().getTarget();
         } else {
             return this;

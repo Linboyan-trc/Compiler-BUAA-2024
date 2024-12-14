@@ -11,9 +11,9 @@ public class Branch extends MidCode {
     public enum BranchOp {
         GT, GE, LT, LE, EQ, NE
     }
-    private final BranchOp branchOp;
-    private final Value leftValue;
-    private final Value rightValue;
+    private BranchOp branchOp;
+    private Value leftValue;
+    private Value rightValue;
     private Label branchLabel;
 
     public Branch(BranchOp branchOp, Value leftValue, Value rightValue, Label branchLabel) {
@@ -44,5 +44,31 @@ public class Branch extends MidCode {
     @Override
     public String toString() {
         return "BRANCH " + branchLabel + " IF " + leftValue + " " + branchOp + " " + rightValue;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 更改跳转条件
+    public void changeBranchOp(Label label) {
+        switch (branchOp) {
+            case GT:
+                branchOp = BranchOp.LE;
+                break;
+            case GE:
+                branchOp = BranchOp.LT;
+                break;
+            case LT:
+                branchOp = BranchOp.GE;
+                break;
+            case LE:
+                branchOp = BranchOp.GT;
+                break;
+            case EQ:
+                branchOp = BranchOp.NE;
+                break;
+            case NE:
+                branchOp = BranchOp.EQ;
+                break;
+        }
+        branchLabel = label;
     }
 }
