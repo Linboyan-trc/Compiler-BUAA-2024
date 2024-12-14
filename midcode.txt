@@ -4,8 +4,6 @@ GLOBAL VAR $c@0
 GLOBAL VAR $d@0 
 GLOBAL VAR $e@0 
 GLOBAL VAR $i@0 0
-CALL main
-EXIT
 main:
 main:
 LOCAL VAR $i@8 0
@@ -28,7 +26,7 @@ CALL func3
 TEMP $1 <- $?
 PUSH $1
 PRINT "%d\n"
-RETURN 0
+EXIT
 func0:
 func0:
 PARA $a@1
@@ -76,10 +74,12 @@ LOCAL VAR $v@5 1906
 NOP
 Label2:
 NOP
-BRANCH Label3: IF 1 EQ 0
+NOP
+Label4:
+NOP
 TEMP $15 <- $i@0
 $16 <- $15 LT 10000
-BRANCH Label4: IF $16 EQ 0
+BRANCH Label5: IF $16 EQ 0
 TEMP $17 <- $a@0
 $18 <- 128 MUL $17
 TEMP $19 <- $a@0
@@ -149,7 +149,7 @@ PUSH $71
 PUSH 1000
 CALL func2
 TEMP $72 <- $?
-BRANCH Label5: IF $72 EQ 0
+BRANCH Label6: IF $72 EQ 0
 TEMP $73 <- $tt0@5
 TEMP $74 <- $tt1@5
 $75 <- $73 ADD $74
@@ -161,20 +161,20 @@ TEMP $80 <- $tt4@5
 $81 <- $79 ADD $80
 PUSH $81
 PRINT "sum = %d\n"
-Label5:
+Label6:
 NOP
 TEMP $82 <- $i@0
 PUSH $82
 CALL func1
 TEMP $83 <- $?
-JUMP Label6
-Label4:
+JUMP Label7
+Label5:
 NOP
 JUMP Label3
-Label6:
+Label7:
 NOP
 NOP
-JUMP Label2
+JUMP Label4
 Label3:
 NOP
 TEMP $84 <- $tt0@5

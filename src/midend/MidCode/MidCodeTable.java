@@ -117,11 +117,11 @@ public class MidCodeTable {
         else if (func.equals("main") && midCode instanceof Return) {
             Exit exit = new Exit();
             midCodes.add(exit);
-            tail = tail.link(exit);
+            tail = tail.linkToNext(exit);
         }
         else {
             midCodes.add(midCode);
-            tail = tail.link(midCode);
+            tail = tail.linkToNext(midCode);
         }
     }
 
@@ -146,7 +146,7 @@ public class MidCodeTable {
         // 1. 不断获取中间代码，删除Nop()
         for(MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
             if(midCode instanceof Nop) {
-                midCode.delete();
+                midCode.removeFromMidCodeList();
             }
         }
     }
@@ -169,7 +169,7 @@ public class MidCodeTable {
 
                 // 3.6 如果本来下一个就是跳转目标，就删除这个跳转，自然进入下一个中间代码即可
                 if (midCode.getNext() == target.getMidCode()) {
-                    midCode.delete();
+                    midCode.removeFromMidCodeList();
                 }
 
                 // 3.7 否则Jump的跳转目的标签不变，记录跳转目的的标签使用过
@@ -190,7 +190,7 @@ public class MidCodeTable {
 
                 // 3.6 如果本来下一个就是跳转目标，就删除这个跳转，自然进入下一个中间代码即可
                 if (midCode.getNext() == target.getMidCode()) {
-                    midCode.delete();
+                    midCode.removeFromMidCodeList();
                 }
 
                 // 3.7 否则获取分支的下一个中间代码
@@ -206,7 +206,7 @@ public class MidCodeTable {
                             && LabelTable.getInstance().getLabelList(nextCode).isEmpty()) {
                         ((Branch) midCode).changeBranchOp(((Jump) nextCode).getLabel());
                         usedLabels.add(((Jump) nextCode).getLabel());
-                        nextCode.delete();
+                        nextCode.removeFromMidCodeList();
                     }
 
                     // 3.9 不懂

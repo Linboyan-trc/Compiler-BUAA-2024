@@ -2,6 +2,7 @@ package midend.MidCode.MidCode;
 
 import midend.LabelTable.Label;
 import midend.MidCode.MidCodeTable;
+import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 
 public class Branch extends MidCode {
@@ -46,6 +47,71 @@ public class Branch extends MidCode {
         return "BRANCH " + branchLabel + " IF " + leftValue + " " + branchOp + " " + rightValue;
     }
 
+    // 2. 化简
+    public void simplify() {
+        // 1. 左右都是Imm
+        if (leftValue instanceof Imm && rightValue instanceof Imm) {
+            // 1.1 获取左右Imm
+            Imm leftImm = (Imm) leftValue;
+            Imm rightImm = (Imm) rightValue;
+
+            // 1.2 记录结果
+            boolean result;
+
+            // 1.3 判断结果
+            switch (branchOp) {
+                case GT:
+                    result = leftImm.getValue() > rightImm.getValue();
+                    break;
+                case GE:
+                    result = leftImm.getValue() >= rightImm.getValue();
+                    break;
+                case LT:
+                    result = leftImm.getValue() < rightImm.getValue();
+                    break;
+                case LE:
+                    result = leftImm.getValue() <= rightImm.getValue();
+                    break;
+                case EQ:
+                    result = leftImm.getValue() == rightImm.getValue();
+                    break;
+                case NE:
+                    result = leftImm.getValue() != rightImm.getValue();
+                    break;
+                default:
+                    result = false;
+            }
+
+            // 1.4 结果为真替换为Jump
+            if (result) {
+                this.changeToAnother(new Jump(branchLabel));
+            }
+
+            // 1.5 结果不为真直接删除
+            else {
+                this.removeFromMidCodeList();
+            }
+        }
+
+        // 2. 左右相等
+        else if (leftValue.equals(rightValue)) {
+            switch (branchOp) {
+                // 2.1 为GT, LT, NE直接替换为Jump
+                case GT:
+                case LT:
+                case NE:
+                    this.changeToAnother(new Jump(branchLabel));
+                    break;
+                // 2.2 为GE, LE, EQ直接删除
+                case GE:
+                case LE:
+                case EQ:
+                    this.removeFromMidCodeList();
+                    break;
+            }
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 更改跳转条件
     public void changeBranchOp(Label label) {
@@ -71,4 +137,6 @@ public class Branch extends MidCode {
         }
         branchLabel = label;
     }
+
+    // 2. 化简
 }

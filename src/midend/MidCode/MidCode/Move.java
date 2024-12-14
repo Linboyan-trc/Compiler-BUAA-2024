@@ -31,6 +31,12 @@ public class Move extends MidCode {
         return sourceValue;
     }
 
+    public void simplify() {
+        if (targetValue.equals(sourceValue)) {
+            this.removeFromMidCodeList();
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 生成中间代码
     @Override

@@ -10,7 +10,7 @@ public class MidCode {
     private MidCode next;
 
     // 1. 链表连接到下一个
-    public MidCode link(MidCode next) {
+    public MidCode linkToNext(MidCode next) {
         this.next = next;
         if (next != null) {
             next.previous = this;
@@ -19,7 +19,7 @@ public class MidCode {
     }
 
     // 2. 删除链表中的一个
-    public void delete() {
+    public void removeFromMidCodeList() {
         // 1. 上一个节点连接到下一个
         previous.next = next;
 
@@ -41,15 +41,15 @@ public class MidCode {
     }
 
     // 3. 更换当前中间代码
-    public void replaceBy(MidCode... midCodes) {
+    public void changeToAnother(MidCode... midCodes) {
         // 3.1 把新的中间代码连接上上一个中间代码
         for (MidCode midCode : midCodes) {
-            previous = previous.link(midCode);
+            previous = previous.linkToNext(midCode);
         }
 
         // 3.2 最后next再连接回来
         if (next != null) {
-            previous.link(next);
+            previous.linkToNext(next);
         }
 
         // 3.3 获取这个中间代码的所有标签

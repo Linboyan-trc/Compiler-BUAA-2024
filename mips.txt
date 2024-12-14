@@ -14,13 +14,6 @@ string5: .asciiz "sum = "
 string6: .asciiz "\n"
 .text
 addiu $sp, $sp, -4
-# CALL main
-sw $ra, 0($sp)
-jal main
-lw $ra, 0($sp)
-# EXIT
-li $v0, 10
-syscall
 # main:
 main:
 addiu $sp, $sp, -16
@@ -71,13 +64,13 @@ la $a0, string1
 li $v0, 4
 syscall
 # CALL func3
-sw $t3, c
-sw $t1, a
 sw $t2, b
-sw $t0, 12($sp)
 sw $t6, 8($sp)
+sw $t0, 12($sp)
+sw $t1, a
 sw $t4, d
 sw $t5, e
+sw $t3, c
 sw $ra, 0($sp)
 jal func3
 lw $ra, 0($sp)
@@ -92,12 +85,11 @@ syscall
 la $a0, string2
 li $v0, 4
 syscall
-# RETURN 0
-sw $t0, 4($sp)
-li $v0, 0
-addiu $sp, $sp, 16
-jr $ra
+# EXIT
+li $v0, 10
+syscall
 # func0:
+sw $t0, 4($sp)
 func0:
 addiu $sp, $sp, -40
 # PARA $a@1
@@ -120,15 +112,15 @@ addiu $t7, $t3, 0
 div $t6, $t7
 mfhi $t8
 # RETURN $6
-sw $t3, 24($sp)
-sw $t1, 32($sp)
 sw $t2, 28($sp)
-sw $t0, 36($sp)
 sw $t7, 8($sp)
-sw $t8, 4($sp)
 sw $t6, 12($sp)
+sw $t0, 36($sp)
+sw $t1, 32($sp)
 sw $t4, 20($sp)
 sw $t5, 16($sp)
+sw $t8, 4($sp)
+sw $t3, 24($sp)
 lw $t0, 4($sp)
 addiu $v0, $t0, 0
 addiu $sp, $sp, 40
@@ -150,11 +142,11 @@ addiu $t2, $t3, 0
 # TEMP $9 <- $i@0
 addiu $t4, $t2, 0
 # RETURN $9
-sw $t3, 8($sp)
-sw $t1, 12($sp)
 sw $t2, i
 sw $t0, 16($sp)
+sw $t1, 12($sp)
 sw $t4, 4($sp)
+sw $t3, 8($sp)
 lw $t0, 4($sp)
 addiu $v0, $t0, 0
 addiu $sp, $sp, 20
@@ -178,12 +170,12 @@ mfhi $t4
 li $fp, 0
 seq $t5, $t4, $fp
 # BRANCH Label1: IF $13 EQ 0
-sw $t3, 12($sp)
-sw $t1, 20($sp)
 sw $t2, 16($sp)
 sw $t0, 24($sp)
+sw $t1, 20($sp)
 sw $t4, 8($sp)
 sw $t5, 4($sp)
+sw $t3, 12($sp)
 lw $t0, 4($sp)
 beq $t0, $0, Label1
 # RETURN 1
@@ -224,30 +216,30 @@ syscall
 li $t7, 1906
 # NOP
 # NOP
-sw $t3, 336($sp)
-sw $t1, i
 sw $t2, 340($sp)
-sw $t0, 344($sp)
 sw $t7, 320($sp)
 sw $t6, 324($sp)
+sw $t0, 344($sp)
+sw $t1, i
 sw $t4, 332($sp)
 sw $t5, 328($sp)
+sw $t3, 336($sp)
 Label2:
-# BRANCH Label3: IF 1 EQ 0
-li $fp, 1
-beq $fp, $0, Label3
+# NOP
+# NOP
+Label4:
 # TEMP $15 <- $i@0
 lw $t1, i
 addiu $t0, $t1, 0
 # $16 <- $15 LT 10000
 li $fp, 10000
 slt $t2, $t0, $fp
-# BRANCH Label4: IF $16 EQ 0
-sw $t1, i
+# BRANCH Label5: IF $16 EQ 0
 sw $t2, 312($sp)
 sw $t0, 316($sp)
+sw $t1, i
 lw $t0, 312($sp)
-beq $t0, $0, Label4
+beq $t0, $0, Label5
 # TEMP $17 <- $a@0
 lw $t2, a
 addiu $t1, $t2, 0
@@ -281,19 +273,19 @@ sw $s0, -4($sp)
 # PUSH $25
 sw $s2, -8($sp)
 # CALL func0
-sw $t3, 304($sp)
-sw $t1, 308($sp)
-sw $t0, 312($sp)
-sw $s0, 276($sp)
-sw $s2, 272($sp)
-sw $t9, 280($sp)
-sw $t6, 292($sp)
-sw $s1, b
-sw $t5, 296($sp)
 sw $t2, a
 sw $t7, 288($sp)
-sw $t8, 284($sp)
+sw $t6, 292($sp)
+sw $s1, b
+sw $t0, 312($sp)
+sw $s0, 276($sp)
 sw $t4, 300($sp)
+sw $s2, 272($sp)
+sw $t3, 304($sp)
+sw $t9, 280($sp)
+sw $t1, 308($sp)
+sw $t5, 296($sp)
+sw $t8, 284($sp)
 sw $ra, 0($sp)
 jal func0
 lw $ra, 0($sp)
@@ -464,40 +456,40 @@ sw $s0, -4($sp)
 li $fp, 1000
 sw $fp, -8($sp)
 # CALL func2
-sw $k0, 136($sp)
-sw $t1, 112($sp)
-sw $t0, 116($sp)
-sw $t9, 324($sp)
-sw $k1, 132($sp)
-sw $s6, 148($sp)
-sw $a3, 124($sp)
-sw $a2, 128($sp)
-sw $s3, 156($sp)
-sw $t8, 92($sp)
-sw $t4, d
-sw $t3, 104($sp)
-sw $s5, c
-sw $s0, 88($sp)
-sw $s2, b
-sw $t6, 96($sp)
-sw $s1, i
-sw $a1, 328($sp)
-sw $t5, 100($sp)
-sw $t2, 108($sp)
 sw $t7, e
-sw $s4, 152($sp)
-sw $v1, 120($sp)
-sw $gp, 140($sp)
+sw $k1, 132($sp)
+sw $t6, 96($sp)
+sw $s0, 88($sp)
+sw $a1, 328($sp)
 sw $s7, 144($sp)
+sw $v1, 120($sp)
+sw $a3, 124($sp)
+sw $s4, 152($sp)
+sw $t1, 112($sp)
+sw $t8, 92($sp)
+sw $t2, 108($sp)
+sw $s6, 148($sp)
+sw $s1, i
+sw $s3, 156($sp)
+sw $t0, 116($sp)
+sw $t4, d
+sw $s2, b
+sw $a2, 128($sp)
+sw $t3, 104($sp)
+sw $t9, 324($sp)
+sw $s5, c
+sw $t5, 100($sp)
+sw $k0, 136($sp)
+sw $gp, 140($sp)
 sw $ra, 0($sp)
 jal func2
 lw $ra, 0($sp)
 # TEMP $72 <- $?
 addiu $t0, $v0, 0
-# BRANCH Label5: IF $72 EQ 0
+# BRANCH Label6: IF $72 EQ 0
 sw $t0, 84($sp)
 lw $t0, 84($sp)
-beq $t0, $0, Label5
+beq $t0, $0, Label6
 # TEMP $73 <- $tt0@5
 lw $t2, 340($sp)
 addiu $t1, $t2, 0
@@ -534,22 +526,22 @@ la $a0, string6
 li $v0, 4
 syscall
 # NOP
-sw $t1, 80($sp)
-sw $t0, 84($sp)
-sw $t9, 60($sp)
-sw $s3, 324($sp)
-sw $t8, 64($sp)
-sw $t4, 336($sp)
-sw $t3, 76($sp)
-sw $s0, 328($sp)
-sw $s2, 52($sp)
-sw $t6, 68($sp)
-sw $s1, 56($sp)
-sw $t5, 72($sp)
-sw $t2, 340($sp)
 sw $t7, 332($sp)
+sw $t6, 68($sp)
+sw $s0, 328($sp)
 sw $s4, 48($sp)
-Label5:
+sw $t1, 80($sp)
+sw $t8, 64($sp)
+sw $t2, 340($sp)
+sw $s1, 56($sp)
+sw $s3, 324($sp)
+sw $t0, 84($sp)
+sw $t4, 336($sp)
+sw $s2, 52($sp)
+sw $t3, 76($sp)
+sw $t9, 60($sp)
+sw $t5, 72($sp)
+Label6:
 # TEMP $82 <- $i@0
 lw $t1, i
 addiu $t0, $t1, 0
@@ -563,18 +555,18 @@ jal func1
 lw $ra, 0($sp)
 # TEMP $83 <- $?
 addiu $t0, $v0, 0
-# JUMP Label6
+# JUMP Label7
 sw $t0, 40($sp)
-j Label6
+j Label7
 # NOP
-Label4:
+Label5:
 # JUMP Label3
 j Label3
 # NOP
-Label6:
+Label7:
 # NOP
-# JUMP Label2
-j Label2
+# JUMP Label4
+j Label4
 # NOP
 Label3:
 # TEMP $84 <- $tt0@5
@@ -601,20 +593,20 @@ addiu $s1, $s2, 0
 # $92 <- $90 ADD $91
 addu $s3, $s0, $s1
 # RETURN $92
-sw $t1, 340($sp)
-sw $t0, 36($sp)
-sw $t9, 328($sp)
-sw $s3, 4($sp)
-sw $t8, 16($sp)
-sw $t4, 28($sp)
-sw $t3, 336($sp)
-sw $s0, 12($sp)
-sw $s2, 324($sp)
-sw $t6, 332($sp)
-sw $s1, 8($sp)
-sw $t5, 24($sp)
-sw $t2, 32($sp)
 sw $t7, 20($sp)
+sw $t6, 332($sp)
+sw $s0, 12($sp)
+sw $t1, 340($sp)
+sw $t8, 16($sp)
+sw $t2, 32($sp)
+sw $s1, 8($sp)
+sw $s3, 4($sp)
+sw $t0, 36($sp)
+sw $t4, 28($sp)
+sw $s2, 324($sp)
+sw $t3, 336($sp)
+sw $t9, 328($sp)
+sw $t5, 24($sp)
 lw $t0, 4($sp)
 addiu $v0, $t0, 0
 addiu $sp, $sp, 348
