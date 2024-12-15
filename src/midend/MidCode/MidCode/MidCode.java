@@ -43,13 +43,14 @@ public class MidCode {
     // 3. 更换当前中间代码
     public void changeToAnother(MidCode... midCodes) {
         // 3.1 把新的中间代码连接上上一个中间代码
+        MidCode tail = previous;
         for (MidCode midCode : midCodes) {
-            previous = previous.linkToNext(midCode);
+            tail = previous.linkToNext(midCode);
         }
 
         // 3.2 最后next再连接回来
         if (next != null) {
-            previous.linkToNext(next);
+            tail.linkToNext(next);
         }
 
         // 3.3 获取这个中间代码的所有标签
