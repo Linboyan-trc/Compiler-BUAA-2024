@@ -2,6 +2,8 @@ package midend.MidCode.Operate;
 
 import midend.MidCode.Value.Value;
 
+import java.util.LinkedList;
+
 public class UnaryOperate implements Operate {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 单变量运算:+, -, !
@@ -9,8 +11,8 @@ public class UnaryOperate implements Operate {
         POS, NEG, NOT
     }
 
-    private final UnaryOp unaryOp;
-    private final Value value;
+    private UnaryOp unaryOp;
+    private Value value;
 
     public UnaryOperate(UnaryOp unaryOp, Value value) {
         this.unaryOp = unaryOp;
@@ -30,5 +32,20 @@ public class UnaryOperate implements Operate {
     @Override
     public String toString() {
         return unaryOp.toString() + " " + value.toString();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public LinkedList<Value> getUseUnit() {
+        LinkedList<Value> useUnit = new LinkedList<>();
+        useUnit.add(value);
+        return useUnit;
+    }
+
+    @Override
+    public void changeToAnotherUnit(Value oldValue, Value newValue) {
+        if (value == oldValue) {
+            value = newValue;
+        }
     }
 }

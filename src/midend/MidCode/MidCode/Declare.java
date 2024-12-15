@@ -1,11 +1,14 @@
 package midend.MidCode.MidCode;
 
 import midend.MidCode.MidCodeTable;
+import midend.MidCode.Optimize.Copy;
+import midend.MidCode.Optimize.DefUnit;
+import midend.MidCode.Optimize.UseUnit;
 import midend.MidCode.Value.Value;
 
 import java.util.LinkedList;
 
-public class Declare extends MidCode {
+public class Declare extends MidCode implements DefUnit, UseUnit, Copy {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 声明一个变量的中间代码
     // 1. 是否是全局变量 + 是否是常量
@@ -69,5 +72,38 @@ public class Declare extends MidCode {
                 (isFinal ? "CONST" : "VAR") + " " +
                 value + " " +
                 initValuesString.toString();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 生成定义变量
+    // 1. 生成定义变量
+    @Override
+    public Value getDefUnit() {
+        // 1. 直接返回声明的变量即可
+        return value;
+    }
+
+    @Override
+    public LinkedList<Value> getUseUnit() {
+        return initValues;
+    }
+
+    @Override
+    public void changeToAnotherUnit(Value oldValue, Value newValue) {
+        for (int i = 0; i < initValues.size(); i++) {
+            if (initValues.get(i) == oldValue) {
+                initValues.set(i, newValue);
+            }
+        }
+    }
+
+    @Override
+    public LinkedList<Value> getSource() {
+        return initValues;
+    }
+
+    @Override
+    public Value getTarget() {
+        return value;
     }
 }

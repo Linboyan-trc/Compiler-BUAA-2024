@@ -42,7 +42,10 @@ public class Compiler {
         midCodeFile.write(MidCodeTable.getInstance().toString());
         midCodeFile.close();
 
-        // 8. 生成mips代码
+        // 8. 优化
+        MidCodeTable.getInstance().simplify();
+
+        // 9. 生成mips代码
         Translator.getInstance().translate();
         mipsCodeFile.write(Translator.getInstance().toString());
         mipsCodeFile.close();

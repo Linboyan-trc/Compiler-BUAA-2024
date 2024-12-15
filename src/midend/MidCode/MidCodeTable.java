@@ -29,7 +29,7 @@ public class MidCodeTable {
     private final LinkedList<Label> loopEndLabels = new LinkedList<>();
 
     // 4. 新定义的
-    private final LinkedList<FuncBlock> funcBlockList = new LinkedList<>();
+    private final LinkedList<FuncBlock> funcBlocks = new LinkedList<>();
     private final HashSet<Label> loopMark = new HashSet<>();
     private final MidCode head = new Nop();
     private MidCode tail = head;
@@ -134,14 +134,87 @@ public class MidCodeTable {
         valToSize.put(value, size);
     }
 
-    // 3. 化简
-    public void simplify() {
-        simplifyNop();
-        simplifyLabel();
-        simplifyExp();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 生成中间代码
+    @Override
+    public String toString() {
+        // 1. 中间代码
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // 2. gloablCodes
+        for (MidCode midCode : globalCodes) {
+            stringBuilder.append(midCode.toString()).append("\n");
+        }
+
+        // 3. midCodes
+        for (MidCode midCode : midCodes) {
+            // 3.1 midCode可能是FuncCall
+            // 3.1 查找FuncCall在标签表中是否有标签，有的话在调用函数前要插入标签，用于跳转
+            // 3.1 main:
+            // 3.2 但在midCodes中没有这个标签，midCodes中为:
+            // 3.2 CALL main<FuncCall>, EXIT<Exit>, main:<FuncEntry>, RETURN 0<Return>
+            for (Label label : LabelTable.getInstance().getLabelList(midCode)) {
+                stringBuilder.append(label.toString()).append("\n");
+            }
+
+            // 3. 生成函数入口，以及函数体
+            // 3. main:
+            // 3. RETURN 0
+            stringBuilder.append(midCode.toString()).append("\n");
+        }
+
+        return stringBuilder.toString();
     }
 
-    // 3.1 化简Nop
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 化简
+    public void simplify() {
+        // 1. 化简
+        boolean vary;
+        do {
+            vary = false;
+
+            // 1. 化简Nop
+            simplifyNop();
+
+            // 2. 化简Label
+            simplifyLabel();
+
+            // 3. 化简Exp
+            simplifyExp();
+
+            // 4. 划分函数区域
+            convertToFuncBlock();
+
+            // 5. 遍历函数块
+            for (FuncBlock funcBlock : funcBlocks) {
+                vary = vary | funcBlock.simplify();
+            }
+
+            // 6. 如果已经稳定，遍历函数块化简循环
+            if (!vary) {
+                for (FuncBlock funcBlock : funcBlocks) {
+                    vary = vary | funcBlock.simplifyLoop();
+                }
+            }
+
+        } while(vary);
+
+        // 2. 清除中间代码列表
+        midCodes.clear();
+
+        // 3. 重新导出中间代码
+        for (MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
+            midCodes.add(midCode);
+        }
+
+        // 4. 生成活跃变量信息
+        for(FuncBlock funcBlock : funcBlocks) {
+            funcBlock.extractToLiveOutUnitTable();
+        }
+    }
+
+    // 1.1 化简Nop
     public void simplifyNop() {
         // 1. 不断获取中间代码，删除Nop()
         for(MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
@@ -151,7 +224,7 @@ public class MidCodeTable {
         }
     }
 
-    // 3.2 化简Label
+    // 1.2 化简Label
     public void simplifyLabel() {
         // 3.1 记录使用的标签
         HashSet<Label> usedLabels = new HashSet<>();
@@ -225,7 +298,7 @@ public class MidCodeTable {
         }
     }
 
-    // 3.3 化简Exp
+    // 1.3 化简Exp
     public void simplifyExp() {
         // 3.3 化简:Assign, Branch, Move
         for (MidCode midCode = head.getNext(); midCode != null; midCode = midCode.getNext()) {
@@ -239,41 +312,31 @@ public class MidCodeTable {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 1. 生成中间代码
-    @Override
-    public String toString() {
-        // 1. 中间代码
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // 2. gloablCodes
-        for (MidCode midCode : globalCodes) {
-            stringBuilder.append(midCode.toString()).append("\n");
-        }
-
-        // 3. midCodes
-        for (MidCode midCode : midCodes) {
-            // 3.1 midCode可能是FuncCall
-            // 3.1 查找FuncCall在标签表中是否有标签，有的话在调用函数前要插入标签，用于跳转
-            // 3.1 main:
-            // 3.2 但在midCodes中没有这个标签，midCodes中为:
-            // 3.2 CALL main<FuncCall>, EXIT<Exit>, main:<FuncEntry>, RETURN 0<Return>
-            for (Label label : LabelTable.getInstance().getLabelList(midCode)) {
-                stringBuilder.append(label.toString()).append("\n");
-            }
-
-            // 3. 生成函数入口，以及函数体
-            // 3. main:
-            // 3. RETURN 0
-            stringBuilder.append(midCode.toString()).append("\n");
-        }
-
-        return stringBuilder.toString();
+    // 2. 获取函数块列表
+    public LinkedList<FuncBlock> getFuncBlocks() {
+        return funcBlocks;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    public LinkedList<FuncBlock> getFuncBlockList() {
-        return funcBlockList;
+    // 3. 划分函数块
+    public void convertToFuncBlock() {
+        // 3.1 遍历中间代码
+        MidCode tempHead = this.head.getNext();
+        MidCode tempTail = tempHead;
+
+        // 3.2 清除函数块
+        funcBlocks.clear();
+
+        // 3.3 创建函数块
+        while (tempTail.getNext() != null) {
+            if (tempTail.getNext() instanceof FuncEntry) {
+                funcBlocks.add(new FuncBlock(tempHead, tempTail));
+                tempHead = tempTail.getNext();
+            }
+            tempTail = tempTail.getNext();
+        }
+
+        // 3.4 最后一个也要作为函数块
+        funcBlocks.add(new FuncBlock(tempHead, tempTail));
     }
 }
 

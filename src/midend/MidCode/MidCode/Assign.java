@@ -1,12 +1,16 @@
 package midend.MidCode.MidCode;
 
 import midend.MidCode.Operate.*;
+import midend.MidCode.Optimize.DefUnit;
+import midend.MidCode.Optimize.UseUnit;
 import midend.MidCode.Value.*;
+
+import java.util.LinkedList;
 
 import static midend.MidCode.Operate.UnaryOperate.UnaryOp.*;
 import static midend.MidCode.Operate.BinaryOperate.BinaryOp.*;
 
-public class Assign extends MidCode {
+public class Assign extends MidCode implements DefUnit, UseUnit {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 不用加载，直接变量之间的赋值
     // 1. 是否是临时变量 + 目标值 + 源值
@@ -32,39 +36,7 @@ public class Assign extends MidCode {
         return sourceValue;
     }
 
-    public Imm fullyCalculate(BinaryOperate.BinaryOp op, Imm targetValue, Imm sourceValue) {
-        switch (op) {
-            case ADD:
-                return new Imm(targetValue.getValue() + sourceValue.getValue());
-            case SUB:
-                return new Imm(targetValue.getValue() - sourceValue.getValue());
-            case MUL:
-                return new Imm(targetValue.getValue() * sourceValue.getValue());
-            case DIV:
-                return new Imm(targetValue.getValue() / sourceValue.getValue());
-            case MOD:
-                return new Imm(targetValue.getValue() % sourceValue.getValue());
-            case AND:
-                return new Imm(targetValue.getValue() == 1 && sourceValue.getValue() == 1 ? 1 : 0);
-            case OR:
-                return new Imm(targetValue.getValue() == 1 || sourceValue.getValue() == 1 ? 1 : 0);
-            case EQ:
-                return new Imm(targetValue.getValue() == sourceValue.getValue() ? 1 : 0);
-            case NE:
-                return new Imm(targetValue.getValue() != sourceValue.getValue() ? 1 : 0);
-            case LT:
-                return new Imm(targetValue.getValue() < sourceValue.getValue() ? 1 : 0);
-            case GT:
-                return new Imm(targetValue.getValue() > sourceValue.getValue() ? 1 : 0);
-            case LE:
-                return new Imm(targetValue.getValue() <= sourceValue.getValue() ? 1 : 0);
-            case GE:
-                return new Imm(targetValue.getValue() >= sourceValue.getValue() ? 1 : 0);
-            default:
-                return null;
-        }
-    }
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 化简
     public void simplify() {
         // 1. 右值是UnaryOperate
@@ -232,10 +204,66 @@ public class Assign extends MidCode {
         }
     }
 
+    // 2. 化简右侧
+    public Imm fullyCalculate(BinaryOperate.BinaryOp op, Imm targetValue, Imm sourceValue) {
+        switch (op) {
+            case ADD:
+                return new Imm(targetValue.getValue() + sourceValue.getValue());
+            case SUB:
+                return new Imm(targetValue.getValue() - sourceValue.getValue());
+            case MUL:
+                return new Imm(targetValue.getValue() * sourceValue.getValue());
+            case DIV:
+                return new Imm(targetValue.getValue() / sourceValue.getValue());
+            case MOD:
+                return new Imm(targetValue.getValue() % sourceValue.getValue());
+            case AND:
+                return new Imm(targetValue.getValue() == 1 && sourceValue.getValue() == 1 ? 1 : 0);
+            case OR:
+                return new Imm(targetValue.getValue() == 1 || sourceValue.getValue() == 1 ? 1 : 0);
+            case EQ:
+                return new Imm(targetValue.getValue() == sourceValue.getValue() ? 1 : 0);
+            case NE:
+                return new Imm(targetValue.getValue() != sourceValue.getValue() ? 1 : 0);
+            case LT:
+                return new Imm(targetValue.getValue() < sourceValue.getValue() ? 1 : 0);
+            case GT:
+                return new Imm(targetValue.getValue() > sourceValue.getValue() ? 1 : 0);
+            case LE:
+                return new Imm(targetValue.getValue() <= sourceValue.getValue() ? 1 : 0);
+            case GE:
+                return new Imm(targetValue.getValue() >= sourceValue.getValue() ? 1 : 0);
+            default:
+                return null;
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 生成中间代码
     @Override
     public String toString() {
         return targetValue + " <- " + sourceValue;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 生成定义变量
+    @Override
+    public Value getDefUnit() {
+        // 1. 返回左值即可
+        return targetValue;
+    }
+
+    // 2. 生成使用变量
+    @Override
+    public LinkedList<Value> getUseUnit() {
+        // 2. 右值生成使用变量
+        return sourceValue.getUseUnit();
+    }
+
+    // 3. 更换使用变量
+    @Override
+    public void changeToAnotherUnit(Value oldValue, Value newValue) {
+        // 3. 右值更换使用变量
+        sourceValue.changeToAnotherUnit(oldValue, newValue);
     }
 }

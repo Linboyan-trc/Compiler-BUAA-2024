@@ -2,10 +2,13 @@ package midend.MidCode.MidCode;
 
 import midend.LabelTable.Label;
 import midend.MidCode.MidCodeTable;
+import midend.MidCode.Optimize.UseUnit;
 import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 
-public class Branch extends MidCode {
+import java.util.LinkedList;
+
+public class Branch extends MidCode implements UseUnit {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 跳转操作符:>, >=, <, <=, ==, !=
     // 2. 跳转: 左值 + branchOp + 右值 + 标签
@@ -45,6 +48,32 @@ public class Branch extends MidCode {
     @Override
     public String toString() {
         return "BRANCH " + branchLabel + " IF " + leftValue + " " + branchOp + " " + rightValue;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 更改跳转条件
+    public void changeBranchOp(Label label) {
+        switch (branchOp) {
+            case GT:
+                branchOp = BranchOp.LE;
+                break;
+            case GE:
+                branchOp = BranchOp.LT;
+                break;
+            case LT:
+                branchOp = BranchOp.GE;
+                break;
+            case LE:
+                branchOp = BranchOp.GT;
+                break;
+            case EQ:
+                branchOp = BranchOp.NE;
+                break;
+            case NE:
+                branchOp = BranchOp.EQ;
+                break;
+        }
+        branchLabel = label;
     }
 
     // 2. 化简
@@ -113,30 +142,21 @@ public class Branch extends MidCode {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 1. 更改跳转条件
-    public void changeBranchOp(Label label) {
-        switch (branchOp) {
-            case GT:
-                branchOp = BranchOp.LE;
-                break;
-            case GE:
-                branchOp = BranchOp.LT;
-                break;
-            case LT:
-                branchOp = BranchOp.GE;
-                break;
-            case LE:
-                branchOp = BranchOp.GT;
-                break;
-            case EQ:
-                branchOp = BranchOp.NE;
-                break;
-            case NE:
-                branchOp = BranchOp.EQ;
-                break;
-        }
-        branchLabel = label;
+    @Override
+    public LinkedList<Value> getUseUnit() {
+        LinkedList<Value> useUnit = new LinkedList<>();
+        useUnit.add(leftValue);
+        useUnit.add(rightValue);
+        return useUnit;
     }
 
-    // 2. 化简
+    @Override
+    public void changeToAnotherUnit(Value oldValue, Value newValue) {
+        if (leftValue == oldValue) {
+            leftValue = newValue;
+        }
+        if (rightValue == oldValue) {
+            rightValue = newValue;
+        }
+    }
 }
