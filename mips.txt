@@ -1,0 +1,9 @@
+.data
+.text
+addiu $sp, $sp, -4
+# 
+main:
+addiu $sp, $sp, -12
+# JUMP Label3
+Label3:
+j Label3

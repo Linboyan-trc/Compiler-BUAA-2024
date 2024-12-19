@@ -106,11 +106,12 @@ public class BasicBlock {
             // 3. 是UseUnit
             // 3. 遍历UseUnit，如果不在基本块定义表里，也不是Imm，就加入到基本块使用表
             if (midCode instanceof UseUnit) {
-                for (Value value : ((UseUnit) midCode).getUseUnit()) {
-                    if (!defUnitTable.contains(value) && !(value instanceof Imm)) {
-                        useUnitTable.add(value);
-                    }
-                }
+//                for (Value value : ((UseUnit) midCode).getUseUnit()) {
+//                    if (!defUnitTable.contains(value) && !(value instanceof Imm)) {
+//                        useUnitTable.add(value);
+//                    }
+//                }
+                ((UseUnit) midCode).getUseUnit().stream().filter(value -> !(defUnitTable.contains(value) || value instanceof Imm)).forEach(useUnitTable::add);
             }
 
             // 4. 是DefUnit
@@ -155,15 +156,16 @@ public class BasicBlock {
     // 1.3 生成到达定义表
     public boolean extractToReachInOut() {
         // 1. 拷贝一份到达定义表
-        HashSet<MidCode> oldreachOutMidCodeTable = new HashSet<>(reachOutMidCodeTable);
+        HashSet<MidCode> oldReachOutMidCodeTable = new HashSet<>(reachOutMidCodeTable);
 
         // 2. 拷贝生成变量
         reachOutMidCodeTable.addAll(genMidCodeTable);
 
         // 3. 前面的代码更新到达定义表
-        for (BasicBlock basicBlock : previousBasicBlocks) {
-            reachInMidCodeTable.addAll(basicBlock.reachOutMidCodeTable);
-        }
+//        for (BasicBlock basicBlock : previousBasicBlocks) {
+//            reachInMidCodeTable.addAll(basicBlock.reachOutMidCodeTable);
+//        }
+        previousBasicBlocks.forEach(basicBlock -> reachInMidCodeTable.addAll(basicBlock.reachOutMidCodeTable));
 
         // 4. 遍历到达定义变量
         for (MidCode midCode : reachInMidCodeTable) {
@@ -174,7 +176,7 @@ public class BasicBlock {
         }
 
         // 5. 判断到达定义表是否已经稳定
-        return !oldreachOutMidCodeTable.equals(reachOutMidCodeTable);
+        return !oldReachOutMidCodeTable.equals(reachOutMidCodeTable);
     }
 
     // 1.4 传播优化
@@ -357,7 +359,7 @@ public class BasicBlock {
     // 1.5 活跃变量
     public boolean extractToLiveInOut() {
         // 1. 拷贝一份活跃变量表
-        HashSet<Value> oldliveInUnitTable = new HashSet<>(liveInUnitTable);
+        HashSet<Value> oldLiveInUnitTable = new HashSet<>(liveInUnitTable);
 
         // 2. 拷贝使用变量
         liveInUnitTable.addAll(useUnitTable);
@@ -366,6 +368,7 @@ public class BasicBlock {
         for(BasicBlock basicBlock : nextBasicBlocks) {
             liveOutUnitTable.addAll(basicBlock.liveInUnitTable);
         }
+        //nextBasicBlocks.forEach(basicBlock -> liveOutUnitTable.addAll(basicBlock.liveInUnitTable));
 
         // 4. 遍历活跃变量
         for (Value value : liveOutUnitTable) {
@@ -376,7 +379,7 @@ public class BasicBlock {
         }
 
         // 5. 判断活跃变量表是否已经稳定
-        return !oldliveInUnitTable.equals(liveInUnitTable);
+        return !oldLiveInUnitTable.equals(liveInUnitTable);
     }
 
     // 1.6 移除死代码

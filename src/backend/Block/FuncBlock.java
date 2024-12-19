@@ -118,28 +118,36 @@ public class FuncBlock {
         // 1.1 对每个基本块，flushAll
         for (BasicBlock basicBlock : basicBlocks) {
             basicBlock.flushAll();
+            basicBlock.extractToDefUse();
+            basicBlock.extractToGenKill();
+            basicBlock.extractToReachInOut();
+//            if (basicBlock.deliveryOptimize()) {
+//                return true;
+//            }
+            basicBlock.extractToLiveInOut();
         }
-
-        // 1.2 生成定义使用表
-        extractToDefUse();
-
-        // 1.3 生成GenKill表
-        extractToGenKill();
-
-        // 1.4 生成到达定义表
-        extractToReachInOut();
-
-        // 1.5 传播优化
-        // 1.5 如果传播优化了先生成中间代码，等待下一轮的优化
-        if (deliveryOptimize()) {
-            return true;
-        }
-
-        // 1.6 活跃变量
-        extractToLiveInOut();
-
-        // 1.7 移除死代码
         return diminishDeadCode();
+
+//        // 1.2 生成定义使用表
+//        extractToDefUse();
+//
+//        // 1.3 生成GenKill表
+//        extractToGenKill();
+//
+//        // 1.4 生成到达定义表
+//        extractToReachInOut();
+//
+//        // 1.5 传播优化
+//        // 1.5 如果传播优化了先生成中间代码，等待下一轮的优化
+//        if (deliveryOptimize()) {
+//            return true;
+//        }
+//
+//        // 1.6 活跃变量
+//        extractToLiveInOut();
+//
+//        // 1.7 移除死代码
+//        return diminishDeadCode();
     }
 
     // 1.1 生成定义使用表
@@ -213,8 +221,9 @@ public class FuncBlock {
 
     // 2. 获取一个定义变量在函数块中对应的中间代码
     public LinkedList<MidCode> getDefUnitToMidCodes(Value defVal) {
-        LinkedList<MidCode> midCodes = defUnitToMidCodes.containsKey(defVal) ? defUnitToMidCodes.get(defVal) : new LinkedList<>();
-        return midCodes;
+//        LinkedList<MidCode> midCodes = defUnitToMidCodes.containsKey(defVal) ? defUnitToMidCodes.get(defVal) : new LinkedList<>();
+//        return midCodes;
+        return defUnitToMidCodes.getOrDefault(defVal, new LinkedList<>());
     }
 
     // 3. 判断一个基本块是否是函数块的开始

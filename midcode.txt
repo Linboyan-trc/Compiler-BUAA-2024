@@ -1,188 +1,23 @@
 main:
-main:
-LOCAL VAR $a@4 
-LOCAL VAR $b@4 
-LOCAL VAR $c@4 
-LOCAL VAR $d@4 
-LOCAL VAR $e@4 
-LOCAL VAR $f@4 
-LOCAL VAR $g@4 1
-LOCAL VAR $h@4 
-LOCAL VAR $j@4 
-LOCAL VAR $k@4 
-LOCAL VAR $l@4 
-LOCAL VAR $o@4 -1
-LOCAL VAR $i@4 2
-LOCAL VAR $n@4 
-LOCAL VAR $m@4 
-LOCAL VAR $flag@4 0
-CALL GETINT
-SAVE $n@4 <- $?
+
+LOCAL VAR $c@1 1
 NOP
 Label1:
 NOP
 NOP
 Label3:
 NOP
-TEMP $0 <- $i@4
-TEMP $1 <- $n@4
-$2 <- $0 LT $1
-BRANCH Label4: IF $2 EQ 0
-TEMP $3 <- $n@4
-TEMP $4 <- $i@4
-$5 <- $3 MOD $4
-SAVE $m@4 <- $5
-TEMP $6 <- $m@4
-$7 <- $6 EQ 0
-BRANCH Label5: IF $7 EQ 0
-SAVE $flag@4 <- 1
-PRINT "0\n"
-Label5:
-NOP
-TEMP $8 <- $i@4
-$9 <- 1 ADD $8
-SAVE $i@4 <- $9
-JUMP Label6
+BRANCH Label4: IF 1 EQ 0
+SAVE $c@1 <- 3
+JUMP Label5
 Label4:
 NOP
 JUMP Label2
-Label6:
+Label5:
 NOP
-NOP
+TEMP $0 <- $c@1
+SAVE $c@1 <- $0
 JUMP Label3
 Label2:
 NOP
-CALL jian
-TEMP $10 <- $?
-SAVE $c@4 <- $10
-TEMP $11 <- $c@4
-PUSH $11
-PRINT "%d\n"
-TEMP $12 <- $c@4
-$13 <- 1 ADD $12
-SAVE $d@4 <- $13
-TEMP $14 <- $c@4
-$15 <- 2 MUL $14
-SAVE $e@4 <- $15
-TEMP $16 <- $e@4
-$17 <- $16 LT 5
-BRANCH Label7: IF $17 EQ 0
-TEMP $18 <- $c@4
-$19 <- $18 MOD 2
-SAVE $f@4 <- $19
-JUMP Label8
-Label7:
-NOP
-TEMP $20 <- $c@4
-$21 <- $20 DIV 2
-SAVE $f@4 <- $21
-Label8:
-NOP
-TEMP $22 <- $f@4
-$23 <- $22 NE 0
-BRANCH Label9: IF $23 EQ 0
-TEMP $24 <- $g@4
-$25 <- 1 ADD $24
-SAVE $g@4 <- $25
-Label9:
-NOP
-TEMP $26 <- $i@4
-TEMP $27 <- $j@4
-$28 <- 1 ADD $27
-$29 <- $26 ADD $28
-SAVE $o@4 <- $29
-NOP
-NOP
-Label10:
-NOP
-NOP
-Label12:
-NOP
-BRANCH Label13: IF 1 EQ 0
-JUMP Label11
-JUMP Label14
-Label13:
-NOP
-JUMP Label11
-Label14:
-NOP
-NOP
-JUMP Label12
-Label11:
-NOP
-TEMP $30 <- $c@4
-TEMP $31 <- $d@4
-$32 <- $30 EQ $31
-BRANCH Label15: IF $32 EQ 0
-TEMP $33 <- $d@4
-TEMP $34 <- $e@4
-$35 <- $33 GE $34
-BRANCH Label16: IF $35 EQ 0
-TEMP $36 <- $e@4
-TEMP $37 <- $f@4
-$38 <- $36 LE $37
-BRANCH Label17: IF $38 EQ 0
-TEMP $39 <- $f@4
-TEMP $40 <- $g@4
-$41 <- $39 NE $40
-BRANCH Label18: IF $41 EQ 0
-TEMP $42 <- $c@4
-$43 <- $42 GT 1
-BRANCH Label19: IF $43 EQ 0
-SAVE $a@4 <- 1
-Label19:
-NOP
-Label18:
-NOP
-Label17:
-NOP
-Label16:
-NOP
-Label15:
-NOP
-TEMP $44 <- $a@4
-TEMP $45 <- $b@4
-PUSH $44
-PUSH $45
-CALL keke
-TEMP $46 <- $?
-TEMP $47 <- $d@4
-TEMP $48 <- $e@4
-TEMP $49 <- $f@4
-TEMP $50 <- $g@4
-PUSH $47
-PUSH $48
-PUSH $49
-PUSH $50
-PRINT "%d\n%d\n%d\n%d\n"
-PRINT "19182620\n"
-PRINT "19182620\n"
-PRINT "19182620\n"
 EXIT
-de:
-de:
-RETURN
-keke:
-keke:
-PARA $i@2
-PARA $j@2
-TEMP $51 <- $i@2
-TEMP $52 <- $j@2
-$53 <- $51 ADD $52
-SAVE $i@2 <- $53
-RETURN 0
-jian:
-jian:
-LOCAL VAR $x@3 
-LOCAL VAR $y@3 
-LOCAL VAR $z@3 
-CALL GETINT
-SAVE $x@3 <- $?
-CALL GETINT
-SAVE $y@3 <- $?
-TEMP $54 <- $x@3
-TEMP $55 <- $y@3
-$56 <- $54 SUB $55
-SAVE $z@3 <- $56
-TEMP $57 <- $z@3
-RETURN $57

@@ -296,6 +296,9 @@ public class MidCodeTable {
                 }
             }
         }
+
+        // 3.9 不懂
+        LabelTable.getInstance().removeUnusedLabels(usedLabels);
     }
 
     // 1.3 化简Exp

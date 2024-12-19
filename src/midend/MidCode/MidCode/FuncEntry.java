@@ -24,6 +24,6 @@ public class FuncEntry extends MidCode {
     @Override
     public String toString() {
         // 1. 直接用这个入口关联的标签生成字符串
-        return entryLabel.toString();
+        return "";
     }
 }
