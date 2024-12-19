@@ -1,23 +1,178 @@
+GLOBAL CONST $N@0 10
+GLOBAL VAR &a@0 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 main:
 
-LOCAL VAR $c@1 1
+LOCAL VAR $i@4 2
+LOCAL VAR $j@4 5
+LOCAL CONST $a1@4 1
+LOCAL CONST $a2@4 2
+CALL GETINT
+SAVE $i@4 <- $?
+CALL GETINT
+SAVE $j@4 <- $?
+TEMP $0 <- $i@4
+TEMP $1 <- $j@4
+$2 <- $0 MUL $1
+$3 <- NEG $2
+PUSH 4
+CALL fib
+TEMP $4 <- $?
+$5 <- $3 MUL $4
+&6 <- &a@0 ADD 1
+TEMP $7 <- *&6
+$8 <- $5 ADD $7
+$9 <- $8 DIV 5
+SAVE $i@4 <- $9
+PUSH 5
+CALL fib
+TEMP $10 <- $?
+$11 <- 2 ADD $10
+PUSH $11
+CALL fib
+TEMP $12 <- $?
+$13 <- -8894 SUB $12
+SAVE $j@4 <- $13
+LOCAL VAR $k@4 -6
+&14 <- &a@0 ADD 0
+TEMP $15 <- *&14
+TEMP $16 <- $i@4
+TEMP $17 <- $i@4
+$18 <- $16 MUL $17
+$19 <- $15 ADD $18
+&20 <- &a@0 ADD 0
+*&20 <- $19
+&21 <- &a@0 ADD 1
+TEMP $22 <- *&21
+TEMP $23 <- $i@4
+TEMP $24 <- $i@4
+$25 <- $23 MUL $24
+$26 <- $22 ADD $25
+&27 <- &a@0 ADD 1
+*&27 <- $26
+&28 <- &a@0 ADD 2
+TEMP $29 <- *&28
+TEMP $30 <- $i@4
+TEMP $31 <- $i@4
+$32 <- $30 MUL $31
+$33 <- $29 ADD $32
+&34 <- &a@0 ADD 2
+*&34 <- $33
+&35 <- &a@0 ADD 3
+TEMP $36 <- *&35
+TEMP $37 <- $i@4
+TEMP $38 <- $i@4
+$39 <- $37 MUL $38
+$40 <- $36 ADD $39
+&41 <- &a@0 ADD 3
+*&41 <- $40
+&42 <- &a@0 ADD 4
+TEMP $43 <- *&42
+TEMP $44 <- $i@4
+TEMP $45 <- $i@4
+$46 <- $44 MUL $45
+$47 <- $43 ADD $46
+&48 <- &a@0 ADD 4
+*&48 <- $47
+&49 <- &a@0 ADD 5
+TEMP $50 <- *&49
+TEMP $51 <- $i@4
+TEMP $52 <- $i@4
+$53 <- $51 MUL $52
+$54 <- $50 ADD $53
+&55 <- &a@0 ADD 5
+*&55 <- $54
+&56 <- &a@0 ADD 6
+TEMP $57 <- *&56
+TEMP $58 <- $i@4
+TEMP $59 <- $i@4
+$60 <- $58 MUL $59
+$61 <- $57 ADD $60
+&62 <- &a@0 ADD 6
+*&62 <- $61
+&63 <- &a@0 ADD 7
+TEMP $64 <- *&63
+TEMP $65 <- $i@4
+TEMP $66 <- $i@4
+$67 <- $65 MUL $66
+$68 <- $64 ADD $67
+&69 <- &a@0 ADD 7
+*&69 <- $68
+&70 <- &a@0 ADD 8
+TEMP $71 <- *&70
+TEMP $72 <- $i@4
+TEMP $73 <- $i@4
+$74 <- $72 MUL $73
+$75 <- $71 ADD $74
+&76 <- &a@0 ADD 8
+*&76 <- $75
+&77 <- &a@0 ADD 9
+TEMP $78 <- *&77
+TEMP $79 <- $i@4
+TEMP $80 <- $i@4
+$81 <- $79 MUL $80
+$82 <- $78 ADD $81
+&83 <- &a@0 ADD 9
+*&83 <- $82
+SAVE $i@4 <- 0
 NOP
 Label1:
 NOP
 NOP
 Label3:
 NOP
-BRANCH Label4: IF 1 EQ 0
-SAVE $c@1 <- 3
+TEMP $84 <- $i@4
+$85 <- $84 LT 10
+BRANCH Label4: IF $85 EQ 0
+TEMP $86 <- $i@4
+&87 <- &a@0 ADD $86
+TEMP $88 <- *&87
+PUSH $88
+PRINT "%d, "
+TEMP $89 <- $i@4
+$90 <- 1 ADD $89
+SAVE $i@4 <- $90
 JUMP Label5
 Label4:
 NOP
 JUMP Label2
 Label5:
 NOP
-TEMP $0 <- $c@1
-SAVE $c@1 <- $0
+NOP
 JUMP Label3
 Label2:
 NOP
+TEMP $91 <- $i@4
+TEMP $92 <- $j@4
+TEMP $93 <- $k@4
+PUSH $91
+PUSH $92
+PUSH $93
+PRINT "\n%d, %d, %d\n"
 EXIT
+fib:
+
+PARA $i@1
+TEMP $94 <- $i@1
+$95 <- $94 EQ 1
+BRANCH Label6: IF $95 EQ 0
+RETURN 1
+Label6:
+NOP
+TEMP $96 <- $i@1
+$97 <- $96 EQ 2
+BRANCH Label7: IF $97 EQ 0
+RETURN 2
+Label7:
+NOP
+TEMP $98 <- $i@1
+$99 <- -1 ADD $98
+PUSH $99
+CALL fib
+TEMP $100 <- $?
+TEMP $101 <- $i@1
+$102 <- -2 ADD $101
+PUSH $102
+CALL fib
+TEMP $103 <- $?
+$104 <- $100 ADD $103
+RETURN $104

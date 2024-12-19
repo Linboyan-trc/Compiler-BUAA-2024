@@ -1,9 +1,563 @@
 .data
+N: .word 10
+a: .word 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+string0: .asciiz ", "
+string1: .asciiz "\n"
+string2: .asciiz ", "
+string3: .asciiz ", "
+string4: .asciiz "\n"
 .text
 addiu $sp, $sp, -4
 # 
 main:
-addiu $sp, $sp, -12
-# JUMP Label3
+addiu $sp, $sp, -400
+# LOCAL VAR $i@4 2
+li $t0, 2
+# LOCAL VAR $j@4 5
+li $t1, 5
+# LOCAL CONST $a1@4 1
+li $t2, 1
+# LOCAL CONST $a2@4 2
+li $t3, 2
+# CALL GETINT
+li $v0, 5
+syscall
+# SAVE $i@4 <- $?
+addiu $t0, $v0, 0
+# CALL GETINT
+li $v0, 5
+syscall
+# SAVE $j@4 <- $?
+addiu $t1, $v0, 0
+# TEMP $0 <- $i@4
+addiu $t4, $t0, 0
+# TEMP $1 <- $j@4
+addiu $t5, $t1, 0
+# $2 <- $0 MUL $1
+mult $t4, $t5
+mflo $t6
+# $3 <- NEG $2
+subu $t7, $0, $t6
+# PUSH 4
+li $fp, 4
+sw $fp, -4($sp)
+# CALL fib
+sw $t0, 396($sp)
+sw $t4, 380($sp)
+sw $t3, 384($sp)
+sw $t6, 372($sp)
+sw $t1, 392($sp)
+sw $t7, 368($sp)
+sw $t2, 388($sp)
+sw $t5, 376($sp)
+sw $ra, 0($sp)
+jal fib
+lw $ra, 0($sp)
+# TEMP $4 <- $?
+addiu $t0, $v0, 0
+# $5 <- $3 MUL $4
+lw $t1, 368($sp)
+mult $t1, $t0
+mflo $t2
+# &6 <- &a@0 ADD 1
+la $t3, a
+li $fp, 4
+addu $t4, $t3, $fp
+# TEMP $7 <- *&6
+lw $t5, 0($t4)
+# $8 <- $5 ADD $7
+addu $t6, $t2, $t5
+# $9 <- $8 DIV 5
+li $fp, 5
+div $t6, $fp
+mflo $t7
+# SAVE $i@4 <- $9
+addiu $t8, $t7, 0
+# PUSH 5
+li $fp, 5
+sw $fp, -4($sp)
+# CALL fib
+sw $t0, 364($sp)
+sw $t8, 396($sp)
+sw $t4, 356($sp)
+sw $t6, 348($sp)
+sw $t1, 368($sp)
+sw $t7, 344($sp)
+sw $t2, 360($sp)
+sw $t5, 352($sp)
+sw $ra, 0($sp)
+jal fib
+lw $ra, 0($sp)
+# TEMP $10 <- $?
+addiu $t0, $v0, 0
+# $11 <- 2 ADD $10
+li $fp, 2
+addu $t1, $fp, $t0
+# PUSH $11
+sw $t1, -4($sp)
+# CALL fib
+sw $t0, 340($sp)
+sw $t1, 336($sp)
+sw $ra, 0($sp)
+jal fib
+lw $ra, 0($sp)
+# TEMP $12 <- $?
+addiu $t0, $v0, 0
+# $13 <- -8894 SUB $12
+li $fp, -8894
+subu $t1, $fp, $t0
+# SAVE $j@4 <- $13
+addiu $t2, $t1, 0
+# LOCAL VAR $k@4 -6
+li $t3, -6
+# &14 <- &a@0 ADD 0
+la $t4, a
+li $fp, 0
+addu $t5, $t4, $fp
+# TEMP $15 <- *&14
+lw $t6, 0($t5)
+# TEMP $16 <- $i@4
+lw $t8, 396($sp)
+addiu $t7, $t8, 0
+# TEMP $17 <- $i@4
+addiu $t9, $t8, 0
+# $18 <- $16 MUL $17
+mult $t7, $t9
+mflo $s0
+# $19 <- $15 ADD $18
+addu $s1, $t6, $s0
+# &20 <- &a@0 ADD 0
+li $fp, 0
+addu $s2, $t4, $fp
+# *&20 <- $19
+sw $s1, 0($s2)
+# &21 <- &a@0 ADD 1
+li $fp, 4
+addu $s3, $t4, $fp
+# TEMP $22 <- *&21
+lw $s4, 0($s3)
+# TEMP $23 <- $i@4
+addiu $s5, $t8, 0
+# TEMP $24 <- $i@4
+addiu $s6, $t8, 0
+# $25 <- $23 MUL $24
+mult $s5, $s6
+mflo $s7
+# $26 <- $22 ADD $25
+addu $gp, $s4, $s7
+# &27 <- &a@0 ADD 1
+li $fp, 4
+addu $k0, $t4, $fp
+# *&27 <- $26
+sw $gp, 0($k0)
+# &28 <- &a@0 ADD 2
+li $fp, 8
+addu $k1, $t4, $fp
+# TEMP $29 <- *&28
+lw $a1, 0($k1)
+# TEMP $30 <- $i@4
+addiu $a2, $t8, 0
+# TEMP $31 <- $i@4
+addiu $a3, $t8, 0
+# $32 <- $30 MUL $31
+mult $a2, $a3
+mflo $v1
+# $33 <- $29 ADD $32
+sw $t0, 332($sp)
+addu $t0, $a1, $v1
+# &34 <- &a@0 ADD 2
+sw $t1, 328($sp)
+li $fp, 8
+addu $t1, $t4, $fp
+# *&34 <- $33
+sw $t0, 0($t1)
+# &35 <- &a@0 ADD 3
+sw $t2, 392($sp)
+li $fp, 12
+addu $t2, $t4, $fp
+# TEMP $36 <- *&35
+sw $t3, 324($sp)
+lw $t3, 0($t2)
+# TEMP $37 <- $i@4
+addiu $t4, $t8, 0
+# TEMP $38 <- $i@4
+addiu $t5, $t8, 0
+# $39 <- $37 MUL $38
+sw $t6, 316($sp)
+mult $t4, $t5
+mflo $t6
+# $40 <- $36 ADD $39
+sw $t7, 312($sp)
+addu $t7, $t3, $t6
+# &41 <- &a@0 ADD 3
+sw $t8, 396($sp)
+la $t8, a
+sw $t9, 308($sp)
+li $fp, 12
+addu $t9, $t8, $fp
+# *&41 <- $40
+sw $t7, 0($t9)
+# &42 <- &a@0 ADD 4
+sw $s0, 304($sp)
+li $fp, 16
+addu $s0, $t8, $fp
+# TEMP $43 <- *&42
+sw $s1, 300($sp)
+lw $s1, 0($s0)
+# TEMP $44 <- $i@4
+lw $s3, 396($sp)
+addiu $s2, $s3, 0
+# TEMP $45 <- $i@4
+sw $s4, 288($sp)
+addiu $s4, $s3, 0
+# $46 <- $44 MUL $45
+sw $s5, 284($sp)
+mult $s2, $s4
+mflo $s5
+# $47 <- $43 ADD $46
+sw $s6, 280($sp)
+addu $s6, $s1, $s5
+# &48 <- &a@0 ADD 4
+sw $s7, 276($sp)
+li $fp, 16
+addu $s7, $t8, $fp
+# *&48 <- $47
+sw $s6, 0($s7)
+# &49 <- &a@0 ADD 5
+sw $gp, 272($sp)
+li $fp, 20
+addu $gp, $t8, $fp
+# TEMP $50 <- *&49
+lw $k0, 0($gp)
+# TEMP $51 <- $i@4
+addiu $k1, $s3, 0
+# TEMP $52 <- $i@4
+sw $a1, 260($sp)
+addiu $a1, $s3, 0
+# $53 <- $51 MUL $52
+sw $a2, 256($sp)
+mult $k1, $a1
+mflo $a2
+# $54 <- $50 ADD $53
+sw $a3, 252($sp)
+addu $a3, $k0, $a2
+# &55 <- &a@0 ADD 5
+sw $v1, 248($sp)
+li $fp, 20
+addu $v1, $t8, $fp
+# *&55 <- $54
+sw $a3, 0($v1)
+# &56 <- &a@0 ADD 6
+sw $t0, 244($sp)
+li $fp, 24
+addu $t0, $t8, $fp
+# TEMP $57 <- *&56
+lw $t1, 0($t0)
+# TEMP $58 <- $i@4
+addiu $t2, $s3, 0
+# TEMP $59 <- $i@4
+sw $t3, 232($sp)
+addiu $t3, $s3, 0
+# $60 <- $58 MUL $59
+sw $t4, 228($sp)
+mult $t2, $t3
+mflo $t4
+# $61 <- $57 ADD $60
+sw $t5, 224($sp)
+addu $t5, $t1, $t4
+# &62 <- &a@0 ADD 6
+sw $t6, 220($sp)
+li $fp, 24
+addu $t6, $t8, $fp
+# *&62 <- $61
+sw $t5, 0($t6)
+# &63 <- &a@0 ADD 7
+sw $t7, 216($sp)
+li $fp, 28
+addu $t7, $t8, $fp
+# TEMP $64 <- *&63
+lw $t8, 0($t7)
+# TEMP $65 <- $i@4
+addiu $t9, $s3, 0
+# TEMP $66 <- $i@4
+addiu $s0, $s3, 0
+# $67 <- $65 MUL $66
+sw $s1, 204($sp)
+mult $t9, $s0
+mflo $s1
+# $68 <- $64 ADD $67
+sw $s2, 200($sp)
+addu $s2, $t8, $s1
+# &69 <- &a@0 ADD 7
+sw $s3, 396($sp)
+la $s3, a
+sw $s4, 196($sp)
+li $fp, 28
+addu $s4, $s3, $fp
+# *&69 <- $68
+sw $s2, 0($s4)
+# &70 <- &a@0 ADD 8
+sw $s5, 192($sp)
+li $fp, 32
+addu $s5, $s3, $fp
+# TEMP $71 <- *&70
+sw $s6, 188($sp)
+lw $s6, 0($s5)
+# TEMP $72 <- $i@4
+lw $gp, 396($sp)
+addiu $s7, $gp, 0
+# TEMP $73 <- $i@4
+sw $k0, 176($sp)
+addiu $k0, $gp, 0
+# $74 <- $72 MUL $73
+sw $k1, 172($sp)
+mult $s7, $k0
+mflo $k1
+# $75 <- $71 ADD $74
+sw $a1, 168($sp)
+addu $a1, $s6, $k1
+# &76 <- &a@0 ADD 8
+sw $a2, 164($sp)
+li $fp, 32
+addu $a2, $s3, $fp
+# *&76 <- $75
+sw $a1, 0($a2)
+# &77 <- &a@0 ADD 9
+sw $a3, 160($sp)
+li $fp, 36
+addu $a3, $s3, $fp
+# TEMP $78 <- *&77
+lw $v1, 0($a3)
+# TEMP $79 <- $i@4
+addiu $t0, $gp, 0
+# TEMP $80 <- $i@4
+sw $t1, 148($sp)
+addiu $t1, $gp, 0
+# $81 <- $79 MUL $80
+sw $t2, 144($sp)
+mult $t0, $t1
+mflo $t2
+# $82 <- $78 ADD $81
+sw $t3, 140($sp)
+addu $t3, $v1, $t2
+# &83 <- &a@0 ADD 9
+sw $t4, 136($sp)
+li $fp, 36
+addu $t4, $s3, $fp
+# *&83 <- $82
+sw $t3, 0($t4)
+# SAVE $i@4 <- 0
+li $gp, 0
+# NOP
+# NOP
+sw $s6, 92($sp)
+sw $s2, 104($sp)
+sw $v1, 64($sp)
+sw $t5, 132($sp)
+sw $k0, 84($sp)
+sw $gp, 396($sp)
+sw $t9, 116($sp)
+sw $t1, 56($sp)
+sw $s1, 108($sp)
+sw $t8, 120($sp)
+sw $a1, 76($sp)
+sw $t3, 48($sp)
+sw $s7, 88($sp)
+sw $t2, 52($sp)
+sw $t0, 60($sp)
+sw $s0, 112($sp)
+sw $k1, 80($sp)
+Label1:
+# NOP
+# NOP
 Label3:
+# TEMP $84 <- $i@4
+lw $t1, 396($sp)
+addiu $t0, $t1, 0
+# $85 <- $84 LT 10
+li $fp, 10
+slt $t2, $t0, $fp
+# BRANCH Label4: IF $85 EQ 0
+sw $t1, 396($sp)
+sw $t2, 36($sp)
+sw $t0, 40($sp)
+lw $t0, 36($sp)
+beq $t0, $0, Label4
+# TEMP $86 <- $i@4
+lw $t2, 396($sp)
+addiu $t1, $t2, 0
+# &87 <- &a@0 ADD $86
+la $t3, a
+sll $fp, $t1, 2
+addu $t4, $t3, $fp
+# TEMP $88 <- *&87
+lw $t5, 0($t4)
+# PUSH $88
+sw $t5, -4($sp)
+# PRINT "%d, "
+lw $a0, -4($sp)
+li $v0, 1
+syscall
+la $a0, string0
+li $v0, 4
+syscall
+# TEMP $89 <- $i@4
+addiu $t6, $t2, 0
+# $90 <- 1 ADD $89
+li $fp, 1
+addu $t7, $fp, $t6
+# SAVE $i@4 <- $90
+addiu $t2, $t7, 0
+# JUMP Label5
+sw $t5, 24($sp)
+sw $t1, 32($sp)
+sw $t7, 16($sp)
+sw $t6, 20($sp)
+sw $t2, 396($sp)
+sw $t0, 36($sp)
+j Label5
+# NOP
+Label4:
+# JUMP Label2
+j Label2
+# NOP
+Label5:
+# NOP
+# JUMP Label3
 j Label3
+# NOP
+Label2:
+# TEMP $91 <- $i@4
+lw $t1, 396($sp)
+addiu $t0, $t1, 0
+# TEMP $92 <- $j@4
+lw $t3, 392($sp)
+addiu $t2, $t3, 0
+# TEMP $93 <- $k@4
+lw $t5, 324($sp)
+addiu $t4, $t5, 0
+# PUSH $91
+sw $t0, -4($sp)
+# PUSH $92
+sw $t2, -8($sp)
+# PUSH $93
+sw $t4, -12($sp)
+# PRINT "\n%d, %d, %d\n"
+la $a0, string1
+li $v0, 4
+syscall
+lw $a0, -4($sp)
+li $v0, 1
+syscall
+la $a0, string2
+li $v0, 4
+syscall
+lw $a0, -8($sp)
+li $v0, 1
+syscall
+la $a0, string3
+li $v0, 4
+syscall
+lw $a0, -12($sp)
+li $v0, 1
+syscall
+la $a0, string4
+li $v0, 4
+syscall
+# EXIT
+li $v0, 10
+syscall
+# 
+sw $t5, 324($sp)
+sw $t1, 396($sp)
+sw $t3, 392($sp)
+sw $t2, 8($sp)
+sw $t0, 12($sp)
+sw $t4, 4($sp)
+fib:
+addiu $sp, $sp, -52
+# PARA $i@1
+lw $t0, 48($sp)
+# TEMP $94 <- $i@1
+addiu $t1, $t0, 0
+# $95 <- $94 EQ 1
+li $fp, 1
+seq $t2, $t1, $fp
+# BRANCH Label6: IF $95 EQ 0
+sw $t1, 44($sp)
+sw $t2, 40($sp)
+sw $t0, 48($sp)
+lw $t0, 40($sp)
+beq $t0, $0, Label6
+# RETURN 1
+sw $t0, 40($sp)
+li $v0, 1
+addiu $sp, $sp, 52
+jr $ra
+# NOP
+Label6:
+# TEMP $96 <- $i@1
+lw $t1, 48($sp)
+addiu $t0, $t1, 0
+# $97 <- $96 EQ 2
+li $fp, 2
+seq $t2, $t0, $fp
+# BRANCH Label7: IF $97 EQ 0
+sw $t1, 48($sp)
+sw $t2, 32($sp)
+sw $t0, 36($sp)
+lw $t0, 32($sp)
+beq $t0, $0, Label7
+# RETURN 2
+sw $t0, 32($sp)
+li $v0, 2
+addiu $sp, $sp, 52
+jr $ra
+# NOP
+Label7:
+# TEMP $98 <- $i@1
+lw $t1, 48($sp)
+addiu $t0, $t1, 0
+# $99 <- -1 ADD $98
+li $fp, -1
+addu $t2, $fp, $t0
+# PUSH $99
+sw $t2, -4($sp)
+# CALL fib
+sw $t1, 48($sp)
+sw $t2, 24($sp)
+sw $t0, 28($sp)
+sw $ra, 0($sp)
+jal fib
+lw $ra, 0($sp)
+# TEMP $100 <- $?
+addiu $t0, $v0, 0
+# TEMP $101 <- $i@1
+lw $t2, 48($sp)
+addiu $t1, $t2, 0
+# $102 <- -2 ADD $101
+li $fp, -2
+addu $t3, $fp, $t1
+# PUSH $102
+sw $t3, -4($sp)
+# CALL fib
+sw $t1, 16($sp)
+sw $t3, 12($sp)
+sw $t2, 48($sp)
+sw $t0, 20($sp)
+sw $ra, 0($sp)
+jal fib
+lw $ra, 0($sp)
+# TEMP $103 <- $?
+addiu $t0, $v0, 0
+# $104 <- $100 ADD $103
+lw $t1, 20($sp)
+addu $t2, $t1, $t0
+# RETURN $104
+sw $t1, 20($sp)
+sw $t2, 4($sp)
+sw $t0, 8($sp)
+lw $t0, 4($sp)
+addiu $v0, $t0, 0
+addiu $sp, $sp, 52
+jr $ra
