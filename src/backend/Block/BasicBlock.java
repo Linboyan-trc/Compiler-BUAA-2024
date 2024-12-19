@@ -7,6 +7,7 @@ import midend.MidCode.Value.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.StringJoiner;
 
 public class BasicBlock {
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -542,5 +543,60 @@ public class BasicBlock {
             // 5. 继续遍历
             tempCode = tempCode.getNext();
         }
+    }
+
+    // 2. 计算变量的使用时间
+    public void calculateUseTime() {
+        MidCode midCode = head;
+        while (midCode != tail.getNext()) {
+            if (midCode instanceof UseUnit) {
+                for (Value useVal : ((UseUnit) midCode).getUseUnit()) {
+                    if (!useVal.isGlobal() && !useVal.isReturn()) {
+                        if (!useTime.containsKey(useVal)) {
+                            useTime.put(useVal, new HashSet<>());
+                        }
+                        useTime.get(useVal).add(midCode);
+                    }
+                }
+            }
+            midCode = midCode.getNext();
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 获得活跃变量
+    public HashSet<Value> getliveOutUnitTable() {
+        return liveOutUnitTable;
+    }
+
+    public boolean isLive(Value value, MidCode code) {
+        return midCodeToLiveOutUnitTable.get(code).contains(value);
+    }
+
+    public boolean usedUp(Value useVal, MidCode midCode) {
+        if (!useTime.containsKey(useVal)) {
+            return false;
+        } else {
+            HashSet<MidCode> useSet = useTime.get(useVal);
+            useSet.remove(midCode);
+            return useSet.isEmpty();
+        }
+    }
+
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        MidCode midCode = head;
+
+        while (midCode != tail.getNext()) {
+            if (midCode != null) {
+                result.append(midCode).append("\n");
+            } else {
+                result.append("null\n");
+                break;
+            }
+            midCode = midCode.getNext();
+        }
+
+        return result.toString();
     }
 }

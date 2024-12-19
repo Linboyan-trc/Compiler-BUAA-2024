@@ -1,6 +1,8 @@
 package backend;
 
 import backend.Address.*;
+import backend.Block.BasicBlock;
+import backend.Block.FuncBlock;
 import backend.MipsCode.*;
 import backend.MipsCode.IIns.*;
 import backend.MipsCode.JIns.JInsJ;
@@ -14,6 +16,7 @@ import midend.LabelTable.LabelTable;
 import midend.MidCode.MidCode.*;
 import midend.MidCode.Operate.BinaryOperate;
 import midend.MidCode.Operate.UnaryOperate;
+import midend.MidCode.Optimize.UseUnit;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
@@ -52,6 +55,10 @@ public class Translator {
     private int pushCount = 0;
     private int strCount = 0;
 
+    private BasicBlock basicBlock;
+    private MidCode nowMidCode;
+    private static int tempLabel = 0;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 获取单例
     public static Translator getInstance() {
@@ -68,6 +75,14 @@ public class Translator {
 
     public HashMap<Value, Address> getValueToAddress() {
         return valueToAddress;
+    }
+
+    public BasicBlock getBasicBlock() {
+        return basicBlock;
+    }
+
+    public MidCode getNowMidCode() {
+        return nowMidCode;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,102 +113,124 @@ public class Translator {
             valueToAddress.put(value, new AbsoluteAddress(value.getName()));
         }
 
-        // 2. 压栈
-        mipsCodeList.add(new IIns2Reg1Imm(addiu, Reg.SP, Reg.SP, new Imm(-4)));
+        for (FuncBlock funcBlock : midCodeTable.getFuncBlocks()) {
+            scheduler.clearAll();
+            //mipsCodeList.add(new Comment("****************              function                ****************\n\n"));
+            scheduler.setFuncBlock(funcBlock);
+            convertFuncBlock(funcBlock);
+            //mipsCodeList.add(new Comment("****************              function                ****************"));
+        }
+    }
 
-        // 3. 从中间代码中的代码部分获取每一个中间代码节点
-        for (MidCode midCode : midCodeTable.getMidCodeList()) {
-            // 1. 清除寄存器
+    public void convertFuncBlock(FuncBlock funcBlock) {
+        for (BasicBlock basicBlock : funcBlock.getBasicBlocks()) {
+            scheduler.clear();
+            //mipsCodeList.add(new Comment("****************              basic block                ****************\n\n"));
+            basicBlock = basicBlock;
+            convertBasicBlock();
+            //mipsCodeList.add(new Comment("****************              basic block                ****************"));
+        }
+    }
+
+    public void convertBasicBlock() {
+        if (labelTable.getLabelList(basicBlock.getHead()).size() != 0) {
+            mipsCodeList.addAll(labelTable.getLabelList(basicBlock.getHead()));
+        }
+        for (MidCode midCode = basicBlock.getHead(); midCode != basicBlock.getTail(); midCode = midCode.getNext()) {
             synchronizedReg.clear();
+            //mipsCodeList.add(new Comment(midCode.toString()));
+            nowMidCode = midCode;
+            convertMidCode();
+        }
+        synchronizedReg.clear();
+        //mipsCodeList.add(new Comment(curBasicBlock.getTail().toString()));
+        nowMidCode = basicBlock.getTail();
+        if (basicBlock.getTail() instanceof Branch || basicBlock.getTail() instanceof Return || basicBlock.getTail() instanceof Jump) {
+            scheduler.flush(basicBlock.getTail() instanceof Return);
+            convertMidCode();
+        } else {
+            convertMidCode();
+            scheduler.flush(false);
+        }
+    }
 
-            // 2. 添加注释，方便Debug
-            mipsCodeList.add(new Comment(midCode.toString()));
-
-            // 3. 分支，返回，跳转需要重置调度器
-            // 3. 返回的时候，需要把临时变量存进栈
-            if (midCode instanceof Branch || midCode instanceof Return || midCode instanceof Jump) {
-                scheduler.flush();
-            }
-
-            // 1. 遇到<FuncEnrty>:Label
-            if (labelTable.getLabelList(midCode).size() != 0) {
-
-                scheduler.flush();
-
-                // 1.2 添加标签
-                mipsCodeList.addAll(labelTable.getLabelList(midCode));
-            }
-
-            switch (midCode.getClass().toString()) {
-                case "class midend.MidCode.MidCode.ArgPush":
-                    assert midCode instanceof ArgPush;
-                    generateMips((ArgPush) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Assign":
-                    assert midCode instanceof Assign;
-                    generateMips((Assign) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Branch":
-                    assert midCode instanceof Branch;
-                    generateMips((Branch) midCode);
-                    break;
-                // 5. Declare:isGlobal, isFinal, <Value>:Word,Addr, size, initValue:Imm
-                case "class midend.MidCode.MidCode.Declare":
-                    assert midCode instanceof Declare;
-                    generateMips((Declare) midCode);
-                    break;
-                // 2. <Exit>:无
-                case "class midend.MidCode.MidCode.Exit":
-                    assert midCode instanceof Exit;
-                    generateMips((Exit) midCode);
-                    break;
-                // 1. <FuncCall>:name
-                case "class midend.MidCode.MidCode.FuncCall":
-                    assert midCode instanceof FuncCall;
-                    generateMips((FuncCall) midCode);
-                    break;
-                // 3. <FuncEntry>:Label
-                case "class midend.MidCode.MidCode.FuncEntry":
-                    assert midCode instanceof FuncEntry;
-                    generateMips((FuncEntry) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.IntGet":
-                    assert midCode instanceof IntGet;
-                    generateMips((IntGet) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.CharGet":
-                    assert midCode instanceof CharGet;
-                    generateMips((CharGet) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Jump":
-                    assert midCode instanceof Jump;
-                    generateMips((Jump) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Load":
-                    assert midCode instanceof Load;
-                    generateMips((Load) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Move":
-                    assert midCode instanceof Move;
-                    generateMips((Move) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.ParaGet":
-                    assert midCode instanceof ParaGet;
-                    generateMips((ParaGet) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Print":
-                    assert midCode instanceof Print;
-                    generateMips((Print) midCode);
-                    break;
-                // 4. Return:Value
-                case "class midend.MidCode.MidCode.Return":
-                    assert midCode instanceof Return;
-                    generateMips((Return) midCode);
-                    break;
-                case "class midend.MidCode.MidCode.Store":
-                    assert midCode instanceof Store;
-                    generateMips((Store) midCode);
-                    break;
+    public void convertMidCode() {
+        switch (nowMidCode.getClass().toString()) {
+            case "class midend.MidCode.MidCode.ArgPush":
+                assert nowMidCode instanceof ArgPush;
+                generateMips((ArgPush) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Assign":
+                assert nowMidCode instanceof Assign;
+                generateMips((Assign) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Branch":
+                assert nowMidCode instanceof Branch;
+                generateMips((Branch) nowMidCode);
+                break;
+            // 5. Declare:isGlobal, isFinal, <Value>:Word,Addr, size, initValue:Imm
+            case "class midend.MidCode.MidCode.Declare":
+                assert nowMidCode instanceof Declare;
+                generateMips((Declare) nowMidCode);
+                break;
+            // 2. <Exit>:无
+            case "class midend.MidCode.MidCode.Exit":
+                assert nowMidCode instanceof Exit;
+                generateMips((Exit) nowMidCode);
+                break;
+            // 1. <FuncCall>:name
+            case "class midend.MidCode.MidCode.FuncCall":
+                assert nowMidCode instanceof FuncCall;
+                generateMips((FuncCall) nowMidCode);
+                break;
+            // 3. <FuncEntry>:Label
+            case "class midend.MidCode.MidCode.FuncEntry":
+                assert nowMidCode instanceof FuncEntry;
+                generateMips((FuncEntry) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.IntGet":
+                assert nowMidCode instanceof IntGet;
+                generateMips((IntGet) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.CharGet":
+                assert nowMidCode instanceof CharGet;
+                generateMips((CharGet) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Jump":
+                assert nowMidCode instanceof Jump;
+                generateMips((Jump) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Load":
+                assert nowMidCode instanceof Load;
+                generateMips((Load) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Move":
+                assert nowMidCode instanceof Move;
+                generateMips((Move) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.ParaGet":
+                assert nowMidCode instanceof ParaGet;
+                generateMips((ParaGet) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Print":
+                assert nowMidCode instanceof Print;
+                generateMips((Print) nowMidCode);
+                break;
+            // 4. Return:Value
+            case "class midend.MidCode.MidCode.Return":
+                assert nowMidCode instanceof Return;
+                generateMips((Return) nowMidCode);
+                break;
+            case "class midend.MidCode.MidCode.Store":
+                assert nowMidCode instanceof Store;
+                generateMips((Store) nowMidCode);
+                break;
+        }
+        if (nowMidCode instanceof UseUnit) {
+            for (Value useUnit : ((UseUnit) nowMidCode).getUseUnit()) {
+                if (basicBlock.usedUp(useUnit, nowMidCode) && !basicBlock.getliveOutUnitTable().contains(useUnit)) {
+                    scheduler.dismissMapping(useUnit);
+                }
             }
         }
     }

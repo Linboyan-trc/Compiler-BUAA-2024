@@ -1,15 +1,22 @@
 package backend.Block;
 
+import backend.RegScheduler;
+import backend.ValueGraph;
+import backend.ValueMeta.Reg;
 import midend.LabelTable.Label;
 import midend.LabelTable.LabelTable;
 import midend.MidCode.MidCode.*;
 import midend.MidCode.MidCode.MidCode;
 import midend.MidCode.MidCodeTable;
+import midend.MidCode.Optimize.DefUnit;
+import midend.MidCode.Optimize.UseUnit;
+import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class FuncBlock {
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -24,6 +31,9 @@ public class FuncBlock {
     //////////////////////////////////////////////////////////////////////////////////////////
     // 1. 定义变量和中间代码的对应
     private final HashMap<Value, LinkedList<MidCode>> defUnitToMidCodes = new HashMap<>();
+    private final HashMap<Value, Integer> valueToLevel = new HashMap<>();
+    private final ValueGraph valueGraph = new ValueGraph(this);
+    private final HashMap<Value, Reg> valueToRegister = new HashMap<>();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // 1. 构建一个函数块，然后划分成基础块
@@ -299,5 +309,171 @@ public class FuncBlock {
         }
     }
 
+    // 2. 分配寄存器
+    public void getRegister() {
+        // 1. 遍历每一个基本块
+        for (BasicBlock basicBlock : basicBlocks) {
+            HashSet<Value> liveOutSet = new HashSet<>(basicBlock.getliveOutUnitTable());
+            MidCode midCode = basicBlock.getTail();
+            while (midCode != basicBlock.getHead().getPrevious()) {
+                if (midCode instanceof DefUnit) {
+                    Value defUnit = ((DefUnit) midCode).getDefUnit();
+                    if (!defUnit.isGlobal() && !defUnit.isReturn()) {
+                        boolean vary = false;
+                        if (midCode instanceof UseUnit) {
+                            for (Value value : liveOutSet) {
+                                if (!value.equals(defUnit) && !value.isGlobal() && !value.isReturn()) {
+                                    valueGraph.addEdge(value, defUnit);
+                                    vary = true;
+                                }
+                            }
+                        }
+                        if (!vary) {
+                            valueGraph.addValue(defUnit);
+                        }
+                        liveOutSet.remove(defUnit);
+                    }
+                }
+                if (midCode instanceof UseUnit) {
+                    for (Value value : ((UseUnit) midCode).getUseUnit()) {
+                        if (!value.isGlobal() && !(value instanceof Imm) && !value.isReturn()) {
+                            liveOutSet.add(value);
+                        }
+                    }
+                }
+                midCode = midCode.getPrevious();
+            }
+        }
 
+        // 2.
+        getLevel();
+
+        // 3.
+        HashSet<Value> localValue = new HashSet<>(valueGraph.getUnregisteredValues());
+
+        // 4.
+        LinkedList<Value> valueList = new LinkedList<>();
+
+        // 5.
+        HashMap<Value, HashSet<Value>> valueToConflict = new HashMap<>();
+
+        // 6.
+        LinkedList<Reg> freeRegs = new LinkedList<>(Reg.globalRegs);
+
+        // 7.
+        HashSet<Reg> usedRegs = new HashSet<>();
+
+        // 8.
+        while (!valueGraph.isEmpty()) {
+            Value value = valueGraph.findValue(freeRegs.size());
+            if (value != null) {
+                HashSet<Value> conflictSet = valueGraph.removeValue(value);
+                valueList.add(value);
+                valueToConflict.put(value, conflictSet);
+            } else {
+                Value localVal = valueGraph.discardValue();
+                HashSet<Value> conflictSet = valueGraph.removeValue(localVal);
+                localValue.add(localVal);
+                valueList.add(localVal);
+                valueToConflict.put(localVal, conflictSet);
+            }
+        }
+
+        // 9.
+        while (!valueList.isEmpty()) {
+            Value value = valueList.removeLast();
+            valueGraph.store(value, valueToConflict.get(value));
+            if (!localValue.contains(value)) {
+                HashSet<Value> conflictSet = valueToConflict.get(value);
+                HashSet<Reg> conflictReg = new HashSet<>();
+                for (Value conflictVal : conflictSet) {
+                    if (valueToConflict.containsKey(conflictVal)) {
+                        conflictReg.add(valueToRegister.get(conflictVal));
+                    }
+                }
+                for (Reg reg : freeRegs) {
+                    if (!conflictReg.contains(reg)) {
+                        valueToRegister.put(value, reg);
+                        usedRegs.add(reg);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 10.
+        RegScheduler.getInstance().dividing(usedRegs);
+    }
+
+    // 3. 计算变量的使用时间
+    public void calculateUseTime() {
+        for(BasicBlock basicBlock : basicBlocks) {
+            basicBlock.calculateUseTime();
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // 1. 获取深度
+    public void getLevel() {
+        // 1. 深度
+        int level = 0;
+        Map<BasicBlock, Integer> basicBlocksLeval = new HashMap<>();
+        Map<BasicBlock, Integer> loopBegin = new HashMap<>();
+        Map<BasicBlock, Integer> loopEnd = new HashMap<>();
+
+        // 2. 遍历循环块
+        for (LoopBlock loopBlock : loopBlocks) {
+            BasicBlock beginBlock = loopBlock.getLoopBlockBeginBasicBlock();
+            BasicBlock endBlock = loopBlock.getLoopBlockEndBasicBlock();
+            loopBegin.put(beginBlock, loopBegin.getOrDefault(beginBlock, 0) + 1);
+            loopEnd.put(endBlock, loopEnd.getOrDefault(endBlock, 0) + 1);
+        }
+
+        // 3. 遍历基本块
+        for (BasicBlock basicBlock : basicBlocks) {
+            if (loopBegin.containsKey(basicBlock)) {
+                level += loopBegin.get(basicBlock);
+            }
+            basicBlocksLeval.put(basicBlock, level);
+            if (loopEnd.containsKey(basicBlock)) {
+                level -= loopEnd.get(basicBlock);
+            }
+        }
+
+        // 4. 遍历基本块
+        for (BasicBlock basicBlock : basicBlocks) {
+            level = basicBlocksLeval.get(basicBlock);
+            MidCode midCode = basicBlock.getHead();
+            while (midCode != basicBlock.getTail().getNext()) {
+                if (midCode instanceof DefUnit) {
+                    Value defUnit = ((DefUnit) midCode).getDefUnit();
+                    int currentLevel = valueToLevel.getOrDefault(defUnit, Integer.MIN_VALUE);
+                    valueToLevel.put(defUnit, Math.max(currentLevel, level));
+                }
+                if (midCode instanceof UseUnit) {
+                    LinkedList<Value> useUnit = ((UseUnit) midCode).getUseUnit();
+                    for (Value value : useUnit) {
+                        if (!(value instanceof Imm)) {
+                            int currentLevel = valueToLevel.getOrDefault(value, Integer.MIN_VALUE);
+                            valueToLevel.put(value, Math.max(currentLevel, level));
+                        }
+                    }
+                }
+                midCode = midCode.getNext();
+            }
+        }
+    }
+
+    // 2. 获取深度
+    public int getLevalValue(Value value) {
+        return valueToLevel.get(value);
+    }
+
+    public Reg getRegister(Value value) {
+        return valueToRegister.get(value);
+    }
+
+    public HashMap<Value, Reg> getValueToRegister() {
+        return valueToRegister;
+    }
 }

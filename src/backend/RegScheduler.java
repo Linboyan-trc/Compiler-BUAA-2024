@@ -1,9 +1,11 @@
 package backend;
 
 import backend.Address.*;
+import backend.Block.FuncBlock;
 import backend.MipsCode.IIns.IIns;
 import backend.MipsCode.IIns.IInsSW;
 import backend.ValueMeta.Reg;
+import midend.MidCode.MidCode.Nop;
 import midend.MidCode.Value.Addr;
 import midend.MidCode.Value.Value;
 import midend.MidCode.Value.Word;
@@ -25,14 +27,20 @@ public class RegScheduler {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 寄存器到Value的映射，代表寄存器中存储的值
     // 2. 标记正在用的寄存器，标记没有被使用的寄存器
-    private HashMap<Reg, Value> reg2value = new HashMap<>();
-    private LinkedList<Reg> busyRegs = new LinkedList<>();
-    private LinkedList<Reg> freeRegs = new LinkedList<>();
+    private HashMap<Reg, Value> registerToValue = new HashMap<>();
+    private LinkedList<Reg> busyRegisters = new LinkedList<>();
+    private LinkedList<Reg> freeRegsisters = new LinkedList<>();
+
+    private List<Reg> globalRegisters = new ArrayList<>();
+    private List<Reg> localRegisters = new ArrayList<>();
+    private HashMap<Value, Reg> valueToRegister = new HashMap<>();
+
+    private FuncBlock funcBlock;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 构造一个寄存器分配器，只会构造一个
     private RegScheduler() {
-        freeRegs.addAll(regs);
+        freeRegsisters.addAll(regs);
     }
 
     public static RegScheduler getInstance() {
@@ -41,42 +49,56 @@ public class RegScheduler {
 
     // 2. 获取映射表
     public HashMap<Reg, Value> getReg2value() {
-        return reg2value;
+        return registerToValue;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 1. 释放所有寄存器，全部寄存器都加入freeRegs
+    // 1. 释放所有寄存器，全部寄存器都加入freeRegsisters
     public void clear() {
-        reg2value.clear();
-        busyRegs.clear();
-        freeRegs.clear();
-        freeRegs.addAll(regs);
+        for (Reg reg : localRegisters) {
+            registerToValue.remove(reg);
+        }
+        busyRegisters.clear();
+        freeRegsisters.clear();
+        freeRegsisters.addAll(localRegisters);
+    }
+
+    public void clearAll() {
+        registerToValue.clear();
+        valueToRegister.clear();
+        busyRegisters.clear();
+        freeRegsisters.clear();
+        freeRegsisters.addAll(localRegisters);
     }
 
     // 2. 根据Value寻找有没有哪个寄存器里存了这个Value，然后返回这个寄存器
     public Reg find(Value value) {
-        // 1. 在busyRegs里遍历，看有没有变量的名字是现在在找的，有就返回寄存器
-        for (Reg reg : busyRegs) {
-            if (reg2value.get(reg).equals(value)) {
+        for (Reg reg : registerToValue.keySet()) {
+            if (registerToValue.get(reg).equals(value)) {
+                if (busyRegisters.contains(reg)) {
+                    busyRegisters.remove(reg);
+                    busyRegisters.addFirst(reg);
+                }
                 return reg;
             }
         }
-        // 1. 没有就返回null
-        return null;
+        if (valueToRegister.containsKey(value)) {
+            registerToValue.put(valueToRegister.get(value), value);
+        }
+        return valueToRegister.get(value);
     }
 
     // 3. 为一个Value分配一个寄存器，分配失败的时候返回null
     public Reg alloc(Value value) {
-        // 1. 传入变量名:Word,name, Addr,name
-        if (!freeRegs.isEmpty()) {
-            // 1.1 获取一个寄存器
-            Reg reg = freeRegs.getFirst();
-            // 1.2 寄存器移入busyRegs中
-            freeRegs.removeFirst();
-            busyRegs.addLast(reg);
-            // 1.3 记录寄存器到Word, Addr的映射
-            reg2value.put(reg, value);
-            // 1.4 返回这个寄存器
+        if (funcBlock.getRegister(value) != null) {
+            registerToValue.put(funcBlock.getRegister(value), value);
+            valueToRegister.put(value, funcBlock.getRegister(value));
+            return funcBlock.getRegister(value);
+        }
+        if (!freeRegsisters.isEmpty()) {
+            Reg reg = freeRegsisters.removeFirst();
+            busyRegisters.addLast(reg);
+            registerToValue.put(reg, value);
             return reg;
         }
         return null;
@@ -85,49 +107,89 @@ public class RegScheduler {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 占用一个正在使用的寄存器
     public Reg preempt(Value value) {
-        // 1. 当所有寄存器都是使用时，找一个寄存器不处于同步占用
-        for (Reg reg : busyRegs) {
-            if (!Translator.getInstance().getSynchronizedReg().contains(reg)) {
-                // 2. 取出寄存器的值
-                Value oldValue = reg2value.get(reg);
-                // 3. 如果寄存器是Word，或者寄存器是Addr但是是临时变量
-                // 3. 这两种情况都需要将此时寄存器的值存储到内存中
-                if (oldValue instanceof Word || (value instanceof Addr && ((Addr) oldValue).isTemp())) {
-                    // 4. 需要制作一个sw指令，将此时reg的值存储到值对应的地址中
-                    Translator.getInstance()
-                            .getMipsCodeList()
-                            .add(
-                                    new IInsSW(
-                                            reg,
-                                            Translator.getInstance().getValueToAddress().get(oldValue)));
-                }
-                // 5. 更新寄存器的值
-                reg2value.put(reg, value);
-                // 6. 寄存器加入到栈尾
-                busyRegs.remove(reg);
-                busyRegs.addLast(reg);
-                // 7. 返回寄存器
-                return reg;
+        Reg selectedReg = null;
+        for (Reg reg : busyRegisters) {
+            Value oldValue = registerToValue.get(reg);
+            if (Translator.getInstance().getBasicBlock().usedUp(oldValue, new Nop())
+                    && !Translator.getInstance().getSynchronizedReg().contains(reg)) {
+                selectedReg = reg;
+                break;
             }
         }
-        // 2. 如果所有寄存器都在被同步占用，由返回空，表示分配失败
+        if (selectedReg == null) {
+            for (Reg reg : busyRegisters) {
+                Value oldValue = registerToValue.get(reg);
+                if (!Translator.getInstance().getBasicBlock().isLive(oldValue, Translator.getInstance().getNowMidCode())
+                        && !Translator.getInstance().getSynchronizedReg().contains(reg)) {
+                    selectedReg = reg;
+                    break;
+                }
+            }
+        }
+        if (selectedReg == null) {
+            for (Reg reg : busyRegisters) {
+                if (!Translator.getInstance().getSynchronizedReg().contains(reg)) {
+                    selectedReg = reg;
+                }
+            }
+        }
+        if (selectedReg != null) {
+            Value oldValue = registerToValue.get(selectedReg);
+            if ((oldValue instanceof Word || (value instanceof Addr && ((Addr) oldValue).isTemp())) &&
+                    Translator.getInstance().getBasicBlock().isLive(oldValue, Translator.getInstance().getNowMidCode())) {
+                Translator.getInstance().getMipsCodeList().add(
+                        new IInsSW(selectedReg, Translator.getInstance().getValueToAddress().get(oldValue)));
+            }
+            registerToValue.put(selectedReg, value);
+            busyRegisters.remove(selectedReg);
+            busyRegisters.addLast(selectedReg);
+            return selectedReg;
+        }
         return null;
     }
 
     // 2. 写回到内存 + 解除寄存器分配状态
-    public void flush() {
-        // 1. 获取所有寄存器和值的映射
-        for (Map.Entry<Reg, Value> entry : reg2value.entrySet()) {
-            // 2. 获取变量地址
-            Address address = Translator.getInstance().getValueToAddress().get(entry.getValue());
-            // 3. 绝对地址 + Word需要写回内存
-            // 3. 相对地址 + Word需要写回栈
-            if (address instanceof AbsoluteAddress && entry.getValue() instanceof Word
-                    || address instanceof RelativeAddress && !(entry.getValue() instanceof Addr)) {
-                Translator.getInstance().getMipsCodeList().add(new IInsSW(entry.getKey(), address));
+    public void flush(boolean isReturn) {
+        for (Reg reg : busyRegisters) {
+            Value value = registerToValue.get(reg);
+            Address address = Translator.getInstance().getValueToAddress().get(value);
+            if (address instanceof AbsoluteAddress && value instanceof Word) {
+                Translator.getInstance().getMipsCodeList().add(new IInsSW(reg, address));
+            } else if (!isReturn && address instanceof RelativeAddress && !(value instanceof Addr && !((Addr) value).isTemp()) &&
+                    Translator.getInstance().getBasicBlock().getliveOutUnitTable().contains(value)) {
+                Translator.getInstance().getMipsCodeList().add(new IInsSW(reg, address));
             }
         }
-        // 4. 释放所有寄存器
-        clear();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public List<Reg> getGlobalRegisters() {
+        return globalRegisters;
+    }
+
+    public void dividing(HashSet<Reg> usedRegs) {
+        globalRegisters.addAll(usedRegs);
+        localRegisters.clear();
+        for (Reg reg : regs) {
+            if (!globalRegisters.contains(reg)) {
+                localRegisters.add(reg);
+            }
+        }
+    }
+
+    public void setFuncBlock(FuncBlock curFuncBlock) {
+        this.funcBlock = curFuncBlock;
+    }
+
+    public void dismissMapping(Value useVal) {
+        for (Reg reg : busyRegisters) {
+            if (registerToValue.get(reg).equals(useVal)) {
+                freeRegsisters.add(reg);
+                busyRegisters.remove(reg);
+                registerToValue.remove(reg);
+                break;
+            }
+        }
     }
 }

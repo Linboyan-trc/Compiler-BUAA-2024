@@ -1,5 +1,8 @@
 package backend.ValueMeta;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Reg implements ValueMeta {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. $0, $v0, $a0, $ra, $sp 留给系统调用和栈(共5个)
@@ -39,6 +42,9 @@ public class Reg implements ValueMeta {
     public static final Reg S13 = new Reg("a3");
     public static final Reg S14 = new Reg("v1");
     public static final Reg TR = new Reg("fp");
+    public static final List<Reg> globalRegs = Arrays.asList(
+            S0, S1, S2, S3, S4, S5, S6
+    );
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 可以为寄存器指定名字，在创建31个实例时使用

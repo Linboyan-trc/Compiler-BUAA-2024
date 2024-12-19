@@ -212,6 +212,16 @@ public class MidCodeTable {
         for(FuncBlock funcBlock : funcBlocks) {
             funcBlock.extractToLiveOutUnitTable();
         }
+
+        // 5. 分配寄存器
+        for(FuncBlock funcBlock : funcBlocks) {
+            funcBlock.getRegister();
+        }
+
+        // 6. 计算变量的使用时间
+        for(FuncBlock funcBlock : funcBlocks) {
+            funcBlock.calculateUseTime();
+        }
     }
 
     // 1.1 化简Nop
