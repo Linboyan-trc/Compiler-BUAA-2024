@@ -1,5 +1,7 @@
 .data
-string0: .asciiz "\n"
+a1: .word 1
+c1: .word 98
+a2: .word 1, 2, 3
 .text
 addiu $sp, $sp, -4
 # CALL main
@@ -11,117 +13,8 @@ li $v0, 10
 syscall
 # main:
 main:
-addiu $sp, $sp, -60
-# LOCAL VAR $x@1 104
-li $t0, 104
-# LOCAL VAR $flag@1 
-# TEMP $0 <- $x@1
-addiu $t2, $t0, 0
-# $1 <- $0 MOD 4
-li $fp, 4
-div $t2, $fp
-mfhi $t3
-# $2 <- NOT $1
-seq $t4, $t3, $0
-# BRANCH Label1: IF $2 EQ 0
-sw $t3, 44($sp)
-sw $t2, 48($sp)
-sw $t0, 56($sp)
-sw $t4, 40($sp)
-sw $t1, 52($sp)
-lw $t0, 40($sp)
-beq $t0, $0, Label1
-# TEMP $3 <- $x@1
-lw $t2, 56($sp)
-addiu $t1, $t2, 0
-# $4 <- $3 MOD 100
-li $fp, 100
-div $t1, $fp
-mfhi $t3
-# BRANCH Label2: IF $4 EQ 0
-sw $t3, 32($sp)
-sw $t2, 56($sp)
-sw $t0, 40($sp)
-sw $t1, 36($sp)
-lw $t0, 32($sp)
-beq $t0, $0, Label2
-# SAVE $flag@1 <- 1
-li $t1, 1
-# JUMP Label3
-sw $t0, 32($sp)
-sw $t1, 52($sp)
-j Label3
-# NOP
-Label2:
-# TEMP $5 <- $x@1
-lw $t1, 56($sp)
-addiu $t0, $t1, 0
-# $6 <- $5 MOD 400
-li $fp, 400
-div $t0, $fp
-mfhi $t2
-# $7 <- $6 EQ 0
-li $fp, 0
-seq $t3, $t2, $fp
-# BRANCH Label4: IF $7 EQ 0
-sw $t3, 20($sp)
-sw $t2, 24($sp)
-sw $t0, 28($sp)
-sw $t1, 56($sp)
-lw $t0, 20($sp)
-beq $t0, $0, Label4
-# SAVE $flag@1 <- 1
-li $t1, 1
-# NOP
-sw $t0, 20($sp)
-sw $t1, 52($sp)
-Label4:
-# NOP
-Label3:
-# JUMP Label5
-j Label5
-# NOP
-Label1:
-# TEMP $8 <- $x@1
-lw $t1, 56($sp)
-addiu $t0, $t1, 0
-# $9 <- $8 MOD 400
-li $fp, 400
-div $t0, $fp
-mfhi $t2
-# $10 <- $9 EQ 0
-li $fp, 0
-seq $t3, $t2, $fp
-# BRANCH Label6: IF $10 EQ 0
-sw $t3, 8($sp)
-sw $t2, 12($sp)
-sw $t0, 16($sp)
-sw $t1, 56($sp)
-lw $t0, 8($sp)
-beq $t0, $0, Label6
-# SAVE $flag@1 <- 1
-li $t1, 1
-# NOP
-sw $t0, 8($sp)
-sw $t1, 52($sp)
-Label6:
-# NOP
-Label5:
-# TEMP $11 <- $flag@1
-lw $t1, 52($sp)
-addiu $t0, $t1, 0
-# PUSH $11
-sw $t0, -4($sp)
-# PRINT "%d\n"
-lw $a0, -4($sp)
-li $v0, 1
-syscall
-la $a0, string0
-li $v0, 4
-syscall
+addiu $sp, $sp, -4
 # RETURN 0
-sw $t0, 4($sp)
-sw $t1, 52($sp)
 li $v0, 0
-addiu $sp, $sp, 60
+addiu $sp, $sp, 4
 jr $ra

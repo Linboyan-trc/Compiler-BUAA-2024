@@ -156,7 +156,7 @@ public class SymbolTable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         for(SymbolItem<DefNode> item : variables){
-            str.append(Integer.toString(id + 1) + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
+            str.append(id + 1 + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
         }
         for(SymbolTable item : children){
             str.append(item.toString());

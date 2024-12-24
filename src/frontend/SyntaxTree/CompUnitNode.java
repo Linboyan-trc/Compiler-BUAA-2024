@@ -30,13 +30,13 @@ public class CompUnitNode implements SyntaxNode {
     public String toString() {
         StringBuilder str = new StringBuilder();
         for(SymbolItem<DefNode> item:symbolTable.getVariables()){
-            str.append(Integer.toString(symbolTable.getId() + 1) + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
+            str.append(symbolTable.getId() + 1 + " " + item.getName() + " " + item.getNode().getDefNodeType().toString() + "\n");
         }
         for(SymbolItem<FuncDefNode> item:symbolTable.getFunctions()){
             if (item.getName().equals("main")) {
                 continue;
             }
-            str.append(Integer.toString(symbolTable.getId() + 1) + " " + item.getName() + " " + item.getNode().getFuncDefType().toString() + "\n");
+            str.append(symbolTable.getId() + 1 + " " + item.getName() + " " + item.getNode().getFuncDefType().toString() + "\n");
         }
         for(SymbolTable child:symbolTable.getChildren()){
             str.append(child.toString());

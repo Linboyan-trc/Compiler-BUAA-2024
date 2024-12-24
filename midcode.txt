@@ -1,42 +1,8 @@
+GLOBAL CONST $a1@0 1
+GLOBAL CONST $c1@0 98
+GLOBAL CONST &a2@0 1, 2, 3
 CALL main
 EXIT
 main:
 main:
-LOCAL VAR $x@1 104
-LOCAL VAR $flag@1 
-TEMP $0 <- $x@1
-$1 <- $0 MOD 4
-$2 <- NOT $1
-BRANCH Label1: IF $2 EQ 0
-TEMP $3 <- $x@1
-$4 <- $3 MOD 100
-BRANCH Label2: IF $4 EQ 0
-SAVE $flag@1 <- 1
-JUMP Label3
-Label2:
-NOP
-TEMP $5 <- $x@1
-$6 <- $5 MOD 400
-$7 <- $6 EQ 0
-BRANCH Label4: IF $7 EQ 0
-SAVE $flag@1 <- 1
-Label4:
-NOP
-Label3:
-NOP
-JUMP Label5
-Label1:
-NOP
-TEMP $8 <- $x@1
-$9 <- $8 MOD 400
-$10 <- $9 EQ 0
-BRANCH Label6: IF $10 EQ 0
-SAVE $flag@1 <- 1
-Label6:
-NOP
-Label5:
-NOP
-TEMP $11 <- $flag@1
-PUSH $11
-PRINT "%d\n"
 RETURN 0

@@ -77,6 +77,10 @@ public class Parser {
         }
     }
 
+    public List<Pair> getTokensToLexer() {
+        return tokens;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////
     // 1. 解析<CompUnit>
     public ParsedUnit parseCompUnit() throws IOException {

@@ -3,6 +3,7 @@ import java.io.*;
 import backend.Translator;
 import frontend.ErrorHandler.ErrorHandler;
 import frontend.Lexer.Lexer;
+import frontend.Lexer.Pair;
 import frontend.Parser.*;
 import frontend.SyntaxTree.CompUnitNode;
 import midend.MidCode.MidCodeTable;
@@ -11,6 +12,7 @@ public class Compiler {
     public static void main(String[] args) throws IOException {
         // 1. 源程序文件，解析结果存储在字符串中
         BufferedReader inputFile = new BufferedReader(new FileReader("testfile.txt"));
+        BufferedWriter lexerFile = new BufferedWriter(new FileWriter("lexer.txt"));
         BufferedWriter grammarFile = new BufferedWriter(new FileWriter("parser.txt"));
         BufferedWriter symbolTableFile = new BufferedWriter(new FileWriter("symbol.txt"));
         BufferedWriter midCodeFile = new BufferedWriter(new FileWriter("midcode.txt"));
@@ -23,6 +25,10 @@ public class Compiler {
         // 3. 语法分析
         Parser parser = new Parser(lexer);
         ParsedUnit compUnit = parser.parseCompUnit();
+        for(Pair pair:parser.getTokensToLexer()){
+            lexerFile.write(pair.toString() + "\n");
+        }
+        lexerFile.close();
         grammarFile.write(compUnit.toString());
         grammarFile.close();
 
