@@ -31,20 +31,24 @@ public class Compiler {
         symbolTableFile.write(compUnitNode.toString());
         symbolTableFile.close();
 
-        // 5. 错误处理
-        ErrorHandler.getInstance().print(errorHandlerFile);
+        if(!ErrorHandler.getInstance().getErrors().isEmpty()) {
+            // 5. 错误处理
+            ErrorHandler.getInstance().print(errorHandlerFile);
 
-        // 6. 化简
-        compUnitNode = compUnitNode.simplify();
+        } else {
 
-        // 7. 生成中间代码
-        compUnitNode.generateMidCode();
-        midCodeFile.write(MidCodeTable.getInstance().toString());
-        midCodeFile.close();
+            // 6. 化简
+            compUnitNode = compUnitNode.simplify();
 
-        // 8. 生成mips代码
-        Translator.getInstance().translate();
-        mipsCodeFile.write(Translator.getInstance().toString());
-        mipsCodeFile.close();
+            // 7. 生成中间代码
+            compUnitNode.generateMidCode();
+            midCodeFile.write(MidCodeTable.getInstance().toString());
+            midCodeFile.close();
+
+            // 8. 生成mips代码
+            Translator.getInstance().translate();
+            mipsCodeFile.write(Translator.getInstance().toString());
+            mipsCodeFile.close();
+        }
     }
 }
