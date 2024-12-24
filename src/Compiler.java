@@ -39,11 +39,11 @@ public class Compiler {
 
         // 7. 生成中间代码
         compUnitNode.generateMidCode();
-        midCodeFile.write(MidCodeTable.getInstance().toString());
-        midCodeFile.close();
 
         // 8. 优化
         MidCodeTable.getInstance().simplify();
+        midCodeFile.write(MidCodeTable.getInstance().toString());
+        midCodeFile.close();
 
         // 9. 生成mips代码
         Translator.getInstance().translate();
