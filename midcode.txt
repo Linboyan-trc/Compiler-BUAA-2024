@@ -1,8 +1,0 @@
-GLOBAL CONST $a1@0 1
-GLOBAL CONST $c1@0 98
-GLOBAL CONST &a2@0 1, 2, 3
-CALL main
-EXIT
-main:
-main:
-RETURN 0
