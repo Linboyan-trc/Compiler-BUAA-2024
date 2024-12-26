@@ -1,5 +1,249 @@
 .data
 .text
+.data
+.text
+.data
+.text
+addiu $sp, $sp, -4
+.data
+.text
+addiu $sp, $sp, -4
+.data
+.text
+addiu $sp, $sp, -4
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+.data
+.text
 addiu $sp, $sp, -4
 
 # CALL main
@@ -13,49 +257,2808 @@ syscall
 
 # main:
 main:
-addiu $sp, $sp, -24
+.data
+.text
+addiu $sp, $sp, -4
 
-# LOCAL VAR $i@1 
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
 
-# LOCAL VAR $j@1 
-
-# CALL GETINT
-li $v0, 5
+# EXIT
+li $v0, 10
 syscall
 
-# SAVE $i@1 <- $?
-addiu $t0, $v0, 0
+# main:
+main:
+.data
+.text
+addiu $sp, $sp, -4
 
-# CALL GETINT
-li $v0, 5
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
 syscall
 
-# SAVE $j@1 <- $?
-addiu $t1, $v0, 0
+# main:
+main:
+.data
+.text
+addiu $sp, $sp, -4
 
-# TEMP $0 <- $i@1
-addiu $t2, $t0, 0
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
 
-# TEMP $1 <- $j@1
-addiu $t3, $t1, 0
-
-# $2 <- $0 BITAND $1
-and $t4, $t2, $t3
-
-# PUSH $2
-sw $t4, -4($sp)
-
-# PRINT "%d"
-lw $a0, -4($sp)
-li $v0, 1
+# EXIT
+li $v0, 10
 syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+.data
+.text
+addiu $sp, $sp, -4
+
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+
+# EXIT
+li $v0, 10
+syscall
+
+# main:
+main:
+addiu $sp, $sp, -160
+
+# LOCAL VAR $a0@1 1
+li $t0, 1
+
+# LOCAL VAR $a1@1 1
+li $t1, 1
+
+# LOCAL VAR $a2@1 2
+li $t2, 2
+
+# LOCAL VAR $a3@1 2
+li $t3, 2
+
+# LOCAL VAR $a4@1 4
+li $t4, 4
+
+# LOCAL VAR $a5@1 4
+li $t5, 4
+
+# LOCAL VAR $a6@1 8
+li $t6, 8
+
+# LOCAL VAR $a7@1 8
+li $t7, 8
+
+# LOCAL VAR $a8@1 16
+li $t8, 16
+
+# LOCAL VAR $a9@1 16
+li $t9, 16
+
+# LOCAL VAR $a10@1 32
+li $s0, 32
+
+# LOCAL VAR $a11@1 32
+li $s1, 32
+
+# LOCAL VAR $a12@1 64
+li $s2, 64
+
+# LOCAL VAR $a13@1 64
+li $s3, 64
+
+# LOCAL VAR $a14@1 128
+li $s4, 128
+
+# LOCAL VAR $a15@1 128
+li $s5, 128
+
+# LOCAL VAR $a16@1 256
+li $s6, 256
+
+# LOCAL VAR $a17@1 256
+li $s7, 256
+
+# LOCAL VAR $a18@1 512
+li $gp, 512
+
+# LOCAL VAR $a19@1 512
+li $k0, 512
+
+# LOCAL VAR $a20@1 1024
+li $k1, 1024
+
+# LOCAL VAR $a21@1 1024
+li $a1, 1024
+
+# LOCAL VAR $a22@1 2048
+li $a2, 2048
+
+# LOCAL VAR $a23@1 2048
+li $a3, 2048
+
+# LOCAL VAR $a24@1 4096
+li $v1, 4096
+
+# LOCAL VAR $a25@1 4096
+sw $t0, 156($sp)
+li $t0, 4096
+
+# LOCAL VAR $a26@1 8192
+sw $t1, 152($sp)
+li $t1, 8192
+
+# LOCAL VAR $a27@1 8192
+sw $t2, 148($sp)
+li $t2, 8192
+
+# LOCAL VAR $a28@1 16384
+sw $t3, 144($sp)
+li $t3, 16384
+
+# LOCAL VAR $a29@1 16384
+sw $t4, 140($sp)
+li $t4, 16384
+
+# LOCAL VAR $a30@1 32768
+sw $t5, 136($sp)
+li $t5, 32768
+
+# TEMP $0 <- $a0@1
+sw $t6, 132($sp)
+sw $t7, 128($sp)
+lw $t7, 156($sp)
+addiu $t6, $t7, 0
+
+# TEMP $1 <- $a10@1
+sw $t8, 124($sp)
+addiu $t8, $s0, 0
+
+# $2 <- $0 ADD $1
+sw $t9, 120($sp)
+addu $t9, $t6, $t8
+
+# TEMP $3 <- $a20@1
+sw $s0, 116($sp)
+addiu $s0, $k1, 0
+
+# $4 <- $2 ADD $3
+sw $s1, 112($sp)
+addu $s1, $t9, $s0
+
+# TEMP $5 <- $a30@1
+sw $s2, 108($sp)
+addiu $s2, $t5, 0
+
+# $6 <- $4 ADD $5
+sw $s3, 104($sp)
+addu $s3, $s1, $s2
+
+# LOCAL VAR $b@1 $6
+sw $s4, 100($sp)
+addu $s4, $s3, $0
 
 # RETURN 0
-sw $t2, 12($sp)
-sw $t4, 4($sp)
-sw $t3, 8($sp)
-sw $t1, 16($sp)
-sw $t0, 20($sp)
+sw $s4, 4($sp)
+sw $s1, 16($sp)
+sw $t2, 48($sp)
+sw $v1, 60($sp)
+sw $t5, 36($sp)
+sw $t6, 32($sp)
+sw $a3, 64($sp)
+sw $a1, 72($sp)
+sw $t7, 156($sp)
+sw $k0, 80($sp)
+sw $gp, 84($sp)
+sw $a2, 68($sp)
+sw $t1, 52($sp)
+sw $t0, 56($sp)
+sw $s0, 20($sp)
+sw $t4, 40($sp)
+sw $s2, 12($sp)
+sw $t8, 28($sp)
+sw $s3, 8($sp)
+sw $t9, 24($sp)
+sw $s6, 92($sp)
+sw $k1, 76($sp)
+sw $s5, 96($sp)
+sw $s7, 88($sp)
+sw $t3, 44($sp)
 li $v0, 0
-addiu $sp, $sp, 24
+addiu $sp, $sp, 160
 jr $ra
