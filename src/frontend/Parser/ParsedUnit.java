@@ -351,7 +351,6 @@ public class ParsedUnit {
                 // 3. <ForStmt>
                 if(getUnit("ForStmt")){
                     forStmtNodeFirst = unit.toForStmtNode();
-                    forStmtNodeFirst.checkForError();
                 }
                 // 4. ;
                 getUnit("SEMICN");
@@ -364,7 +363,6 @@ public class ParsedUnit {
                 // 7. <ForStmt>
                 if(getUnit("ForStmt")){
                     forStmtNodeSecond = unit.toForStmtNode();
-                    forStmtNodeSecond.checkForError();
                 }
                 // 8. )
                 getUnit("RPARENT");

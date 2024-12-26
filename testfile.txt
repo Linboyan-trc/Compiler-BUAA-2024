@@ -1,45 +1,5 @@
-const int const1 = 10; // 正确：定义一个常量
-
-int func(int x) { // 正确：函数定义
-    const1 = 20; // 错误：不能改变常量的值（错误类型 h）
-    return x + 1; // 正确：函数返回值
-}
-
-void no_return_func() { // 正确：void 类型函数定义
-    return 1; // 错误：void 函数不能有带返回值的 return 语句（错误类型 f）
-}
-
-int missing_return_func() { // 错误：有返回值的函数缺少 return 语句（错误类型 g）
-    int x = 10;
-    x = x + 1;
-}
-
-int main) { // 错误：缺少右小括号（错误类型 j）
-    int x; // 正确：变量声明
-    x = getint(); // 正确：合法使用 getint()
-
-    break; // 错误：在非循环块中使用 break 语句（错误类型 m）
-
-    int arr[5]; // 正确：定义数组
-    arr[10] = 1; // 错误：数组越界访问（错误类型未明但在语义上出错）
-
-    char c; // 正确：定义字符变量
-    c = getint(); // 错误：getint 不能赋值给 char 类型变量（错误类型未明确）
-
-    int y;
-    y = getchar(); // 正确：getchar 返回值可以赋值给 int
-    printf("%d\n", x, y); // 错误：printf 中格式字符与表达式个数不匹配（错误类型 l）
-
-    if (x && | y) { // 错误：非法符号（错误类型 a）
-        x = 1;
-    }
-
-    for (x = 0; x < 10; ) { // 正确：for 条件缺少更新语句
-        continue; // 正确：合法使用 continue
-    }
-
-    int z;
-    printf("%d", z); // 错误：使用未初始化的变量（错误类型未明但在语义上出错）
-
-    return; // 错误：main 函数的返回值必须为常量 0（错误类型 g）
+const int i = 1;
+int main() {
+    for ( ; i < 1; i = i + 1) ;
+    return 0;
 }
