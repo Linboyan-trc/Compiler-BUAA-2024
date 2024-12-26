@@ -1,6 +1,6 @@
 CONSTTK const
-INTTK int
-IDENFR i
+INTTK integer
+IDENFR const1
 ASSIGN =
 INTCON 1
 <Number>
@@ -11,24 +11,121 @@ INTCON 1
 <ConstExp>
 <ConstInitVal>
 <ConstDef>
+COMMA ,
+IDENFR const2
+ASSIGN =
+MINU -
+<UnaryOp>
+INTCON 100
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<ConstExp>
+<ConstInitVal>
+<ConstDef>
 SEMICN ;
 <ConstDecl>
-INTTK int
-MAINTK main
+INTTK integer
+IDENFR change1
+<VarDef>
+SEMICN ;
+<VarDecl>
+INTTK integer
+<FuncType>
+IDENFR gets1
 LPARENT (
+INTTK integer
+IDENFR var1
+<FuncFParam>
+COMMA ,
+INTTK integer
+IDENFR var2
+<FuncFParam>
+<FuncFParams>
 RPARENT )
 LBRACE {
-FORTK for
-LPARENT (
+IDENFR const1
+<LVal>
+ASSIGN =
+INTCON 999
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
 SEMICN ;
-IDENFR i
+<Stmt>
+IDENFR change1
+<LVal>
+ASSIGN =
+IDENFR var1
 <LVal>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
+PLUS +
+IDENFR var2
+<LVal>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+<Stmt>
+RETURNTK return
+LPARENT (
+IDENFR change1
+<LVal>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+RPARENT )
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+SEMICN ;
+<Stmt>
+RBRACE }
+<Block>
+<FuncDef>
+INTTK integer
+MAINTK main
+LPARENT (
+RPARENT )
+LBRACE {
+IDENFR change1
+<LVal>
+ASSIGN =
+INTCON 10
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+SEMICN ;
+<Stmt>
+IFTK if
+LPARENT (
+INTCON 1
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
 <RelExp>
-LSS <
+<EqExp>
+<LAndExp>
+AND &
 INTCON 1
 <Number>
 <PrimaryExp>
@@ -40,25 +137,10 @@ INTCON 1
 <LAndExp>
 <LOrExp>
 <Cond>
-SEMICN ;
-IDENFR i
-<LVal>
-ASSIGN =
-IDENFR i
-<LVal>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-PLUS +
-INTCON 1
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<Exp>
-<ForStmt>
+RPARENT )
+PRINTFTK printf
+LPARENT (
+STRCON "Hello World$"
 RPARENT )
 SEMICN ;
 <Stmt>

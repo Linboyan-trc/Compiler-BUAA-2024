@@ -22,7 +22,7 @@ public class Category {
         strTokenTable.put("main", Token.MAINTK);
         strTokenTable.put("void", Token.VOIDTK);
         strTokenTable.put("const", Token.CONSTTK);
-        strTokenTable.put("int", Token.INTTK);
+        strTokenTable.put("integer", Token.INTTK);
         strTokenTable.put("char", Token.CHARTK);
         strTokenTable.put("break", Token.BREAKTK);
         strTokenTable.put("continue", Token.CONTINUETK);

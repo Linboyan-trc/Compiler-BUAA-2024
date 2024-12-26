@@ -1,5 +1,12 @@
-const int i = 1;
-int main() {
-    for ( ; i < 1; i = i + 1) ;
-    return 0;
+const integer const1 = 1, const2 = -100;
+integer change1;
+integer gets1(integer var1,integer var2){
+   const1 = 999;
+   change1 = var1 + var2
+   return (change1);
+}
+integer main(){
+   change1 = 10;
+   if(1 & 1) printf("Hello World$");
+   return 0;
 }
