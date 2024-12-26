@@ -1,5 +1,8 @@
-const int i = 1;
 int main() {
-    for ( ; i < 1; i = i + 1) ;
+    int a = 2;
+    // int b = 5**3; // (5+3)^3 = 512
+    int c = a**3; // (2+3)^3 = 125
+    // printf("%d\n", b);
+    printf("%d\n", c);
     return 0;
 }

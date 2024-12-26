@@ -43,6 +43,7 @@ public class Category {
         strTokenTable.put("+", Token.PLUS);
         strTokenTable.put("-", Token.MINU);
         strTokenTable.put("*", Token.MULT);
+        strTokenTable.put("**", Token.POW);
         strTokenTable.put("/", Token.DIV);
         strTokenTable.put("%", Token.MOD);
         strTokenTable.put("<", Token.LSS);

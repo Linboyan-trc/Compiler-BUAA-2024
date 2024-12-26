@@ -1095,7 +1095,7 @@ public class Parser {
 
 
         // 3. {'*' | '/' | '%' <UnaryExp>}
-        while(getToken(MULT,DIV,MOD)) {
+        while(getToken(MULT,POW, DIV,MOD)) {
             // 3.1 制作一个preUnits替代subUnits，并且包含了第一个<MulExp>
             LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
 

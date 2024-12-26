@@ -46,6 +46,7 @@ public class BinaryExpNode implements ExpNode {
         if(binaryOp.getToken() == Token.PLUS ||
                 binaryOp.getToken() == Token.MINU ||
                 binaryOp.getToken() == Token.MULT ||
+                binaryOp.getToken() == Token.POW ||
                 binaryOp.getToken() == Token.DIV ||
                 binaryOp.getToken() == Token.MOD) {
             return SyntaxType.Int;
@@ -95,6 +96,24 @@ public class BinaryExpNode implements ExpNode {
             // 2. * / %
             case MULT:
                 return new NumberNode(value1 * value2);
+            case POW:
+                // 1. value2 = 0
+                if(value2 == 0){
+                    return new NumberNode(1);
+                }
+                // 2. value2 = 1
+                else if (value2 == 1) {
+                    return new NumberNode(value1 + value2);
+                }
+                // 3. value2 >= 2
+                else {
+                    long temp = value1 + value2;
+                    long temp1 = temp;
+                    for(int i = 0; i < value2-1;i++){
+                        temp1 = temp1 * temp;
+                    }
+                    return new NumberNode(temp1);
+                }
             case DIV:
                 return new NumberNode(value1 / value2);
             case MOD:
@@ -266,6 +285,28 @@ public class BinaryExpNode implements ExpNode {
                         return new UnaryExpNode(symbolTable, new Pair(MINU, 0), leftExp).simplify();
                     } else {
                         return new BinaryExpNode(symbolTable, right, binaryOp, leftExp).simplify();
+                    }
+                case POW:
+                    // 1. right = 0
+                    if(right.getValue() == 0){
+                        return new NumberNode(1);
+                    }
+                    // 2. right = 1
+                    else if (right.getValue() == 1) {
+                        return new BinaryExpNode(symbolTable, leftExp, new Pair(PLUS, "+", 0), new NumberNode(1)).simplify();
+                    }
+                    // 3. right >= 2
+                    else {
+                        // 1. base BinaryNode: 左边 + 右边
+                        long rightValue = right.getValue();
+                        BinaryExpNode base = new BinaryExpNode(symbolTable, leftExp, new Pair(PLUS, "+", 0), new NumberNode(rightValue));
+                        // 2. 包装成 BinaryNode:
+                        BinaryExpNode it = new BinaryExpNode(symbolTable, leftExp, new Pair(PLUS, "+", 0), new NumberNode(rightValue));
+                        // 3. 迭代
+                        for(int i = 0; i < rightValue - 1; i++){
+                            it = new BinaryExpNode(symbolTable, it, new Pair(MULT, "*", 0), base);
+                        }
+                        return it;
                     }
                 case DIV:
                     // 1. 除法，右边为1，直接返回左边

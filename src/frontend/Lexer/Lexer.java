@@ -265,6 +265,32 @@ public class Lexer {
                     columnNumber++;
                     return new Pair(token, stringBuilder.toString(), lineNumber);
                 }
+            case '*':
+                // 1. 最后一个
+                if (columnNumber + 1 == line.length()) {
+                    // 1. 获取Token加入tokens
+                    token = Category.getInstance().getTokenType(stringBuilder.toString());
+                    columnNumber++;
+                    return new Pair(token, stringBuilder.toString(), lineNumber);
+                }
+                // 2. 不是最后一个，然后下一个是*
+                else if(line.charAt(columnNumber + 1) == '*'){
+                    // 1.更新ch和stringBuilder
+                    columnNumber++;
+                    ch = line.charAt(columnNumber);
+                    stringBuilder.append(ch);
+                    // 2. 识别**
+                    token = Category.getInstance().getTokenType(stringBuilder.toString());
+                    columnNumber++;
+                    return new Pair(token, stringBuilder.toString(), lineNumber);
+                }
+                // 3. *
+                else {
+                    // 1. 获取Token加入tokens
+                    token = Category.getInstance().getTokenType(stringBuilder.toString());
+                    columnNumber++;
+                    return new Pair(token, stringBuilder.toString(), lineNumber);
+                }
             default:
                 // 1. 获取Token加入tokens
                 token = Category.getInstance().getTokenType(stringBuilder.toString());

@@ -1,0 +1,65 @@
+.data
+string0: .asciiz "\n"
+.text
+addiu $sp, $sp, -4
+# CALL main
+sw $ra, 0($sp)
+jal main
+lw $ra, 0($sp)
+# EXIT
+li $v0, 10
+syscall
+# main:
+main:
+addiu $sp, $sp, -48
+# LOCAL VAR $a@1 2
+li $t0, 2
+# TEMP $0 <- $a@1
+addiu $t1, $t0, 0
+# $1 <- $0 ADD 3
+li $fp, 3
+addu $t2, $t1, $fp
+# TEMP $2 <- $a@1
+addiu $t3, $t0, 0
+# $3 <- $2 ADD 3
+li $fp, 3
+addu $t4, $t3, $fp
+# $4 <- $1 MUL $3
+mult $t2, $t4
+mflo $t5
+# TEMP $5 <- $a@1
+addiu $t6, $t0, 0
+# $6 <- $5 ADD 3
+li $fp, 3
+addu $t7, $t6, $fp
+# $7 <- $4 MUL $6
+mult $t5, $t7
+mflo $t8
+# LOCAL VAR $c@1 $7
+addu $t9, $t8, $0
+# TEMP $8 <- $c@1
+addiu $s0, $t9, 0
+# PUSH $8
+sw $s0, -4($sp)
+# PRINT "%d\n"
+lw $a0, -4($sp)
+li $v0, 1
+syscall
+la $a0, string0
+li $v0, 4
+syscall
+# RETURN 0
+sw $t4, 28($sp)
+sw $s0, 4($sp)
+sw $t0, 44($sp)
+sw $t2, 36($sp)
+sw $t9, 8($sp)
+sw $t1, 40($sp)
+sw $t8, 12($sp)
+sw $t3, 32($sp)
+sw $t5, 24($sp)
+sw $t6, 20($sp)
+sw $t7, 16($sp)
+li $v0, 0
+addiu $sp, $sp, 48
+jr $ra
