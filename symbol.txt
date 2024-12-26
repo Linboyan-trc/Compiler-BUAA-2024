@@ -1,2 +1,1 @@
-2 a Int
-2 c Int
+2 i Int

@@ -7,6 +7,7 @@ import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
 import frontend.SyntaxTree.BlockItemNode;
 import frontend.SyntaxTree.BlockNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.ExpNode.BinaryExpNode;
 import frontend.SyntaxTree.ExpNode.CharacterNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
@@ -92,11 +93,12 @@ public class BranchNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         // 1. 单节点 + continue，包装成block插入
         boolean flag = false;
         if(ifStmt instanceof ContinueNode){
             LinkedList<BlockItemNode> bi1 = new LinkedList<>();
+            bi1.add(declNode);
             bi1.add(assignNode);
             bi1.add(ifStmt);
             BlockNode temp1 = new BlockNode(symbolTable,bi1,0);
@@ -105,6 +107,7 @@ public class BranchNode implements StmtNode {
         }
         if(elseStmt instanceof ContinueNode){
             LinkedList<BlockItemNode> bi2 = new LinkedList<>();
+            bi2.add(declNode);
             bi2.add(assignNode);
             bi2.add(elseStmt);
             BlockNode temp2 = new BlockNode(symbolTable,bi2,0);
@@ -113,13 +116,13 @@ public class BranchNode implements StmtNode {
         }
         // 2. 为block，直接进行block插入
         if(ifStmt instanceof BlockNode){
-            flag = ((BlockNode) ifStmt).hasContinue(assignNode);
+            flag = ((BlockNode) ifStmt).hasContinue(declNode, assignNode);
         }
         if(elseStmt instanceof BlockNode || elseStmt instanceof BranchNode){
             if(elseStmt instanceof BlockNode) {
-                flag = ((BlockNode) elseStmt).hasContinue(assignNode);
+                flag = ((BlockNode) elseStmt).hasContinue(declNode, assignNode);
             } else {
-                flag = ((BranchNode) elseStmt).hasContinue(assignNode);
+                flag = ((BranchNode) elseStmt).hasContinue(declNode, assignNode);
             }
         }
         return flag;

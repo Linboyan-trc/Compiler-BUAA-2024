@@ -92,13 +92,21 @@ public class ForNode implements StmtNode {
         // }
         // 3.1 as1
         StmtNode as1 = new NopNode();
+        BlockItemNode de1 = new NopNode();
         if(simForStmtNodeFirst != null) {
+            if(simForStmtNodeFirst.isDef()){
+                de1 = (BlockItemNode) simForStmtNodeFirst.getVarDef();
+            }
             as1 = (StmtNode) new AssignNode(symbolTable, simForStmtNodeFirst.getLValNode(), simForStmtNodeFirst.getExpNode());
         }
 
         // 3.2 as2
         StmtNode as2 = new NopNode();
+        BlockItemNode de2 = new NopNode();
         if(simForStmtNodeSecond != null) {
+            if(simForStmtNodeSecond.isDef()){
+                de2 = (BlockItemNode) simForStmtNodeSecond.getVarDef();
+            }
             as2 = (StmtNode) new AssignNode(symbolTable, simForStmtNodeSecond.getLValNode(), simForStmtNodeSecond.getExpNode());
         }
 
@@ -107,12 +115,13 @@ public class ForNode implements StmtNode {
         // 3.3 多节点调用方法
         if(stmt instanceof ContinueNode){
             LinkedList<BlockItemNode> bi = new LinkedList<>();
+            bi.add(de2);
             bi.add(as2);
             bi.add(stmt);
             stmt = new BlockNode(symbolTable, bi, 0);
         } else {
             if (as2 instanceof AssignNode) {
-                stmt.hasContinue((AssignNode) as2);
+                stmt.hasContinue((BlockItemNode) de2, (AssignNode) as2);
             }
         }
         stmt = stmt.simplify();
@@ -123,6 +132,7 @@ public class ForNode implements StmtNode {
         // 3.5 LinkedList<BlockItemNode> for while
         LinkedList<BlockItemNode> bi1 = new LinkedList<>();
         bi1.add(bn);
+        bi1.add(de2);
         bi1.add(as2);
         BlockNode bk = new BlockNode(symbolTable, bi1, 0);
 
@@ -131,6 +141,7 @@ public class ForNode implements StmtNode {
 
         // 3.6 LinkedList<BlockItemNode> for block
         LinkedList<BlockItemNode> bi2 = new LinkedList<>();
+        bi2.add(de1);
         bi2.add(as1);
         bi2.add(lp);
         BlockNode bk2 = new BlockNode(symbolTable, bi2, 0);
@@ -139,7 +150,7 @@ public class ForNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode) {
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode) {
         return false;
     }
 

@@ -3,10 +3,12 @@ MAINTK main
 LPARENT (
 RPARENT )
 LBRACE {
+FORTK for
+LPARENT (
 INTTK int
-IDENFR a
+IDENFR i
 ASSIGN =
-INTCON 2
+INTCON 0
 <Number>
 <PrimaryExp>
 <UnaryExp>
@@ -17,31 +19,53 @@ INTCON 2
 <VarDef>
 SEMICN ;
 <VarDecl>
-INTTK int
-IDENFR c
-ASSIGN =
-IDENFR a
+<ForStmt>
+SEMICN ;
+IDENFR i
 <LVal>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
-POW **
-INTCON 3
+<AddExp>
+<RelExp>
+LSS <
+INTCON 10
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<RelExp>
+<EqExp>
+<LAndExp>
+<LOrExp>
+<Cond>
+SEMICN ;
+IDENFR i
+<LVal>
+ASSIGN =
+IDENFR i
+<LVal>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+PLUS +
+INTCON 1
 <Number>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
 <Exp>
-<InitVal>
-<VarDef>
-SEMICN ;
-<VarDecl>
+<ForStmt>
+RPARENT )
+LBRACE {
 PRINTFTK printf
 LPARENT (
 STRCON "%d\n"
 COMMA ,
-IDENFR c
+IDENFR i
 <LVal>
 <PrimaryExp>
 <UnaryExp>
@@ -50,6 +74,10 @@ IDENFR c
 <Exp>
 RPARENT )
 SEMICN ;
+<Stmt>
+RBRACE }
+<Block>
+<Stmt>
 <Stmt>
 RETURNTK return
 INTCON 0

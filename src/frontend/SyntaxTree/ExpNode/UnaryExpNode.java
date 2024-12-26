@@ -5,6 +5,8 @@ import frontend.Lexer.Token;
 import static frontend.Lexer.Token.*;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.StmtNode.*;
 import midend.MidCode.MidCode.Assign;
 import midend.MidCode.Operate.UnaryOperate;
@@ -165,7 +167,7 @@ public class UnaryExpNode implements ExpNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode) {
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode) {
         return false;
     }
 

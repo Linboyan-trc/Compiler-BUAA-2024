@@ -2,6 +2,8 @@ package frontend.SyntaxTree.StmtNode;
 
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.MidCode.MidCode.Return;
 import midend.MidCode.Value.Value;
@@ -39,7 +41,7 @@ public class ReturnNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         return false;
     }
 

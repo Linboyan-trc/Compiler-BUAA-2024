@@ -1,6 +1,8 @@
 package frontend.SyntaxTree.StmtNode;
 
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.LabelTable.Label;
 import midend.MidCode.MidCode.*;
@@ -29,7 +31,7 @@ public class LoopNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         return false;
     }
 

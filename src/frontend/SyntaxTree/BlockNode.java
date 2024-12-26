@@ -75,14 +75,15 @@ public class BlockNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         for (int i = 0; i < blockItemNodes.size(); i++) {
             BlockItemNode blockItemNode = blockItemNodes.get(i);
             if (blockItemNode instanceof StmtNode) {
-                if (((StmtNode) blockItemNode).hasContinue(assignNode)) {
+                if (((StmtNode) blockItemNode).hasContinue(declNode, assignNode)) {
                     // 在当前位置前插入 assignNode
                     if(blockItemNode instanceof ContinueNode) {
-                        blockItemNodes.add(i, assignNode);
+                        blockItemNodes.add(i, declNode);
+                        blockItemNodes.add(i+1, assignNode);
                     }
                     return true;
                 }

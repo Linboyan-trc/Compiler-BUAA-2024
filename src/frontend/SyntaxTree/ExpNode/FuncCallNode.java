@@ -5,6 +5,8 @@ import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.StmtNode.*;
 import frontend.SyntaxTree.FuncDefNode;
 import midend.MidCode.Value.Value;
@@ -91,7 +93,7 @@ public class FuncCallNode implements ExpNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode) {
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode) {
         return false;
     }
 

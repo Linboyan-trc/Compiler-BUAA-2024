@@ -1,6 +1,8 @@
 package frontend.SyntaxTree.StmtNode;
 
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import midend.MidCode.MidCode.Jump;
 import midend.MidCode.MidCodeTable;
 import midend.MidCode.Value.Value;
@@ -20,7 +22,7 @@ public class BreakNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         return false;
     }
 

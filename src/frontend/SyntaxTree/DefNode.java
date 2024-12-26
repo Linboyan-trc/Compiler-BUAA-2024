@@ -131,6 +131,14 @@ public class DefNode implements SyntaxNode {
         return symbolTable.getId();
     }
 
+    public ExpNode getFirstInitValue() {
+        if(initValues != null) {
+            return initValues.get(0);
+        } else {
+            return null;
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 化简
     @Override

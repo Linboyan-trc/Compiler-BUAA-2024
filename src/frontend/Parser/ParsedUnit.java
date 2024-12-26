@@ -64,6 +64,14 @@ public class ParsedUnit {
         return unit;
     }
 
+    public List<ParsedUnit> getUnits() {
+        return units;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
     // 1. <CompUnitNode>, <DeclNode>, <DefNode>
     // 1. <CompUnitNode>
@@ -511,12 +519,32 @@ public class ParsedUnit {
 
     private ForStmtNode toForStmtNode() {
         // 1. <ForStmtNode> = symbolTable + lValNode + expNode
-        // 2. <ForStmt> = <LVal> '=' <Exp>
-        LValNode lValNode = getUnit().toLValNode();
+        // 2. <ForStmt> = <LVal> '=' <Exp> | BType <VarDef>
+        getUnit();
+        boolean isDef = false;
+        if(unit instanceof ParsedUnit){
+            if(unit.name.equals("VarDecl")){
+                // 1. isDef
+                isDef = true;
+                // 2. BType
+                // 3. VarDef
+                DeclNode varDef = unit.toDeclNode();
+                ForStmtNode forStmtNode = new ForStmtNode(
+                        symbolTable,
+                        new LValNode(symbolTable, varDef.getDefNodes().get(0).getPair(), null),
+                        varDef.getDefNodes().get(0).getFirstInitValue(),
+                        isDef,
+                        varDef);
+                forStmtNode.checkForError();
+                return forStmtNode;
+            }
+        }
+
+        LValNode lValNode = unit.toLValNode();
         getUnit("ASSIGN");
         ExpNode expNode = getUnit().toExpNode();
         // 3. check
-        ForStmtNode forStmtNode = new ForStmtNode(symbolTable, lValNode, expNode);
+        ForStmtNode forStmtNode = new ForStmtNode(symbolTable, lValNode, expNode, isDef,  null);
         forStmtNode.checkForError();
         return forStmtNode;
     }

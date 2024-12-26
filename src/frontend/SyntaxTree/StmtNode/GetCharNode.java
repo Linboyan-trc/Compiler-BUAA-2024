@@ -4,6 +4,8 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.DefNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import frontend.SyntaxTree.ExpNode.LValNode;
@@ -50,7 +52,7 @@ public class GetCharNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         return false;
     }
 

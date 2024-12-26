@@ -2,6 +2,8 @@ package frontend.SyntaxTree.ExpNode;
 
 import frontend.SyntaxTable.SymbolTable;
 import frontend.SyntaxTable.SyntaxType;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.StmtNode.*;
 import midend.MidCode.Value.Imm;
 import midend.MidCode.Value.Value;
@@ -41,7 +43,7 @@ public class CharacterNode implements ExpNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode) {
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode) {
         return false;
     }
 

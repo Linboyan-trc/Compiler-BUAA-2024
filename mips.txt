@@ -11,36 +11,34 @@ li $v0, 10
 syscall
 # main:
 main:
-addiu $sp, $sp, -48
-# LOCAL VAR $a@1 2
-li $t0, 2
-# TEMP $0 <- $a@1
-addiu $t1, $t0, 0
-# $1 <- $0 ADD 3
-li $fp, 3
-addu $t2, $t1, $fp
-# TEMP $2 <- $a@1
-addiu $t3, $t0, 0
-# $3 <- $2 ADD 3
-li $fp, 3
-addu $t4, $t3, $fp
-# $4 <- $1 MUL $3
-mult $t2, $t4
-mflo $t5
-# TEMP $5 <- $a@1
-addiu $t6, $t0, 0
-# $6 <- $5 ADD 3
-li $fp, 3
-addu $t7, $t6, $fp
-# $7 <- $4 MUL $6
-mult $t5, $t7
-mflo $t8
-# LOCAL VAR $c@1 $7
-addu $t9, $t8, $0
-# TEMP $8 <- $c@1
-addiu $s0, $t9, 0
-# PUSH $8
-sw $s0, -4($sp)
+addiu $sp, $sp, -28
+# LOCAL VAR $i@1 0
+li $t0, 0
+# SAVE $i@1 <- 0
+li $t0, 0
+# NOP
+sw $t0, 24($sp)
+Label1:
+# BRANCH Label2: IF 1 EQ 0
+li $fp, 1
+beq $fp, $0, Label2
+# TEMP $0 <- $i@1
+lw $t1, 24($sp)
+addiu $t0, $t1, 0
+# $1 <- $0 LT 10
+li $fp, 10
+slt $t2, $t0, $fp
+# BRANCH Label3: IF $1 EQ 0
+sw $t2, 16($sp)
+sw $t1, 24($sp)
+sw $t0, 20($sp)
+lw $t0, 16($sp)
+beq $t0, $0, Label3
+# TEMP $2 <- $i@1
+lw $t2, 24($sp)
+addiu $t1, $t2, 0
+# PUSH $2
+sw $t1, -4($sp)
 # PRINT "%d\n"
 lw $a0, -4($sp)
 li $v0, 1
@@ -48,18 +46,34 @@ syscall
 la $a0, string0
 li $v0, 4
 syscall
+# JUMP Label4
+sw $t2, 24($sp)
+sw $t1, 12($sp)
+sw $t0, 16($sp)
+j Label4
+# NOP
+Label3:
+# JUMP Label2
+j Label2
+# NOP
+Label4:
+# NOP
+# TEMP $3 <- $i@1
+lw $t1, 24($sp)
+addiu $t0, $t1, 0
+# $4 <- 1 ADD $3
+li $fp, 1
+addu $t2, $fp, $t0
+# SAVE $i@1 <- $4
+addiu $t1, $t2, 0
+# JUMP Label1
+sw $t2, 4($sp)
+sw $t1, 24($sp)
+sw $t0, 8($sp)
+j Label1
+# NOP
+Label2:
 # RETURN 0
-sw $t4, 28($sp)
-sw $s0, 4($sp)
-sw $t0, 44($sp)
-sw $t2, 36($sp)
-sw $t9, 8($sp)
-sw $t1, 40($sp)
-sw $t8, 12($sp)
-sw $t3, 32($sp)
-sw $t5, 24($sp)
-sw $t6, 20($sp)
-sw $t7, 16($sp)
 li $v0, 0
-addiu $sp, $sp, 48
+addiu $sp, $sp, 28
 jr $ra

@@ -693,7 +693,9 @@ public class Parser {
                 if(token != SEMICN) {
                     retract(1);
                     units.add(parseForStmt());
-                    getToken();
+                    if(!units.getLast().getUnits().get(0).getName().equals("VarDecl")){
+                        getToken();
+                    }
                 }
                 // 4. ';'
                 units.add(pair);
@@ -860,20 +862,28 @@ public class Parser {
         return new ParsedUnit("Stmt", units);
     }
 
-    // 1. <ForStmt> = <LVal> '=' <Exp>
+    // 1. <ForStmt> = <LVal> '=' <Exp> | BType <VarDef>
     public ParsedUnit parseForStmt() throws IOException {
         // 1. units
         LinkedList<ParsedUnit> units = new LinkedList<>();
 
-        // 2. <LVal>
-        units.add(parseLVal());
 
-        // 3. '='
-        getToken(ASSIGN);
-        units.add(pair);
+        // 2.
+        if(getToken(INTTK, CHARTK)){
+            retract(1);
+            // 2.3 <VarDef>
+            units.add(parseVarDecl());
+        } else {
+            // 2. <LVal>
+            units.add(parseLVal());
 
-        // 4. <Exp>
-        units.add(parseExp());
+            // 3. '='
+            getToken(ASSIGN);
+            units.add(pair);
+
+            // 4. <Exp>
+            units.add(parseExp());
+        }
 
         // 5. 返回节点
         return new ParsedUnit("ForStmt", units);

@@ -4,6 +4,8 @@ import frontend.ErrorHandler.ErrorHandler;
 import frontend.ErrorHandler.ErrorRecord;
 import frontend.Lexer.Pair;
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.BlockItemNode;
+import frontend.SyntaxTree.DeclNode;
 import frontend.SyntaxTree.ExpNode.ExpNode;
 import midend.MidCode.Value.Value;
 import midend.MidCode.MidCode.*;
@@ -68,7 +70,7 @@ public class PrintNode implements StmtNode {
     }
 
     @Override
-    public boolean hasContinue(AssignNode assignNode){
+    public boolean hasContinue(BlockItemNode declNode, AssignNode assignNode){
         return false;
     }
 
