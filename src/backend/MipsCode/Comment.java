@@ -13,6 +13,6 @@ public class Comment implements MipsCode {
     // 1. 生成mips代码
     @Override
     public String toString() {
-        return "# " + comment;
+        return "\n# " + comment;
     }
 }

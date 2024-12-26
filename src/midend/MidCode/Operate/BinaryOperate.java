@@ -6,7 +6,7 @@ public class BinaryOperate implements Operate {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. 用于:+-, */%, &&, ||, <<, >, >=, <, <=, ==, !=
     public enum BinaryOp {
-        ADD, SUB, MUL, DIV, MOD, AND, OR, SLL, GT, GE, LT, LE, EQ, NE
+        ADD, SUB, MUL, DIV, MOD, BITAND, AND, OR, SLL, GT, GE, LT, LE, EQ, NE
     }
 
     private final BinaryOp binaryOp;

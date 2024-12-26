@@ -47,7 +47,8 @@ public class BinaryExpNode implements ExpNode {
                 binaryOp.getToken() == Token.MINU ||
                 binaryOp.getToken() == Token.MULT ||
                 binaryOp.getToken() == Token.DIV ||
-                binaryOp.getToken() == Token.MOD) {
+                binaryOp.getToken() == Token.MOD ||
+                binaryOp.getToken() == Token.BITAND) {
             return SyntaxType.Int;
         }
         // 2. 否则是<Cond>
@@ -99,6 +100,8 @@ public class BinaryExpNode implements ExpNode {
                 return new NumberNode(value1 / value2);
             case MOD:
                 return new NumberNode(value1 % value2);
+            case BITAND:
+                return new NumberNode(value1 & value2);
             // 3. > >= < <=
             case GRE:
                 return new NumberNode(value1 > value2 ? 1 : 0);
@@ -214,6 +217,9 @@ public class BinaryExpNode implements ExpNode {
                 case MOD:
                     return left.getValue() == 0 ? new NumberNode(0) :
                             new BinaryExpNode(symbolTable, left, binaryOp, rightExp);
+                case BITAND:
+                    return left.getValue() == 0 ? new NumberNode(0) :
+                            new BinaryExpNode(symbolTable, left, binaryOp, rightExp);
                 // 2. && 当左侧为0就返回0
                 case AND:
                     return left.getValue() == 0 ? new NumberNode(0) : rightExp;
@@ -283,6 +289,9 @@ public class BinaryExpNode implements ExpNode {
                     // 1. 取模，右边为+-1，直接返回0
                     return right.getValue() == 1 || right.getValue() == -1 ? new NumberNode(0) :
                             new BinaryExpNode(symbolTable, leftExp, binaryOp, right);
+                case BITAND:
+                    return right.getValue() == 0 ? new NumberNode(0) :
+                            new BinaryExpNode(symbolTable, leftExp, binaryOp, right);
                 //case AND:
                     // 1. &&，右边为0，直接返回0
                     //return right.getValue() == 0 ? new NumberNode(0) : leftExp;
@@ -317,6 +326,7 @@ public class BinaryExpNode implements ExpNode {
             put(MULT, BinaryOperate.BinaryOp.MUL);
             put(DIV, BinaryOperate.BinaryOp.DIV);
             put(MOD, BinaryOperate.BinaryOp.MOD);
+            put(BITAND, BinaryOperate.BinaryOp.BITAND);
             put(GRE, BinaryOperate.BinaryOp.GT);
             put(GEQ, BinaryOperate.BinaryOp.GE);
             put(LSS, BinaryOperate.BinaryOp.LT);

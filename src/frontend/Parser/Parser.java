@@ -1112,7 +1112,7 @@ public class Parser {
 
 
         // 3. {'*' | '/' | '%' <UnaryExp>}
-        while(getToken(MULT,DIV,MOD)) {
+        while(getToken(MULT,DIV,MOD, BITAND)) {
             // 3.1 制作一个preUnits替代subUnits，并且包含了第一个<MulExp>
             LinkedList<ParsedUnit> preUnits = new LinkedList<>(units);
 
@@ -1126,7 +1126,7 @@ public class Parser {
             // 3.4 用preUnit，作为<MulExp> = <MulExp> */% <UnaryExp>
             units.add(preUnit);
 
-            // 3.5 */%
+            // 3.5 */% bitand
             units.add(pair);
 
             // 3.6 <UnaryExp>

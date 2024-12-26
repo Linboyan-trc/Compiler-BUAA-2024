@@ -327,6 +327,9 @@ public class Translator {
                 mipsCodeList.add(new Div(leftReg, rightReg));
                 mipsCodeList.add(new Mfhi(valMeta));
                 break;
+            case BITAND:
+                mipsCodeList.add(new RIns3Reg(and, valMeta, leftReg, rightReg));
+                break;
             case EQ:
                 mipsCodeList.add(new RIns3Reg(seq, valMeta, leftReg, rightReg));
                 break;

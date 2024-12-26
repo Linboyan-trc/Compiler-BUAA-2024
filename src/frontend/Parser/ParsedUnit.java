@@ -464,7 +464,7 @@ public class ParsedUnit {
                 // 7.4 <LOrExp>, <LAndExp>, <EqExp>, <RelExp> -> <AddExp>
             default:
                 ExpNode leftExp = getUnit().toExpNode();
-                if (getUnit("PLUS", "MINU", "MULT", "DIV", "MOD", "LSS", "LEQ", "GRE", "GEQ", "EQL", "NEQ", "AND", "OR")) {
+                if (getUnit("PLUS", "MINU", "MULT", "DIV", "MOD", "BITAND", "LSS", "LEQ", "GRE", "GEQ", "EQL", "NEQ", "AND", "OR")) {
                     return new BinaryExpNode(symbolTable, leftExp, unit.toPair(), getUnit().toExpNode());
                 } else {
                     return leftExp;

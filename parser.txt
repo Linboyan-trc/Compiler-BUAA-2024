@@ -28,8 +28,7 @@ IDENFR i
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
-<AddExp>
-PLUS +
+BITAND bitand
 IDENFR j
 <LVal>
 <PrimaryExp>
