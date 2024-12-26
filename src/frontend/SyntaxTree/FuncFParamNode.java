@@ -19,7 +19,8 @@ public class FuncFParamNode extends DefNode {
                 pair,
                 null,
                 new LinkedList<>(),
-                null);
+                null,
+                false);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

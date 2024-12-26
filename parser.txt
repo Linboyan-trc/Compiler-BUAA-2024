@@ -1,49 +1,28 @@
-CONSTTK const
-INTTK int
-IDENFR i
-ASSIGN =
-INTCON 1
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<ConstExp>
-<ConstInitVal>
-<ConstDef>
-SEMICN ;
-<ConstDecl>
 INTTK int
 MAINTK main
 LPARENT (
 RPARENT )
 LBRACE {
-FORTK for
-LPARENT (
-SEMICN ;
+INTTK int
 IDENFR i
-<LVal>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<RelExp>
-LSS <
-INTCON 1
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<RelExp>
-<EqExp>
-<LAndExp>
-<LOrExp>
-<Cond>
-SEMICN ;
-IDENFR i
-<LVal>
 ASSIGN =
+GETINTTK getint
+LPARENT (
+RPARENT )
+<VarDef>
+COMMA ,
+IDENFR j
+ASSIGN =
+GETINTTK getint
+LPARENT (
+RPARENT )
+<VarDef>
+SEMICN ;
+<VarDecl>
+PRINTFTK printf
+LPARENT (
+STRCON "%d"
+COMMA ,
 IDENFR i
 <LVal>
 <PrimaryExp>
@@ -51,17 +30,15 @@ IDENFR i
 <MulExp>
 <AddExp>
 PLUS +
-INTCON 1
-<Number>
+IDENFR j
+<LVal>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
 <Exp>
-<ForStmt>
 RPARENT )
 SEMICN ;
-<Stmt>
 <Stmt>
 RETURNTK return
 INTCON 0

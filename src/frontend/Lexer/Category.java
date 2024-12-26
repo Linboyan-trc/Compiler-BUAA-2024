@@ -45,6 +45,7 @@ public class Category {
         strTokenTable.put("*", Token.MULT);
         strTokenTable.put("/", Token.DIV);
         strTokenTable.put("%", Token.MOD);
+        strTokenTable.put("bitand", Token.BITAND);
         strTokenTable.put("<", Token.LSS);
         strTokenTable.put(">", Token.GRE);
         strTokenTable.put("=", Token.ASSIGN);

@@ -155,8 +155,11 @@ public class ParsedUnit {
         // 5.1 获取节点'=' + 获取节点转"..."或<ExpNodeList>
         LinkedList<ExpNode> initValues = new LinkedList<>();
         Pair initValueForSTRCON = null;
+        boolean isGetInt = false;
         if (getUnit("ASSIGN")) {
-            if (getUnit().getUnit("STRCON")){
+            if(getUnit("GETINTTK")){
+                isGetInt = true;
+            } else if (getUnit().getUnit("STRCON")){
                 initValueForSTRCON = unit.getUnitNow().toPair();
             } else {
                 initValues.addAll(unit.toExpNodeList());
@@ -165,7 +168,7 @@ public class ParsedUnit {
 
         // 6. 创建<DefNode>
         // 6.1 <ConstDef>则此<DefNode>为isFinal为true
-        DefNode defNode = new DefNode(symbolTable, name.equals("ConstDef"), defNodeType, pair, length, initValues, initValueForSTRCON);
+        DefNode defNode = new DefNode(symbolTable, name.equals("ConstDef"), defNodeType, pair, length, initValues, initValueForSTRCON, isGetInt);
 
         // 7. 添加到符号表中
         symbolTable.addToVariables(defNode);
@@ -286,7 +289,18 @@ public class ParsedUnit {
         getUnit("LBRACE");
         LinkedList<BlockItemNode> blockItemNodes = new LinkedList<>();
         while (!getUnit("RBRACE")) {
-            blockItemNodes.add(getUnit().toBlockItemNode());
+            BlockItemNode temp = getUnit().toBlockItemNode();
+            blockItemNodes.add(temp);
+            if(temp instanceof DeclNode){
+                DeclNode temp1 = (DeclNode) temp;
+                for(DefNode defNode : temp1.getDefNodes()){
+                    if(defNode.isGetInt()){
+                        LValNode temp2 = new LValNode(symbolTable, defNode.getPair(), null);
+                        GetIntNode temp3 = new GetIntNode(symbolTable, temp2);
+                        blockItemNodes.add(temp3);
+                    }
+                }
+            }
         }
         return new BlockNode(symbolTable, blockItemNodes, unit.toPair().getLineNumber());
     }

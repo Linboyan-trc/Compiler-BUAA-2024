@@ -2,6 +2,7 @@ package frontend.SyntaxTree;
 
 import frontend.SyntaxTable.SymbolItem;
 import frontend.SyntaxTable.SymbolTable;
+import frontend.SyntaxTree.StmtNode.GetIntNode;
 import midend.MidCode.*;
 import midend.MidCode.MidCode.Exit;
 import midend.MidCode.MidCode.FuncCall;

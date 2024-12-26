@@ -1,1 +1,2 @@
-1 i ConstInt
+2 i Int
+2 j Int

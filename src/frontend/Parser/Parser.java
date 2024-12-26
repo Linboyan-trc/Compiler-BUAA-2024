@@ -307,7 +307,7 @@ public class Parser {
     ///////////////////////////////////////////////////////////////////////////////////////
     // 3. 解析<VarDecl>, <VarDef>, <InitVal>
     // 3.1 <VarDecl> = BType <VarDef> {, <VarDef>}
-    // 3.1 <VarDef> = <Def> , <Def> '=' <InitVal>
+    // 3.1 <VarDef> = <Def> , <Def> '=' <InitVal>, <Def> = getint()
     // 3.1 <InitVal> = <Exp>, {<Exp>, <Exp>}, "StringConst"
     // 3.2 <Def> = IDENFR [<ConstExp>]
     public ParsedUnit parseVarDecl() throws IOException {
@@ -361,8 +361,25 @@ public class Parser {
             // 2.1 '='
             units.add(pair);
 
-            // 2.2 <InitVal>
-            units.add(parseInitVal());
+            // 2.2 getint()
+            if (getToken(GETINTTK)) {
+                // 1. 'getint' | 'getchar'
+                units.add(pair);
+                // 2. '('
+                getToken(LPARENT);
+                units.add(pair);
+                // 3. ')'
+                if (getToken(RPARENT)) {
+                    units.add(pair);
+                } else {
+                    errorHandler.addError(new ErrorRecord(pair.getLineNumber(), 'j'));
+                }
+            }
+
+            // 2.3 <InitVal>
+            else {
+                units.add(parseInitVal());
+            }
         }
 
         // 3. 返回节点:<VarDef>

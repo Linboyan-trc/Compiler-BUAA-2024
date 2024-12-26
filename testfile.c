@@ -1,5 +1,6 @@
-const int i = 1;
-int main() {
-    for ( ; i < 1; i = i + 1) ;
-    return 0;
+int main()
+{
+	int i = getint(), j = getint();
+	printf("%d", i + j);
+	return 0;
 }

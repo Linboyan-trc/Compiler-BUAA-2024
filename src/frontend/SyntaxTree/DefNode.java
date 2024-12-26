@@ -25,12 +25,13 @@ public class DefNode implements SyntaxNode {
     private ExpNode length = null;
     private LinkedList<ExpNode> initValues = null;
     private Pair initValueForSTRCON = null;
+    private boolean isGetInt;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // 1. set
     public DefNode(SymbolTable symbolTable, boolean isFinal,
                    SyntaxType defNodeType, Pair pair,
-                   ExpNode length, LinkedList<ExpNode> initValues, Pair initValueForSTRCON) {
+                   ExpNode length, LinkedList<ExpNode> initValues, Pair initValueForSTRCON, boolean isGetInt) {
         this.symbolTable = symbolTable;
         this.isFinal = isFinal;
         this.defNodeType = defNodeType;
@@ -38,6 +39,7 @@ public class DefNode implements SyntaxNode {
         this.length = length;
         this.initValues = initValues;
         this.initValueForSTRCON = initValueForSTRCON;
+        this.isGetInt = isGetInt;
         // 1. 字符串转初值
         if(this.initValueForSTRCON != null) {
             if(this.initValues == null) {
@@ -129,6 +131,10 @@ public class DefNode implements SyntaxNode {
 
     public int getScopeId() {
         return symbolTable.getId();
+    }
+
+    public boolean isGetInt() {
+        return isGetInt;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

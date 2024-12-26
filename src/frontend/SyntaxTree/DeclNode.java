@@ -21,6 +21,10 @@ public class DeclNode implements BlockItemNode {
         this.defNodes = defNodes;
     }
 
+    public LinkedList<DefNode> getDefNodes() {
+        return defNodes;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public DeclNode simplify() {
