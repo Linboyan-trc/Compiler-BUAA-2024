@@ -1,0 +1,129 @@
+1. Decl:
+    ConstDecl:
+        声明int: 单个常量，多个常量，单个数组，多个数组
+        const int a = 1;
+        const int b = 1, c = 2;
+        const int d[5] = {0,1,2,3,4};
+        const int e[5] = {0,1,2,3,4}, f[5] = {0,1,2,3,4};
+
+        声明char: 单个常量，多个常量，单个数组，多个数组
+        const char g = 'g';
+        const char h = 'h', i = 'i';
+        const char j[5] = {'0','1','2','3','4'};
+        const char k[5] = {'0','1','2','3','4'}, l[5] = {'0','1','2','3','4'};
+
+    VarDecl:
+        声明int: 
+            不赋初值: 单个常量，多个常量，单个数组，多个数组
+            int m;
+            int n, o;
+            int p[1];
+            int q[1], r[1];
+            赋初值: 单个常量，多个常量，单个数组，多个数组
+            int s = 1;
+            int t = 1, u = 1;
+            int v[1] = {1};
+            int w[1] = {1}, x[1] = {1};
+
+        声明char: 
+            不赋初值: 单个常量，多个常量，单个数组，多个数组
+            char y;
+            char z, aa;
+            char bb[1];
+            char cc[1], dd[1];
+            赋初值: 单个常量，多个常量，单个数组，多个数组
+            char ee = '1';
+            char ff = '1', gg = '1';
+            char hh[1] = {'1'};
+            char ii[1] = {'1'}, jj[1] = {'1'};
+
+2. FuncDef:
+    void型: 无参数，一个变量参数，两个变量参数，一个数组参数，两个数组参数
+        void kk(){}
+        void ll(int a){}
+        void mm(int a, int b){}
+        void nn(int a[]){}
+        void oo(int a[], int b[]){}
+    int型: 无参数，一个变量参数，两个变量参数，一个数组参数，两个数组参数
+        int pp(){
+            return 1;
+        }
+        int qq(int a){
+            return 1;
+        }
+        int rr(int a, int b){
+            return 1;
+        }
+        int ss(int a[]){
+            return 1;
+        }
+        int tt(int a[], int b[]){
+            return 1;
+        }
+    char型: 无参数，一个变量参数，两个变量参数，一个数组参数，两个数组参数
+        char uu(){
+            return 'c';
+        }
+        char vv(char a){
+            return 'c';
+        }
+        char ww(char a, char b){
+            return 'c';
+        }
+        char xx(char a[]){
+            return 'c';
+        }
+        char yy(char a[], char b[]){
+            return 'c';
+        }
+        
+3. MainFuncDef:
+    int main() {}
+
+    Decl:
+        1. Decl{}
+
+    Stmt:
+        1. 赋值
+        2. 表达式
+            ;
+            1+1;
+        3. {}
+        4. if(); if(){} if(){}else{}
+        5. for(;;){}
+            要先int i
+
+            1. 两种
+                无
+                i = 1
+
+            2. 五种
+                无
+                i < 10
+                i <= 10
+                i > 10
+                i >= 10
+            3. 三种
+                无
+                i = i + 1
+                i = i - 1
+        6. break;
+        7. continue;
+        8. return 1;
+        9. 赋值 + getint();
+        10. 赋值 + getchar();
+        11. printf();
+
+
+————————————————————————————————————————————————————————————————————————————
+1. <Ident> = <identifier>
+<identifier>
+    <identifier-nondigit> -> _ | a | b | ... | A | B | ...
+    <identifier> <identifier-nondigit>
+    <identifier> <digit>
+    eg:
+        a,b,c,...,z
+        aa,bb,cc,...,zz
+        a_a,b_b,...,z_z
+
+        a1,a2,...,a100
