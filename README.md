@@ -1,0 +1,17 @@
+# Compiler
+- 此仓库为BUAA-2024 Compiler课程
+- 实验通过情况
+    - 文法阅读 ✅
+    - 词法分析 ✅
+    - 语法分析 ✅
+    - 语义分析 ✅
+    - 代码生成一 ✅
+    - 代码生成二 ✅
+- Compiler Structure
+    - Frontend
+        - 完成词法分析、语法分析
+        - 构建抽象语法树
+    - Midend
+        - 将抽象语法树转换成中间代码
+    - Backend
+        - 将中间代码转换为目标代码`MIPS`
